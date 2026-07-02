@@ -1,3 +1,4 @@
+import click
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -35,6 +36,16 @@ def create_app(config_name='development'):
     mail.init_app(app)
     CORS(app)
 
+    # Import models so Flask-Migrate can detect them
+    with app.app_context():
+        import app.models  # noqa: F401
+
+    # Flask-Login user loader
+    @login_manager.user_loader
+    def load_user(user_id):
+        from app.models.user import User
+        return db.session.get(User, int(user_id))
+
     # Register blueprints
     from app.routes.main import main_bp
     from app.routes.auth import auth_bp
@@ -42,10 +53,77 @@ def create_app(config_name='development'):
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp, url_prefix='/auth')
 
+    # Register CLI commands
+    register_cli_commands(app)
+
     # Register error handlers
     register_error_handlers(app)
 
     return app
+
+
+def register_cli_commands(app):
+    """Register custom Flask CLI commands."""
+
+    @app.cli.command('seed-roles')
+    def seed_roles():
+        """Seed the roles table with default roles."""
+        from app.models.role import Role
+
+        default_roles = [
+            ('Administrator', 'System Administrator'),
+            ('Doctor', 'Medical Practitioner'),
+            ('Nurse', 'Nursing Staff'),
+            ('Receptionist', 'Reception'),
+            ('Pharmacist', 'Pharmacy'),
+            ('Lab Technician', 'Laboratory'),
+            ('Inventory Manager', 'Inventory'),
+            ('Accountant', 'Billing'),
+            ('Patient', 'Portal User'),
+        ]
+
+        added = 0
+        for role_name, description in default_roles:
+            if not Role.query.filter_by(role_name=role_name).first():
+                db.session.add(Role(role_name=role_name, description=description))
+                added += 1
+
+        db.session.commit()
+        click.echo(f'Seeded {added} new role(s). Total roles: {Role.query.count()}')
+
+    @app.cli.command('create-admin')
+    @click.option('--code', prompt='Employee code', help='Unique employee code')
+    @click.option('--email', prompt='Email', help='Admin email')
+    @click.option('--password', prompt=True, hide_input=True, confirmation_prompt=True)
+    @click.option('--first-name', prompt='First name')
+    @click.option('--last-name', prompt='Last name', default='')
+    def create_admin(code, email, password, first_name, last_name):
+        """Create an administrator user."""
+        from app.models.user import User
+        from app.models.role import Role
+        from app.models.user_role import UserRole
+
+        if User.query.filter_by(email=email).first():
+            click.echo(f'Error: User with email {email} already exists.')
+            return
+
+        user = User(
+            employee_code=code,
+            first_name=first_name,
+            last_name=last_name or None,
+            email=email,
+            status='ACTIVE',
+        )
+        user.set_password(password)
+        db.session.add(user)
+        db.session.flush()  # get user_id
+
+        admin_role = Role.query.filter_by(role_name='Administrator').first()
+        if admin_role:
+            db.session.add(UserRole(user_id=user.user_id, role_id=admin_role.role_id))
+
+        db.session.commit()
+        click.echo(f'Admin user "{user.full_name}" created successfully.')
 
 
 def register_error_handlers(app):
