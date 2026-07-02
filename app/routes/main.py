@@ -26,7 +26,7 @@ def dashboard():
     # Query active doctors
     doctor_role = Role.query.filter_by(role_name='Doctor').first()
     if doctor_role:
-        active_doctors = User.query.join(UserRole).filter(
+        active_doctors = User.query.join(UserRole, User.user_id == UserRole.user_id).filter(
             UserRole.role_id == doctor_role.role_id,
             UserRole.is_active == True,
             User.status == 'ACTIVE'
