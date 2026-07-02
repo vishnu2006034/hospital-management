@@ -5,6 +5,8 @@ from app import db
 from app.models.visit import Visit
 from app.models.patient import Patient
 from app.models.user import User
+from app.models.role import Role
+from app.models.user_role import UserRole
 
 visits_bp = Blueprint('visits', __name__, url_prefix='/visits')
 
@@ -61,10 +63,13 @@ def add_visit():
 
     patients = Patient.query.order_by(Patient.first_name).all()
     doctors = User.query.join(
-        db.text("user_roles ON users.user_id = user_roles.user_id")
+        UserRole, User.user_id == UserRole.user_id
     ).join(
-        db.text("roles ON user_roles.role_id = roles.role_id")
-    ).filter(db.text("roles.role_name = 'Doctor'")).all()
+        Role, UserRole.role_id == Role.role_id
+    ).filter(
+        Role.role_name == 'Doctor',
+        User.status == 'ACTIVE'
+    ).all()
     # Fallback: if no doctors with role, show all active users
     if not doctors:
         doctors = User.query.filter_by(status='ACTIVE').order_by(User.first_name).all()

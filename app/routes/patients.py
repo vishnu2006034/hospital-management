@@ -3,6 +3,7 @@ from flask_login import login_required
 
 from app import db
 from app.models.patient import Patient
+from app.models.visit import Visit
 
 patients_bp = Blueprint('patients', __name__, url_prefix='/patients')
 
@@ -63,7 +64,7 @@ def add_patient():
 @login_required
 def view_patient(patient_id):
     patient = Patient.query.get_or_404(patient_id)
-    visits = patient.visits.order_by(db.text('visit_date DESC')).limit(20).all()
+    visits = patient.visits.order_by(Visit.visit_date.desc()).limit(20).all()
     return render_template('patients/detail.html', patient=patient, visits=visits)
 
 
