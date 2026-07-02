@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}MedCore HMS - Hospital Management System{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero" id="hero-section">
+    <div class="hero-bg-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+    <div class="hero-content">
+        <div class="hero-badge">
+            <i class="fas fa-shield-halved"></i>
+            <span>Trusted Healthcare Platform</span>
+        </div>
+        <h1 class="hero-title">
+            Smart Hospital<br>
+            <span class="gradient-text">Management System</span>
+        </h1>
+        <p class="hero-subtitle">
+            Streamline your hospital operations with our comprehensive management solution.
+            From patient records to billing, appointments to pharmacy — all in one place.
+        </p>
+        <div class="hero-actions">
+            <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary btn-lg">
+                <i class="fas fa-rocket"></i> Get Started
+            </a>
+            <a href="#features" class="btn btn-outline btn-lg">
+                <i class="fas fa-play-circle"></i> Learn More
+            </a>
+        </div>
+        <div class="hero-stats">
+            <div class="stat-item">
+                <span class="stat-number" data-count="500">0</span>
+                <span class="stat-label">Hospitals</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" data-count="10000">0</span>
+                <span class="stat-label">Patients</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" data-count="2000">0</span>
+                <span class="stat-label">Doctors</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section" id="features">
+    <div class="section-container">
+        <div class="section-header">
+            <span class="section-badge">Features</span>
+            <h2 class="section-title">Everything You Need to <span class="gradient-text">Manage Your Hospital</span></h2>
+            <p class="section-subtitle">Our comprehensive suite of tools covers every aspect of hospital management.</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon" style="--accent: #6366f1;">
+                    <i class="fas fa-user-injured"></i>
+                </div>
+                <h3>Patient Management</h3>
+                <p>Complete patient lifecycle management from registration to discharge with detailed medical records.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon" style="--accent: #06b6d4;">
+                    <i class="fas fa-user-doctor"></i>
+                </div>
+                <h3>Doctor Management</h3>
+                <p>Manage doctor profiles, schedules, specializations, and availability in real time.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon" style="--accent: #8b5cf6;">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <h3>Appointments</h3>
+                <p>Smart appointment scheduling with conflict detection and automated reminders.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon" style="--accent: #10b981;">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                </div>
+                <h3>Billing & Payments</h3>
+                <p>Automated billing, insurance claims processing, and comprehensive payment tracking.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon" style="--accent: #f43f5e;">
+                    <i class="fas fa-pills"></i>
+                </div>
+                <h3>Pharmacy</h3>
+                <p>Prescription management, medicine inventory, and automated stock alerts.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon" style="--accent: #f59e0b;">
+                    <i class="fas fa-bed"></i>
+                </div>
+                <h3>Ward & Bed Management</h3>
+                <p>Real-time bed availability tracking, ward assignments, and room management.</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

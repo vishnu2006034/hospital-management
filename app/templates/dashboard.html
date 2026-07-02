@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - MedCore HMS{% endblock %}
+
+{% block content %}
+<section class="dashboard-section">
+    <div class="section-container">
+        <div class="dashboard-header">
+            <h1>Dashboard</h1>
+            <p class="dashboard-subtitle">Welcome to MedCore Hospital Management System</p>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="dashboard-stats-grid">
+            <div class="dash-stat-card" style="--accent: #6366f1;">
+                <div class="dash-stat-icon"><i class="fas fa-user-injured"></i></div>
+                <div class="dash-stat-info">
+                    <span class="dash-stat-number">--</span>
+                    <span class="dash-stat-label">Total Patients</span>
+                </div>
+            </div>
+            <div class="dash-stat-card" style="--accent: #06b6d4;">
+                <div class="dash-stat-icon"><i class="fas fa-user-doctor"></i></div>
+                <div class="dash-stat-info">
+                    <span class="dash-stat-number">--</span>
+                    <span class="dash-stat-label">Active Doctors</span>
+                </div>
+            </div>
+            <div class="dash-stat-card" style="--accent: #10b981;">
+                <div class="dash-stat-icon"><i class="fas fa-calendar-check"></i></div>
+                <div class="dash-stat-info">
+                    <span class="dash-stat-number">--</span>
+                    <span class="dash-stat-label">Today's Appointments</span>
+                </div>
+            </div>
+            <div class="dash-stat-card" style="--accent: #f59e0b;">
+                <div class="dash-stat-icon"><i class="fas fa-bed"></i></div>
+                <div class="dash-stat-info">
+                    <span class="dash-stat-number">--</span>
+                    <span class="dash-stat-label">Available Beds</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Placeholder for future modules -->
+        <div class="dashboard-placeholder">
+            <div class="placeholder-icon"><i class="fas fa-database"></i></div>
+            <h2>Database Schema Pending</h2>
+            <p>The dashboard will populate with real data once the database models are configured. Please provide your schema to proceed.</p>
+        </div>
+    </div>
+</section>
+{% endblock %}
