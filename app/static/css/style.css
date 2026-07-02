@@ -1017,7 +1017,7 @@ img {
     min-width: 180px;
     padding: 0.5rem 0;
     z-index: 1000;
-    margin-top: 0.5rem;
+    margin-top: 0;
 }
 
 .dropdown-menu a {
