@@ -77,7 +77,7 @@
                         <a href="{{ url_for('visits.edit_visit', visit_id=visit.visit_id) }}" class="btn btn-outline btn-sm">
                             <i class="fas fa-edit"></i> Edit
                         </a>
-                        <button class="btn btn-danger btn-sm" onclick="openDeleteModal('{{ url_for('visits.delete_visit', visit_id=visit.visit_id) }}')">
+                        <button class="btn btn-danger btn-sm" onclick="openDeleteModal(this.dataset.url)" data-url="{{ url_for('visits.delete_visit', visit_id=visit.visit_id) }}">
                             <i class="fas fa-trash"></i>
                         </button>
                     </td>

@@ -62,7 +62,7 @@
                         <a href="{{ url_for('medicines.edit_medicine', medicine_id=medicine.medicine_id) }}" class="btn btn-outline btn-sm">
                             <i class="fas fa-edit"></i> Edit
                         </a>
-                        <button class="btn btn-danger btn-sm" onclick="openDeleteModal('{{ url_for('medicines.delete_medicine', medicine_id=medicine.medicine_id) }}')">
+                        <button class="btn btn-danger btn-sm" onclick="openDeleteModal(this.dataset.url)" data-url="{{ url_for('medicines.delete_medicine', medicine_id=medicine.medicine_id) }}">
                             <i class="fas fa-trash"></i>
                         </button>
                     </td>

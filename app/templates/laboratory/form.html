@@ -81,17 +81,20 @@
 
 {% block extra_js %}
 {% if not lab %}
+<script type="application/json" id="visit-map-data">
+{
+    {% for v in visits %}
+    "{{ v.visit_id }}": "{{ v.patient_id }}"{% if not loop.last %},{% endif %}
+    {% endfor %}
+}
+</script>
 <script>
     const visitSelect = document.getElementById('visit_id');
     const patientSelect = document.getElementById('patient_id');
 
     if (visitSelect && patientSelect) {
-        // Auto-match patient from visit selection
-        const visitMap = {
-            {% for v in visits %}
-            "{{ v.visit_id }}": "{{ v.patient_id }}",
-            {% endfor %}
-        };
+        const dataEl = document.getElementById('visit-map-data');
+        const visitMap = dataEl ? JSON.parse(dataEl.textContent) : {};
 
         visitSelect.addEventListener('change', () => {
             const patId = visitMap[visitSelect.value];

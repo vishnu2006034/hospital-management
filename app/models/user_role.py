@@ -34,5 +34,9 @@ class UserRole(db.Model):
     role = db.relationship('Role', back_populates='user_roles')
     assigner = db.relationship('User', foreign_keys=[assigned_by])
 
+    def __init__(self, **kwargs):
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
     def __repr__(self):
         return f'<UserRole user={self.user_id} role={self.role_id}>'

@@ -43,21 +43,24 @@
 {% endblock %}
 
 {% block extra_js %}
+<script type="application/json" id="catalog-map-data">
+{
+    {% for t in tests %}
+    "{{ t.test_id }}": {
+        "unit": "{{ t.unit or '' }}",
+        "range": "{{ t.reference_range or '' }}"
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+}
+</script>
 <script>
     const testSelect = document.getElementById('test_id');
     const unitInput = document.getElementById('unit');
     const rangeInput = document.getElementById('reference_range');
 
     if (testSelect && unitInput && rangeInput) {
-        // Auto-populate normal ranges & units from catalog
-        const catalogMap = {
-            {% for t in tests %}
-            "{{ t.test_id }}": {
-                "unit": "{{ t.unit or '' }}",
-                "range": "{{ t.reference_range or '' }}"
-            },
-            {% endfor %}
-        };
+        const dataEl = document.getElementById('catalog-map-data');
+        const catalogMap = dataEl ? JSON.parse(dataEl.textContent) : {};
 
         testSelect.addEventListener('change', () => {
             const data = catalogMap[testSelect.value];

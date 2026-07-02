@@ -63,7 +63,7 @@
                         <a href="{{ url_for('patients.edit_patient', patient_id=patient.patient_id) }}" class="btn btn-outline btn-sm" title="Edit">
                             <i class="fas fa-edit"></i> Edit
                         </a>
-                        <button class="btn btn-danger btn-sm" onclick="openDeleteModal('{{ url_for('patients.delete_patient', patient_id=patient.patient_id) }}')" title="Delete">
+                        <button class="btn btn-danger btn-sm" onclick="openDeleteModal(this.dataset.url)" data-url="{{ url_for('patients.delete_patient', patient_id=patient.patient_id) }}" title="Delete">
                             <i class="fas fa-trash"></i>
                         </button>
                     </td>

@@ -51,6 +51,10 @@ class User(UserMixin, db.Model):
         'DoctorReport', back_populates='doctor', lazy='dynamic'
     )
 
+    def __init__(self, **kwargs):
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
     # ---- Flask-Login integration ----
     def get_id(self):
         """Return the user_id as a string for Flask-Login."""
