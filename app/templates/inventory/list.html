@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% import "crud/_form_macros.html" as macros %}
+
+{% block title %}Inventory - MedCore HMS{% endblock %}
+
+{% block content %}
+<section class="section-container" style="padding-top: 100px; padding-bottom: 80px;">
+    <div class="section-header" style="text-align: left; margin-bottom: 2rem;">
+        <span class="section-badge">Store Rooms</span>
+        <h1 class="section-title">Inventory Stock</h1>
+        <p class="section-subtitle" style="margin: 0;">Track pharmaceutical batches, stock quantities, and expiry status.</p>
+    </div>
+
+    <!-- Actions Bar -->
+    <div class="actions-bar">
+        <form method="GET" action="{{ url_for('inventory.list_inventory') }}" class="search-form" style="max-width: 600px;">
+            <input type="text" name="q" value="{{ search }}" placeholder="Search by batch no. or medicine name..." class="search-input">
+            {% set filter_options = [('', 'All Batches'), ('low', 'Low Stock'), ('expired', 'Expired')] %}
+            <select name="filter" class="search-input" style="max-width: 140px; padding: 0.5rem;" onchange="this.form.submit()">
+                {% for val, label in filter_options %}
+                <option value="{{ val }}" {% if val == filter_type %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
+            {% if search or filter_type %}
+            <a href="{{ url_for('inventory.list_inventory') }}" class="btn btn-outline">Clear</a>
+            {% endif %}
+        </form>
+        <a href="{{ url_for('inventory.add_inventory') }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add Inventory Batch
+        </a>
+    </div>
+
+    <!-- Table -->
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Medicine</th>
+                    <th>Batch Number</th>
+                    <th>Expiry Date</th>
+                    <th>Supplier</th>
+                    <th>Purchase Price</th>
+                    <th>Selling Price</th>
+                    <th>In Stock</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in inventory.items %}
+                <tr>
+                    <td>
+                        <strong>{{ item.medicine.medicine_name }}</strong>
+                        <br>
+                        <small style="color: var(--text-muted);">{{ item.medicine.generic_name or '--' }}</small>
+                    </td>
+                    <td><strong>{{ item.batch_number }}</strong></td>
+                    <td>
+                        {{ item.expiry_date or '--' }}
+                        {% if item.is_expired %}
+                        <br><span class="badge badge-danger">Expired</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ item.supplier or '--' }}</td>
+                    <td>₹{{ "{:,.2f}".format(item.purchase_price) if item.purchase_price else '--' }}</td>
+                    <td>₹{{ "{:,.2f}".format(item.selling_price) if item.selling_price else '--' }}</td>
+                    <td>
+                        <strong>{{ item.quantity_in_stock }}</strong>
+                        <br>
+                        <small style="color: var(--text-muted);">Min: {{ item.minimum_stock }}</small>
+                    </td>
+                    <td>
+                        {% if item.is_expired %}
+                        <span class="badge badge-danger">Expired</span>
+                        {% elif item.is_low_stock %}
+                        <span class="badge badge-warning">Low Stock</span>
+                        {% else %}
+                        <span class="badge badge-success">Good</span>
+                        {% endif %}
+                    </td>
+                    <td class="table-actions">
+                        <a href="{{ url_for('inventory.add_transaction', inventory_id=item.inventory_id) }}" class="btn btn-outline btn-sm" title="Stock Transactions">
+                            <i class="fas fa-arrow-right-arrow-left"></i> Txns
+                        </a>
+                        <a href="{{ url_for('inventory.edit_inventory', inventory_id=item.inventory_id) }}" class="btn btn-outline btn-sm">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="9" style="text-align: center; color: var(--text-muted); padding: 3rem 0;">
+                        <i class="fas fa-boxes-stacked" style="font-size: 2.5rem; margin-bottom: 1rem; display: block;"></i>
+                        No batches registered in inventory.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {{ macros.pagination(inventory, 'inventory.list_inventory', q=search, filter=filter_type) }}
+</section>
+{% endblock %}

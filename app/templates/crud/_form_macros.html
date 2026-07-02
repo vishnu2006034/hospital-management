@@ -1,0 +1,97 @@
+{# ============================================
+   Reusable Form Field Macros
+   ============================================ #}
+
+{%- macro text_field(name, label, value='', type='text', required=false, placeholder='', icon='', readonly=false) -%}
+<div class="form-group">
+    <label for="{{ name }}">
+        {%- if icon %}<i class="fas fa-{{ icon }}"></i> {% endif -%}
+        {{ label }}{% if required %} <span class="required">*</span>{% endif %}
+    </label>
+    <input type="{{ type }}" id="{{ name }}" name="{{ name }}"
+           value="{{ value }}" placeholder="{{ placeholder }}"
+           {% if required %}required{% endif %}
+           {% if readonly %}readonly{% endif %}>
+</div>
+{%- endmacro -%}
+
+{%- macro textarea_field(name, label, value='', required=false, placeholder='', rows=4, icon='') -%}
+<div class="form-group">
+    <label for="{{ name }}">
+        {%- if icon %}<i class="fas fa-{{ icon }}"></i> {% endif -%}
+        {{ label }}{% if required %} <span class="required">*</span>{% endif %}
+    </label>
+    <textarea id="{{ name }}" name="{{ name }}" rows="{{ rows }}"
+              placeholder="{{ placeholder }}"
+              {% if required %}required{% endif %}>{{ value }}</textarea>
+</div>
+{%- endmacro -%}
+
+{%- macro select_field(name, label, options, selected='', required=false, icon='', blank_label='Select...') -%}
+<div class="form-group">
+    <label for="{{ name }}">
+        {%- if icon %}<i class="fas fa-{{ icon }}"></i> {% endif -%}
+        {{ label }}{% if required %} <span class="required">*</span>{% endif %}
+    </label>
+    <select id="{{ name }}" name="{{ name }}" {% if required %}required{% endif %}>
+        <option value="" disabled {% if not selected %}selected{% endif %}>{{ blank_label }}</option>
+        {% for val, text in options %}
+        <option value="{{ val }}" {% if val|string == selected|string %}selected{% endif %}>{{ text }}</option>
+        {% endfor %}
+    </select>
+</div>
+{%- endmacro -%}
+
+{%- macro date_field(name, label, value='', required=false, icon='calendar') -%}
+<div class="form-group">
+    <label for="{{ name }}">
+        {%- if icon %}<i class="fas fa-{{ icon }}"></i> {% endif -%}
+        {{ label }}{% if required %} <span class="required">*</span>{% endif %}
+    </label>
+    <input type="date" id="{{ name }}" name="{{ name }}"
+           value="{{ value }}" {% if required %}required{% endif %}>
+</div>
+{%- endmacro -%}
+
+{%- macro number_field(name, label, value='', required=false, step='1', min='', max='', icon='') -%}
+<div class="form-group">
+    <label for="{{ name }}">
+        {%- if icon %}<i class="fas fa-{{ icon }}"></i> {% endif -%}
+        {{ label }}{% if required %} <span class="required">*</span>{% endif %}
+    </label>
+    <input type="number" id="{{ name }}" name="{{ name }}"
+           value="{{ value }}" step="{{ step }}"
+           {% if min %}min="{{ min }}"{% endif %}
+           {% if max %}max="{{ max }}"{% endif %}
+           {% if required %}required{% endif %}>
+</div>
+{%- endmacro -%}
+
+{%- macro checkbox_field(name, label, checked=false) -%}
+<div class="form-group">
+    <label class="checkbox-label">
+        <input type="checkbox" name="{{ name }}" {% if checked %}checked{% endif %}>
+        {{ label }}
+    </label>
+</div>
+{%- endmacro -%}
+
+{%- macro pagination(paginator, endpoint, **kwargs) -%}
+{% if paginator.pages > 1 %}
+<div class="pagination">
+    {% if paginator.has_prev %}
+    <a href="{{ url_for(endpoint, page=paginator.prev_num, **kwargs) }}" class="page-btn"><i class="fas fa-chevron-left"></i></a>
+    {% endif %}
+    {% for p in paginator.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+        {% if p %}
+        <a href="{{ url_for(endpoint, page=p, **kwargs) }}" class="page-btn {% if p == paginator.page %}active{% endif %}">{{ p }}</a>
+        {% else %}
+        <span class="page-ellipsis">…</span>
+        {% endif %}
+    {% endfor %}
+    {% if paginator.has_next %}
+    <a href="{{ url_for(endpoint, page=paginator.next_num, **kwargs) }}" class="page-btn"><i class="fas fa-chevron-right"></i></a>
+    {% endif %}
+</div>
+{% endif %}
+{%- endmacro -%}

@@ -15,38 +15,78 @@
             <div class="dash-stat-card" style="--accent: #6366f1;">
                 <div class="dash-stat-icon"><i class="fas fa-user-injured"></i></div>
                 <div class="dash-stat-info">
-                    <span class="dash-stat-number">--</span>
+                    <span class="dash-stat-number">{{ total_patients }}</span>
                     <span class="dash-stat-label">Total Patients</span>
                 </div>
             </div>
             <div class="dash-stat-card" style="--accent: #06b6d4;">
                 <div class="dash-stat-icon"><i class="fas fa-user-doctor"></i></div>
                 <div class="dash-stat-info">
-                    <span class="dash-stat-number">--</span>
+                    <span class="dash-stat-number">{{ active_doctors }}</span>
                     <span class="dash-stat-label">Active Doctors</span>
                 </div>
             </div>
             <div class="dash-stat-card" style="--accent: #10b981;">
                 <div class="dash-stat-icon"><i class="fas fa-calendar-check"></i></div>
                 <div class="dash-stat-info">
-                    <span class="dash-stat-number">--</span>
-                    <span class="dash-stat-label">Today's Appointments</span>
+                    <span class="dash-stat-number">{{ today_appointments }}</span>
+                    <span class="dash-stat-label">Today's Visits</span>
                 </div>
             </div>
             <div class="dash-stat-card" style="--accent: #f59e0b;">
                 <div class="dash-stat-icon"><i class="fas fa-bed"></i></div>
                 <div class="dash-stat-info">
-                    <span class="dash-stat-number">--</span>
+                    <span class="dash-stat-number">{{ available_beds }}</span>
                     <span class="dash-stat-label">Available Beds</span>
                 </div>
             </div>
         </div>
 
-        <!-- Placeholder for future modules -->
-        <div class="dashboard-placeholder">
-            <div class="placeholder-icon"><i class="fas fa-database"></i></div>
-            <h2>Database Schema Pending</h2>
-            <p>The dashboard will populate with real data once the database models are configured. Please provide your schema to proceed.</p>
+        <!-- Management Modules Grid -->
+        <div class="modules-section">
+            <h2 class="modules-title">Management Modules</h2>
+            <div class="modules-grid">
+                <a href="{{ url_for('patients.list_patients') }}" class="module-card">
+                    <div class="module-icon" style="--accent: #6366f1;"><i class="fas fa-hospital-user"></i></div>
+                    <h3>Patients</h3>
+                    <p>Register patients, view medical history and allergies.</p>
+                </a>
+                <a href="{{ url_for('visits.list_visits') }}" class="module-card">
+                    <div class="module-icon" style="--accent: #8b5cf6;"><i class="fas fa-file-medical"></i></div>
+                    <h3>Visits & Vitals</h3>
+                    <p>Track OPD/IPD visits, log vitals and complaints.</p>
+                </a>
+                <a href="{{ url_for('prescriptions.list_prescriptions') }}" class="module-card">
+                    <div class="module-icon" style="--accent: #ec4899;"><i class="fas fa-pills"></i></div>
+                    <h3>Prescriptions</h3>
+                    <p>Prescribe medications, check dosages and frequencies.</p>
+                </a>
+                <a href="{{ url_for('medicines.list_medicines') }}" class="module-card">
+                    <div class="module-icon" style="--accent: #10b981;"><i class="fas fa-prescription-bottle-medical"></i></div>
+                    <h3>Medicine Catalog</h3>
+                    <p>Manage the master drug catalog and categories.</p>
+                </a>
+                <a href="{{ url_for('inventory.list_inventory') }}" class="module-card">
+                    <div class="module-icon" style="--accent: #f59e0b;"><i class="fas fa-boxes-stacked"></i></div>
+                    <h3>Inventory Stock</h3>
+                    <p>Track batches, expiry dates, supplier info, and transactions.</p>
+                </a>
+                <a href="{{ url_for('laboratory.list_lab') }}" class="module-card">
+                    <div class="module-icon" style="--accent: #06b6d4;"><i class="fas fa-microscope"></i></div>
+                    <h3>Laboratory Requests</h3>
+                    <p>Manage laboratory requests and test catalogs.</p>
+                </a>
+                <a href="{{ url_for('reports.list_reports') }}" class="module-card">
+                    <div class="module-icon" style="--accent: #ef4444;"><i class="fas fa-notes-medical"></i></div>
+                    <h3>Doctor Reports</h3>
+                    <p>Write consultation reports and follow-up instructions.</p>
+                </a>
+                <a href="{{ url_for('staff.list_staff') }}" class="module-card">
+                    <div class="module-icon" style="--accent: #64748b;"><i class="fas fa-users-gear"></i></div>
+                    <h3>Staff & Roles</h3>
+                    <p>Configure hospital staff, roles, and access credentials.</p>
+                </a>
+            </div>
         </div>
     </div>
 </section>

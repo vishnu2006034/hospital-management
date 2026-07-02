@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}Lab Request #{{ lab.lab_id }} - MedCore HMS{% endblock %}
+
+{% block content %}
+<section class="section-container" style="padding-top: 100px; padding-bottom: 80px;">
+    <!-- Detail Header -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <span class="badge badge-info" style="margin-bottom: 0.5rem;">Lab Diagnostics</span>
+            <h1 style="font-size: 2rem; font-weight: 800; margin: 0;">Lab Request #{{ lab.lab_id }}</h1>
+            <p style="color: var(--text-secondary); margin: 0.25rem 0 0 0;">
+                Patient: <strong><a href="{{ url_for('patients.view_patient', patient_id=lab.patient_id) }}">{{ lab.patient.full_name }}</a></strong> ({{ lab.patient.patient_number }})
+                &bull; Requested on {{ lab.created_at.strftime('%Y-%m-%d %H:%M') }}
+            </p>
+        </div>
+        <div style="display: flex; gap: 0.75rem;">
+            {% if lab.test_status != 'COMPLETED' %}
+            <a href="{{ url_for('laboratory.add_report', lab_id=lab.lab_id) }}" class="btn btn-primary">
+                <i class="fas fa-file-circle-plus"></i> Add Test Result
+            </a>
+            {% endif %}
+            <a href="{{ url_for('laboratory.edit_lab', lab_id=lab.lab_id) }}" class="btn btn-outline">
+                <i class="fas fa-edit"></i> Edit Request
+            </a>
+            <a href="{{ url_for('laboratory.list_lab') }}" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i> Board Directory
+            </a>
+        </div>
+    </div>
+
+    <div class="detail-grid">
+        <!-- Sidebar: Details -->
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <div class="detail-card">
+                <h3><i class="fas fa-circle-info"></i> Diagnostics Info</h3>
+                <div class="detail-list">
+                    <div class="detail-item">
+                        <span class="detail-label">Lab ID / Status</span>
+                        <span class="detail-value">
+                            #{{ lab.lab_id }} &bull;
+                            <span class="badge {% if lab.test_status == 'COMPLETED' %}badge-success{% elif lab.test_status == 'PENDING' %}badge-warning{% else %}badge-primary{% endif %}">
+                                {{ lab.test_status }}
+                            </span>
+                        </span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Priority</span>
+                        <span class="detail-value">
+                            <span class="badge {% if lab.priority == 'HIGH' or lab.priority == 'STAT' %}badge-danger{% else %}badge-info{% endif %}">
+                                {{ lab.priority }}
+                            </span>
+                        </span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Patient Visit</span>
+                        <span class="detail-value"><a href="{{ url_for('visits.view_visit', visit_id=lab.visit_id) }}">Visit #{{ lab.visit_id }}</a></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Requested Doctor</span>
+                        <span class="detail-value">Dr. {{ lab.requester.full_name if lab.requester else '--' }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Assigned Technician</span>
+                        <span class="detail-value">{{ lab.technician.full_name if lab.technician else 'Unassigned' }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Sample Type</span>
+                        <span class="detail-value">{{ lab.sample_type or 'Not Logged' }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Sample Collected At</span>
+                        <span class="detail-value">{{ lab.sample_collected_at.strftime('%Y-%m-%d %H:%M') if lab.sample_collected_at else 'Not Yet' }}</span>
+                    </div>
+                    {% if lab.completed_at %}
+                    <div class="detail-item">
+                        <span class="detail-label">Completed At</span>
+                        <span class="detail-value">{{ lab.completed_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="detail-card">
+                <h3><i class="fas fa-comment-medical"></i> Doctor Remarks</h3>
+                <p style="font-size: 0.95rem; line-height: 1.6; color: var(--text-secondary);">{{ lab.remarks or 'No remarks provided.' }}</p>
+            </div>
+        </div>
+
+        <!-- Main Panel: Test Results / Lab Reports -->
+        <div class="history-card">
+            <h3 style="justify-content: space-between;">
+                <span><i class="fas fa-file-waveform"></i> Diagnostic Test Results</span>
+                {% if lab.test_status != 'COMPLETED' %}
+                <a href="{{ url_for('laboratory.add_report', lab_id=lab.lab_id) }}" class="btn btn-outline btn-sm">
+                    <i class="fas fa-plus"></i> Add Result
+                </a>
+                {% endif %}
+            </h3>
+            <div class="table-responsive" style="margin-top: 1.5rem; border: none; box-shadow: none;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Report No.</th>
+                            <th>Test Name</th>
+                            <th>Value / Result</th>
+                            <th>Unit</th>
+                            <th>Ref. Range</th>
+                            <th>Status</th>
+                            <th>Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for report in reports %}
+                        <tr {% if report.is_abnormal %}style="background: rgba(239, 68, 68, 0.05);"{% endif %}>
+                            <td><strong>{{ report.report_number }}</strong></td>
+                            <td>
+                                <strong>{{ report.test.test_name }}</strong>
+                                <br>
+                                <small style="color: var(--text-muted);">Code: {{ report.test.test_code }}</small>
+                            </td>
+                            <td>
+                                <strong {% if report.is_abnormal %}style="color: #fda4af;"{% endif %}>
+                                    {{ report.result }}
+                                </strong>
+                            </td>
+                            <td>{{ report.unit or '--' }}</td>
+                            <td>{{ report.reference_range or '--' }}</td>
+                            <td>
+                                {% if report.is_abnormal %}
+                                <span class="badge badge-danger">Abnormal</span>
+                                {% else %}
+                                <span class="badge badge-success">Normal</span>
+                                {% endif %}
+                            </td>
+                            <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ report.remarks }}">{{ report.remarks or '--' }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 3rem 0;">
+                                <i class="fas fa-file-circle-xmark" style="font-size: 2rem; margin-bottom: 0.75rem; display: block;"></i>
+                                No test results added to this lab request.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

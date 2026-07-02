@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% import "crud/_form_macros.html" as macros %}
+
+{% block title %}Lab Test Catalog - MedCore HMS{% endblock %}
+
+{% block content %}
+<section class="section-container" style="padding-top: 100px; padding-bottom: 80px;">
+    <div class="section-header" style="text-align: left; margin-bottom: 2rem;">
+        <span class="section-badge">Diagnostics</span>
+        <h1 class="section-title">Lab Test Catalog</h1>
+        <p class="section-subtitle" style="margin: 0;">Configure laboratory test templates, reference values, and pricing.</p>
+    </div>
+
+    <!-- Actions Bar -->
+    <div class="actions-bar">
+        <form method="GET" action="{{ url_for('laboratory.list_catalog') }}" class="search-form">
+            <input type="text" name="q" value="{{ search }}" placeholder="Search tests by name or code..." class="search-input">
+            <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
+            {% if search %}
+            <a href="{{ url_for('laboratory.list_catalog') }}" class="btn btn-outline">Clear</a>
+            {% endif %}
+        </form>
+        <div style="display: flex; gap: 0.5rem;">
+            <a href="{{ url_for('laboratory.list_lab') }}" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i> Laboratory Board
+            </a>
+            <a href="{{ url_for('laboratory.add_catalog') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add Test Profile
+            </a>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Test Name</th>
+                    <th>Category</th>
+                    <th>Sample Type</th>
+                    <th>Unit</th>
+                    <th>Reference Range</th>
+                    <th>Min / Max Normal</th>
+                    <th>Default Price</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for test in tests.items %}
+                <tr>
+                    <td><strong>{{ test.test_code }}</strong></td>
+                    <td><strong>{{ test.test_name }}</strong></td>
+                    <td>{{ test.category or '--' }}</td>
+                    <td>{{ test.sample_type or '--' }}</td>
+                    <td>{{ test.unit or '--' }}</td>
+                    <td>{{ test.reference_range or '--' }}</td>
+                    <td>
+                        {% if test.normal_min is not none or test.normal_max is not none %}
+                        {{ test.normal_min or '0' }} - {{ test.normal_max or '&infin;'|safe }}
+                        {% else %}
+                        --
+                        {% endif %}
+                    </td>
+                    <td>₹{{ "{:,.2f}".format(test.default_price) if test.default_price else '--' }}</td>
+                    <td>
+                        {% if test.is_active %}
+                        <span class="badge badge-success">Active</span>
+                        {% else %}
+                        <span class="badge badge-danger">Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td class="table-actions">
+                        <a href="{{ url_for('laboratory.edit_catalog', test_id=test.test_id) }}" class="btn btn-outline btn-sm">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="10" style="text-align: center; color: var(--text-muted); padding: 3rem 0;">
+                        <i class="fas fa-flask-vial" style="font-size: 2.5rem; margin-bottom: 1rem; display: block;"></i>
+                        No test profiles registered in catalog.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {{ macros.pagination(tests, 'laboratory.list_catalog', q=search) }}
+</section>
+{% endblock %}

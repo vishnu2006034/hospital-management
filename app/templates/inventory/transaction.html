@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% import "crud/_form_macros.html" as macros %}
+
+{% block title %}Stock Transactions: Batch {{ inv.batch_number }} - MedCore HMS{% endblock %}
+
+{% block content %}
+<section class="section-container" style="padding-top: 100px; padding-bottom: 80px;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <span class="badge badge-primary" style="margin-bottom: 0.5rem;">Inventory Ledgers</span>
+            <h1 style="font-size: 2rem; font-weight: 800; margin: 0;">Batch: {{ inv.batch_number }}</h1>
+            <p style="color: var(--text-secondary); margin: 0.25rem 0 0 0;">
+                Medicine: <strong>{{ inv.medicine.medicine_name }}</strong> &bull; Current Stock: <strong>{{ inv.quantity_in_stock }} units</strong>
+            </p>
+        </div>
+        <a href="{{ url_for('inventory.list_inventory') }}" class="btn btn-outline">
+            <i class="fas fa-arrow-left"></i> Inventory Directory
+        </a>
+    </div>
+
+    <div class="detail-grid">
+        <!-- Sidebar: Record New Stock Transaction -->
+        <div class="detail-card">
+            <h3><i class="fas fa-plus"></i> Record Movement</h3>
+            <form method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                {% set type_options = [('IN', 'Stock IN (+)'), ('OUT', 'Stock OUT (-)'), ('ADJUSTMENT', 'ADJUSTMENT (Overwrite)')] %}
+                {{ macros.select_field('transaction_type', 'Movement Type', type_options, 'IN', required=true, icon='shuffle') }}
+
+                {{ macros.number_field('quantity', 'Quantity', '', required=true, min='1', icon='hashtag') }}
+
+                {% set ref_options = [('PURCHASE', 'Purchase / Shipment'), ('PRESCRIPTION', 'Prescription Dispense'), ('DAMAGE', 'Damaged Stock'), ('EXPIRED', 'Expired / Disposed'), ('CORRECTION', 'Audit Correction')] %}
+                {{ macros.select_field('reference_type', 'Reference Reason', ref_options, 'PURCHASE', icon='bookmark') }}
+
+                {{ macros.number_field('reference_id', 'Reference ID (e.g. Visit/Bill ID)', '', icon='file-lines') }}
+
+                {{ macros.textarea_field('remarks', 'Internal Remarks / Notes', placeholder='Explain the stock correction...', icon='align-left') }}
+
+                <button type="submit" class="btn btn-primary btn-block" style="margin-top: 1rem;">
+                    <i class="fas fa-check-circle"></i> Commit Transaction
+                </button>
+            </form>
+        </div>
+
+        <!-- Main Panel: Stock Ledger History -->
+        <div class="history-card">
+            <h3><i class="fas fa-list-check"></i> Transaction Ledger</h3>
+            <div class="table-responsive" style="margin-top: 1rem; border: none; box-shadow: none;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Date & Time</th>
+                            <th>Type</th>
+                            <th>Qty</th>
+                            <th>Reference</th>
+                            <th>Performed By</th>
+                            <th>Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for txn in transactions %}
+                        <tr>
+                            <td>{{ txn.transaction_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                            <td>
+                                <span class="badge {% if txn.transaction_type == 'IN' %}badge-success{% elif txn.transaction_type == 'OUT' %}badge-danger{% else %}badge-warning{% endif %}">
+                                    {{ txn.transaction_type }}
+                                </span>
+                            </td>
+                            <td><strong>{{ txn.quantity }}</strong></td>
+                            <td>
+                                {{ txn.reference_type or '--' }}
+                                {% if txn.reference_id %}
+                                (#{{ txn.reference_id }})
+                                {% endif %}
+                            </td>
+                            <td>{{ txn.performer.full_name if txn.performer else '--' }}</td>
+                            <td style="max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ txn.remarks }}">{{ txn.remarks or '--' }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2rem 0;">
+                                No transactions logged for this batch.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

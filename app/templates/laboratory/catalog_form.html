@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% import "crud/_form_macros.html" as macros %}
+
+{% block title %}{% if test %}Edit Test Profile{% else %}Add Test Profile{% endif %} - MedCore HMS{% endblock %}
+
+{% block content %}
+<section class="section-container" style="padding-top: 100px; padding-bottom: 80px;">
+    <div class="form-container">
+        <h1 class="form-title">{% if test %}Edit Catalog Test Profile{% else %}Create Lab Test Profile{% endif %}</h1>
+        <p class="form-subtitle">{% if test %}Modify catalog specifications for "{{ test.test_name }}".{% else %}Register a new diagnostic test parameter in the master catalog.{% endif %}</p>
+
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="form-row">
+                {{ macros.text_field('test_code', 'Unique Test Code (e.g. CBC, FBS)', test.test_code if test else '', required=true, placeholder='e.g. CBC, LFT, FBS', icon='barcode') }}
+                {{ macros.text_field('test_name', 'Test Name', test.test_name if test else '', required=true, placeholder='e.g. Complete Blood Count', icon='flask') }}
+            </div>
+
+            <div class="form-row">
+                {% set cat_options = [
+                    ('Hematology', 'Hematology'),
+                    ('Biochemistry', 'Biochemistry'),
+                    ('Microbiology', 'Microbiology'),
+                    ('Serology', 'Serology'),
+                    ('Urinalysis', 'Urinalysis'),
+                    ('Pathology', 'Pathology'),
+                    ('Hormones', 'Hormones')
+                ] %}
+                {{ macros.select_field('category', 'Category Group', cat_options, test.category if test else '', icon='tags') }}
+                
+                {{ macros.text_field('sample_type', 'Default Sample Type', test.sample_type if test else '', placeholder='e.g. Whole Blood, Urine, Serum', icon='droplet') }}
+            </div>
+
+            <div class="form-row">
+                {{ macros.text_field('unit', 'Measurement Unit', test.unit if test else '', placeholder='e.g. g/dL, mg/dL', icon='circle-info') }}
+                {{ macros.text_field('reference_range', 'Reference Range Text', test.reference_range if test else '', placeholder='e.g. 13.5 - 17.5', icon='ruler-horizontal') }}
+            </div>
+
+            <div class="form-row">
+                {{ macros.number_field('normal_min', 'Normal Minimum Value', test.normal_min if test else '', step='0.01', icon='gauge-simple-min') }}
+                {{ macros.number_field('normal_max', 'Normal Maximum Value', test.normal_max if test else '', step='0.01', icon='gauge-simple-max') }}
+            </div>
+
+            <div class="form-row">
+                {{ macros.number_field('default_price', 'Default Price (₹)', test.default_price if test else '', step='0.01', icon='indian-rupee-sign') }}
+                {% if test %}
+                {{ macros.checkbox_field('is_active', 'Active catalog template', test.is_active) }}
+                {% endif %}
+            </div>
+
+            {{ macros.textarea_field('description', 'Test Summary / Information', test.description if test else '', icon='align-left') }}
+
+            <div class="form-actions">
+                <a href="{{ url_for('laboratory.list_catalog') }}" class="btn btn-outline">Cancel</a>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Test Profile</button>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% import "crud/_form_macros.html" as macros %}
+
+{% block title %}{% if report %}Edit Report{% else %}Write Consultation Report{% endif %} - MedCore HMS{% endblock %}
+
+{% block content %}
+<section class="section-container" style="padding-top: 100px; padding-bottom: 80px;">
+    <div class="form-container">
+        <h1 class="form-title">{% if report %}Edit Report #{{ report.report_number }}{% else %}Write Consultation Report{% endif %}</h1>
+        <p class="form-subtitle">{% if report %}Modify details for this clinical consultation report.{% else %}Record details for a consultation session, including diagnosis and follow-up charts.{% endif %}</p>
+
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="form-row">
+                {% if report %}
+                <div class="form-group">
+                    <label><i class="fas fa-user"></i> Patient</label>
+                    <input type="text" value="{{ report.patient.full_name }} ({{ report.patient.patient_number }})" readonly>
+                    <input type="hidden" name="patient_id" value="{{ report.patient_id }}">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-file-medical"></i> Visit ID</label>
+                    <input type="text" value="Visit #{{ report.visit_id }} - {{ report.visit.visit_date.strftime('%Y-%m-%d') }}" readonly>
+                    <input type="hidden" name="visit_id" value="{{ report.visit_id }}">
+                </div>
+                {% else %}
+                {% set visit_options = [] %}
+                {% for v in visits %}
+                    {% set _ = visit_options.append((v.visit_id, "Visit #" ~ v.visit_id ~ " - " ~ v.patient.full_name ~ " (" ~ v.visit_date.strftime('%Y-%m-%d') ~ ")")) %}
+                {% endfor %}
+                {{ macros.select_field('visit_id', 'Select Patient Visit', visit_options, visit_id or '', required=true, icon='file-medical') }}
+
+                {% set patient_options = [] %}
+                {% for p in patients %}
+                    {% set _ = patient_options.append((p.patient_id, p.full_name ~ " (" ~ p.patient_number ~ ")")) %}
+                {% endfor %}
+                {{ macros.select_field('patient_id', 'Confirm Patient', patient_options, '', required=true, icon='user') }}
+                {% endif %}
+            </div>
+
+            <h3 style="margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; color: var(--primary-300);">Clinical Documentation</h3>
+            {{ macros.textarea_field('chief_complaint', 'Chief Complaint', report.chief_complaint if report else '', required=true, placeholder='Primary reasons patient sought care...', icon='comment-medical') }}
+            {{ macros.textarea_field('clinical_findings', 'Clinical Findings', report.clinical_findings if report else '', placeholder='Observations from physical exam, vitals, patient demeanor...', icon='stethoscope') }}
+            {{ macros.textarea_field('diagnosis', 'Diagnosis / Assessment', report.diagnosis if report else '', required=true, placeholder='Primary diagnosis, differential diagnosis, diagnostic code...', icon='brain') }}
+            {{ macros.textarea_field('treatment_plan', 'Treatment Plan & Interventions', report.treatment_plan if report else '', placeholder='Instructions for medications, lifestyle adjustments, test schedules...', icon='rectangle-list') }}
+            {{ macros.textarea_field('prescribed_medicines', 'Prescribed Medicines List (Free Text)', report.prescribed_medicines if report else '', placeholder='For pharmacy record and summary printout...', icon='pills') }}
+            {{ macros.textarea_field('doctor_notes', 'Internal Doctor Notes', report.doctor_notes if report else '', placeholder='Confidential notes for other clinical staff...', icon='align-left') }}
+
+            <h3 style="margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; color: var(--primary-300);">Follow-Up Scheduling</h3>
+            <div class="form-row">
+                {{ macros.checkbox_field('follow_up_required', 'Follow-Up Session Required', report.follow_up_required if report else false) }}
+            </div>
+            <div class="form-row" id="follow-up-group">
+                {{ macros.date_field('follow_up_date', 'Follow-Up Date', report.follow_up_date|string if report and report.follow_up_date else '', icon='calendar-day') }}
+                {{ macros.text_field('next_visit_reason', 'Next Session Purpose', report.next_visit_reason if report else '', placeholder='e.g. Suture removal, check BP', icon='circle-question') }}
+            </div>
+
+            <div class="form-actions">
+                <a href="{% if report %}{{ url_for('reports.view_report', report_id=report.doctor_report_id) }}{% else %}{{ url_for('reports.list_reports') }}{% endif %}" class="btn btn-outline">Cancel</a>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Report</button>
+            </div>
+        </form>
+    </div>
+</section>
+
+{% block extra_js %}
+<script>
+    const followCheck = document.getElementsByName('follow_up_required')[0];
+    const followGroup = document.getElementById('follow-up-group');
+
+    if (followCheck && followGroup) {
+        const toggleFollow = () => {
+            followGroup.style.display = followCheck.checked ? 'grid' : 'none';
+        };
+        followCheck.addEventListener('change', toggleFollow);
+        toggleFollow();
+    }
+
+    {% if not report %}
+    const visitSelect = document.getElementById('visit_id');
+    const patientSelect = document.getElementById('patient_id');
+
+    if (visitSelect && patientSelect) {
+        const visitMap = {
+            {% for v in visits %}
+            "{{ v.visit_id }}": "{{ v.patient_id }}",
+            {% endfor %}
+        };
+        visitSelect.addEventListener('change', () => {
+            const patId = visitMap[visitSelect.value];
+            if (patId) {
+                patientSelect.value = patId;
+            }
+        });
+    }
+    {% endif %}
+</script>
+{% endblock %}
+{% endblock %}

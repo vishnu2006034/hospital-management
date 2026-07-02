@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% import "crud/_form_macros.html" as macros %}
+
+{% block title %}{% if user %}Edit Staff Member{% else %}Add Staff Member{% endif %} - MedCore HMS{% endblock %}
+
+{% block content %}
+<section class="section-container" style="padding-top: 100px; padding-bottom: 80px;">
+    <div class="form-container">
+        <h1 class="form-title">{% if user %}Edit Staff Profile{% else %}Add Staff Member{% endif %}</h1>
+        <p class="form-subtitle">{% if user %}Update profile details for {{ user.full_name }} ({{ user.employee_code }}).{% else %}Register a new hospital employee and select their starting role.{% endif %}</p>
+
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="form-row">
+                {{ macros.text_field('first_name', 'First Name', user.first_name if user else '', required=true, icon='user') }}
+                {{ macros.text_field('last_name', 'Last Name', user.last_name if user else '', icon='user') }}
+            </div>
+
+            <div class="form-row">
+                {% set gen_opts = [('Male', 'Male'), ('Female', 'Female'), ('Other', 'Other')] %}
+                {{ macros.select_field('gender', 'Gender', gen_opts, user.gender if user else '', icon='venus-mars') }}
+                {{ macros.date_field('dob', 'Date of Birth', user.dob|string if user and user.dob else '', icon='calendar-day') }}
+            </div>
+
+            <div class="form-row">
+                {{ macros.text_field('phone', 'Phone Number', user.phone if user else '', type='tel', icon='phone') }}
+                {{ macros.text_field('email', 'Email Address (Used for Login)', user.email if user else '', type='email', required=true, icon='envelope') }}
+            </div>
+
+            <div class="form-row">
+                {{ macros.text_field('department', 'Department', user.department if user else '', placeholder='e.g. Cardiology, Outpatient, Lab', icon='hospital') }}
+                {{ macros.text_field('specialization', 'Specialization', user.specialization if user else '', placeholder='e.g. Cardiologist, Lab Technician', icon='stethoscope') }}
+            </div>
+
+            <div class="form-row">
+                {{ macros.text_field('license_number', 'Medical License No (Doctors/Nurses)', user.license_number if user else '', icon='id-card') }}
+                {{ macros.date_field('joining_date', 'Joining Date', user.joining_date|string if user and user.joining_date else '', icon='calendar-days') }}
+            </div>
+
+            <div class="form-row">
+                {% set status_opts = [('ACTIVE', 'Active'), ('INACTIVE', 'Inactive'), ('SUSPENDED', 'Suspended')] %}
+                {{ macros.select_field('status', 'Employee Status', status_opts, user.status if user else 'ACTIVE', icon='info') }}
+            </div>
+
+            <h3 style="margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; color: var(--primary-300);">Security & Roles</h3>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="password"><i class="fas fa-lock"></i> Password {% if user %}(Leave blank to keep current){% else %}(Required){% endif %}</label>
+                    <input type="password" id="password" name="password" {% if not user %}required{% endif %} placeholder="{% if user %}Keep existing...{% else %}Enter secure password{% endif %}">
+                </div>
+
+                {% if not user %}
+                {% set role_options = [] %}
+                {% for role in roles %}
+                    {% set _ = role_options.append((role.role_id, role.role_name ~ " - " ~ (role.description or '')) ) %}
+                {% endfor %}
+                {{ macros.select_field('role_id', 'Assign Starting Role', role_options, '', required=true, icon='user-gear') }}
+                {% endif %}
+            </div>
+
+            <div class="form-actions">
+                <a href="{% if user %}{{ url_for('staff.view_staff', user_id=user.user_id) }}{% else %}{{ url_for('staff.list_staff') }}{% endif %}" class="btn btn-outline">Cancel</a>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Profile</button>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

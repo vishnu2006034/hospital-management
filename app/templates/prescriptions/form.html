@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% import "crud/_form_macros.html" as macros %}
+
+{% block title %}Write Prescription - MedCore HMS{% endblock %}
+
+{% block content %}
+<section class="section-container" style="padding-top: 100px; padding-bottom: 80px;">
+    <div class="form-container">
+        <h1 class="form-title">Write Prescription</h1>
+        <p class="form-subtitle">Add prescribed medicines to a patient visit. Stock will be automatically deducted.</p>
+
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="form-row">
+                {% if visit_id %}
+                {% set selected_visit = None %}
+                {% for v in visits %}
+                    {% if v.visit_id|string == visit_id|string %}
+                        {% set selected_visit = v %}
+                    {% endif %}
+                {% endfor %}
+                <div class="form-group">
+                    <label><i class="fas fa-file-medical"></i> Selected Visit</label>
+                    <input type="text" value="Visit #{{ visit_id }} - {{ selected_visit.patient.full_name if selected_visit else '' }}" readonly>
+                    <input type="hidden" name="visit_id" value="{{ visit_id }}">
+                </div>
+                {% else %}
+                {% set visit_options = [] %}
+                {% for v in visits %}
+                    {% set _ = visit_options.append((v.visit_id, "Visit #" ~ v.visit_id ~ " - " ~ v.patient.full_name ~ " (Dr. " ~ (v.doctor.full_name if v.doctor else '--') ~ ")")) %}
+                {% endfor %}
+                {{ macros.select_field('visit_id', 'Select Patient Visit', visit_options, '', required=true, icon='file-medical') }}
+                {% endif %}
+
+                {% set stock_options = [] %}
+                {% for inv in inventory %}
+                    {% set _ = stock_options.append((inv.inventory_id, inv.medicine.medicine_name ~ " (Batch: " ~ inv.batch_number ~ ", Stock: " ~ inv.quantity_in_stock ~ ")")) %}
+                {% endfor %}
+                {{ macros.select_field('inventory_id', 'Select Drug & Batch', stock_options, '', required=true, icon='boxes-stacked') }}
+            </div>
+
+            <div class="form-row">
+                {{ macros.text_field('dosage', 'Dosage (e.g. 500mg, 1 tablet)', required=true, placeholder='e.g. 500mg, 1 capsule', icon='weight') }}
+                {{ macros.text_field('frequency', 'Frequency (e.g. Twice daily, 1-0-1)', required=true, placeholder='e.g. Twice daily, 1-0-1', icon='clock') }}
+            </div>
+
+            <div class="form-row">
+                {{ macros.text_field('duration', 'Duration (e.g. 5 days, 1 week)', required=true, placeholder='e.g. 5 days', icon='calendar-days') }}
+                {{ macros.number_field('quantity', 'Quantity to Dispense', required=true, min='1', icon='hashtag') }}
+            </div>
+
+            {{ macros.textarea_field('instructions', 'Special Instructions', placeholder='Take after food, avoid dairy, etc.', icon='align-left') }}
+
+            <div class="form-actions">
+                <a href="{% if visit_id %}{{ url_for('visits.view_visit', visit_id=visit_id) }}{% else %}{{ url_for('prescriptions.list_prescriptions') }}{% endif %}" class="btn btn-outline">Cancel</a>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-prescription"></i> Save Prescription</button>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

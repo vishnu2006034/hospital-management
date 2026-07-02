@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Report Details: {{ report.report_number }} - MedCore HMS{% endblock %}
+
+{% block content %}
+<section class="section-container" style="padding-top: 100px; padding-bottom: 80px;">
+    <!-- Detail Header -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <span class="badge badge-warning" style="margin-bottom: 0.5rem;">Consultation Record</span>
+            <h1 style="font-size: 2rem; font-weight: 800; margin: 0;">Report: {{ report.report_number }}</h1>
+            <p style="color: var(--text-secondary); margin: 0.25rem 0 0 0;">
+                Patient: <strong><a href="{{ url_for('patients.view_patient', patient_id=report.patient_id) }}">{{ report.patient.full_name }}</a></strong> ({{ report.patient.patient_number }})
+                &bull; {{ report.created_at.strftime('%Y-%m-%d %H:%M') }}
+            </p>
+        </div>
+        <div style="display: flex; gap: 0.75rem;">
+            <a href="{{ url_for('reports.edit_report', report_id=report.doctor_report_id) }}" class="btn btn-outline">
+                <i class="fas fa-edit"></i> Edit Report
+            </a>
+            <a href="{{ url_for('visits.view_visit', visit_id=report.visit_id) }}" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i> View Visit
+            </a>
+            <a href="{{ url_for('reports.list_reports') }}" class="btn btn-outline">
+                <i class="fas fa-list"></i> Directory
+            </a>
+        </div>
+    </div>
+
+    <div class="detail-grid">
+        <!-- Sidebar: Info -->
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <div class="detail-card">
+                <h3><i class="fas fa-circle-info"></i> Summary Data</h3>
+                <div class="detail-list">
+                    <div class="detail-item">
+                        <span class="detail-label">Report Number</span>
+                        <span class="detail-value">{{ report.report_number }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Date Generated</span>
+                        <span class="detail-value">{{ report.created_at.strftime('%Y-%m-%d') }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Physician</span>
+                        <span class="detail-value">Dr. {{ report.doctor.full_name if report.doctor else '--' }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Linked Visit</span>
+                        <span class="detail-value"><a href="{{ url_for('visits.view_visit', visit_id=report.visit_id) }}">Visit #{{ report.visit_id }}</a></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-card" style="border-left: 4px solid var(--accent-500);">
+                <h3><i class="fas fa-calendar-day" style="color: var(--accent-400);"></i> Follow-up Status</h3>
+                <div class="detail-list">
+                    <div class="detail-item">
+                        <span class="detail-label">Required</span>
+                        <span class="detail-value">
+                            {% if report.follow_up_required %}
+                            <span class="badge badge-warning">Yes</span>
+                            {% else %}
+                            <span class="badge badge-success">No</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                    {% if report.follow_up_required %}
+                    <div class="detail-item">
+                        <span class="detail-label">Target Date</span>
+                        <span class="detail-value">{{ report.follow_up_date }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Purpose</span>
+                        <span class="detail-value">{{ report.next_visit_reason or '--' }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Panel: Medical documentation -->
+        <div style="display: flex; flex-direction: column; gap: 1.75rem;">
+            <div class="history-card">
+                <h3><i class="fas fa-file-invoice"></i> Clinical Summary</h3>
+                <div style="display: flex; flex-direction: column; gap: 1.5rem; margin-top: 1rem;">
+                    <div>
+                        <h4 style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.35rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.25rem;">Chief Complaint</h4>
+                        <p style="font-size: 0.95rem; line-height: 1.6; white-space: pre-line;">{{ report.chief_complaint or '--' }}</p>
+                    </div>
+                    <div>
+                        <h4 style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.35rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.25rem;">Clinical Findings</h4>
+                        <p style="font-size: 0.95rem; line-height: 1.6; white-space: pre-line;">{{ report.clinical_findings or '--' }}</p>
+                    </div>
+                    <div>
+                        <h4 style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.35rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.25rem;">Diagnosis</h4>
+                        <p style="font-size: 0.95rem; line-height: 1.6; white-space: pre-line; font-weight: 600;">{{ report.diagnosis or '--' }}</p>
+                    </div>
+                    <div>
+                        <h4 style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.35rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.25rem;">Treatment Plan</h4>
+                        <p style="font-size: 0.95rem; line-height: 1.6; white-space: pre-line;">{{ report.treatment_plan or '--' }}</p>
+                    </div>
+                    {% if report.prescribed_medicines %}
+                    <div>
+                        <h4 style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.35rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.25rem;">Prescribed Medicines Summary</h4>
+                        <p style="font-size: 0.95rem; line-height: 1.6; white-space: pre-line;">{{ report.prescribed_medicines }}</p>
+                    </div>
+                    {% endif %}
+                    {% if report.doctor_notes %}
+                    <div>
+                        <h4 style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.35rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.25rem;">Internal Observations & Remarks</h4>
+                        <p style="font-size: 0.95rem; line-height: 1.6; white-space: pre-line;">{{ report.doctor_notes }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

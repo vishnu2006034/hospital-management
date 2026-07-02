@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% import "crud/_form_macros.html" as macros %}
+
+{% block title %}{% if patient %}Edit Patient{% else %}Register Patient{% endif %} - MedCore HMS{% endblock %}
+
+{% block content %}
+<section class="section-container" style="padding-top: 100px; padding-bottom: 80px;">
+    <div class="form-container">
+        <h1 class="form-title">{% if patient %}Edit Patient Record{% else %}Register New Patient{% endif %}</h1>
+        <p class="form-subtitle">{% if patient %}Modify details for {{ patient.full_name }} ({{ patient.patient_number }}).{% else %}Enter patient details to create a new registration.{% endif %}</p>
+
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="form-row">
+                {{ macros.text_field('first_name', 'First Name', patient.first_name if patient else '', required=true, icon='user') }}
+                {{ macros.text_field('last_name', 'Last Name', patient.last_name if patient else '', icon='user') }}
+            </div>
+
+            <div class="form-row">
+                {% set gender_options = [('Male', 'Male'), ('Female', 'Female'), ('Other', 'Other')] %}
+                {{ macros.select_field('gender', 'Gender', gender_options, patient.gender if patient else '', icon='venus-mars') }}
+                {{ macros.date_field('dob', 'Date of Birth', patient.dob|string if patient and patient.dob else '', icon='calendar-day') }}
+            </div>
+
+            <div class="form-row">
+                {% set blood_options = [('A+', 'A+'), ('A-', 'A-'), ('B+', 'B+'), ('B-', 'B-'), ('O+', 'O+'), ('O-', 'O-'), ('AB+', 'AB+'), ('AB-', 'AB-')] %}
+                {{ macros.select_field('blood_group', 'Blood Group', blood_options, patient.blood_group if patient else '', icon='droplet') }}
+                {{ macros.text_field('phone', 'Phone Number', patient.phone if patient else '', type='tel', icon='phone') }}
+            </div>
+
+            {{ macros.text_field('email', 'Email Address', patient.email if patient else '', type='email', icon='envelope') }}
+            {{ macros.textarea_field('address', 'Residential Address', patient.address if patient else '', icon='location-dot') }}
+
+            <h3 style="margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; color: var(--primary-300);">Emergency Contact Info</h3>
+            <div class="form-row">
+                {{ macros.text_field('emergency_contact_name', 'Contact Person Name', patient.emergency_contact_name if patient else '', icon='user-shield') }}
+                {{ macros.text_field('emergency_contact_phone', 'Contact Person Phone', patient.emergency_contact_phone if patient else '', type='tel', icon='phone') }}
+            </div>
+
+            <h3 style="margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; color: var(--primary-300);">Medical Context</h3>
+            {{ macros.textarea_field('allergies', 'Known Allergies / Reactions', patient.allergies if patient else '', placeholder='Penicillin, Sulfa, Peanuts, etc.', icon='hand-dots') }}
+            {{ macros.textarea_field('medical_history', 'Relevant Medical History / Conditions', patient.medical_history if patient else '', placeholder='Hypertension, Diabetes, Asthma, past surgeries, etc.', icon='file-medical') }}
+
+            <div class="form-actions">
+                <a href="{% if patient %}{{ url_for('patients.view_patient', patient_id=patient.patient_id) }}{% else %}{{ url_for('patients.list_patients') }}{% endif %}" class="btn btn-outline">Cancel</a>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Record</button>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

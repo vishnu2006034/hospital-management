@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% import "crud/_form_macros.html" as macros %}
+
+{% block title %}{% if medicine %}Edit Medicine{% else %}Add Medicine{% endif %} - MedCore HMS{% endblock %}
+
+{% block content %}
+<section class="section-container" style="padding-top: 100px; padding-bottom: 80px;">
+    <div class="form-container">
+        <h1 class="form-title">{% if medicine %}Edit Medicine Details{% else %}Add New Medicine{% endif %}</h1>
+        <p class="form-subtitle">{% if medicine %}Update attributes for {{ medicine.medicine_name }}.{% else %}Input medicine information to register it in catalog.{% endif %}</p>
+
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="form-row">
+                {{ macros.text_field('medicine_name', 'Medicine Name', medicine.medicine_name if medicine else '', required=true, icon='prescription-bottle-medical') }}
+                {{ macros.text_field('generic_name', 'Generic Name', medicine.generic_name if medicine else '', icon='dna') }}
+            </div>
+
+            <div class="form-row">
+                {% set category_options = [
+                    ('Analgesics', 'Analgesics (Pain Relievers)'),
+                    ('Antibiotics', 'Antibiotics'),
+                    ('Antiseptics', 'Antiseptics'),
+                    ('Antipyretics', 'Antipyretics (Fever Reducers)'),
+                    ('Cardiovascular', 'Cardiovascular Drugs'),
+                    ('Gastrointestinal', 'Gastrointestinal Drugs'),
+                    ('Hormones', 'Hormones'),
+                    ('Vitamins/Supplements', 'Vitamins & Supplements')
+                ] %}
+                {{ macros.select_field('category', 'Category', category_options, medicine.category if medicine else '', icon='tags') }}
+                
+                {% set form_options = [
+                    ('Tablet', 'Tablet'),
+                    ('Capsule', 'Capsule'),
+                    ('Syrup', 'Syrup'),
+                    ('Injection', 'Injection'),
+                    ('Ointment', 'Ointment'),
+                    ('Inhaler', 'Inhaler'),
+                    ('Drops', 'Drops')
+                ] %}
+                {{ macros.select_field('dosage_form', 'Dosage Form', form_options, medicine.dosage_form if medicine else '', icon='capsules') }}
+            </div>
+
+            <div class="form-row">
+                {{ macros.text_field('strength', 'Strength (e.g. 500mg, 10ml)', medicine.strength if medicine else '', placeholder='e.g. 500mg, 10ml', icon='weight') }}
+                {{ macros.text_field('manufacturer', 'Manufacturer', medicine.manufacturer if medicine else '', icon='industry') }}
+            </div>
+
+            <div class="form-row">
+                {{ macros.number_field('unit_price', 'Default Unit Price (₹)', medicine.unit_price if medicine else '', step='0.01', icon='indian-rupee-sign') }}
+            </div>
+
+            <div class="form-actions">
+                <a href="{{ url_for('medicines.list_medicines') }}" class="btn btn-outline">Cancel</a>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Medicine</button>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

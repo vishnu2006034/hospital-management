@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% import "crud/_form_macros.html" as macros %}
+
+{% block title %}{% if visit %}Edit Visit{% else %}New Visit{% endif %} - MedCore HMS{% endblock %}
+
+{% block content %}
+<section class="section-container" style="padding-top: 100px; padding-bottom: 80px;">
+    <div class="form-container">
+        <h1 class="form-title">{% if visit %}Edit Visit #{{ visit.visit_id }}{% else %}Record New Visit{% endif %}</h1>
+        <p class="form-subtitle">{% if visit %}Update vitals, diagnosis, and notes for this consultation.{% else %}Create a new visit record. Log complaints and vitals.{% endif %}</p>
+
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="form-row">
+                {% if visit %}
+                <div class="form-group">
+                    <label><i class="fas fa-user"></i> Patient</label>
+                    <input type="text" value="{{ visit.patient.full_name }} ({{ visit.patient.patient_number }})" readonly>
+                    <input type="hidden" name="patient_id" value="{{ visit.patient_id }}">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-user-doctor"></i> Doctor</label>
+                    <input type="text" value="Dr. {{ visit.doctor.full_name if visit.doctor else '--' }}" readonly>
+                    <input type="hidden" name="doctor_id" value="{{ visit.doctor_id }}">
+                </div>
+                {% else %}
+                {% set patient_options = [] %}
+                {% for p in patients %}
+                    {% set _ = patient_options.append((p.patient_id, p.full_name ~ " (" ~ p.patient_number ~ ")")) %}
+                {% endfor %}
+                {{ macros.select_field('patient_id', 'Patient', patient_options, patient_id or '', required=true, icon='user') }}
+
+                {% set doctor_options = [] %}
+                {% for d in doctors %}
+                    {% set _ = doctor_options.append((d.user_id, "Dr. " ~ d.full_name ~ " (" ~ (d.specialization or 'Gen. Physician') ~ ")")) %}
+                {% endfor %}
+                {{ macros.select_field('doctor_id', 'Consulting Doctor', doctor_options, current_user.user_id if current_user.has_role('Doctor') else '', required=true, icon='user-doctor') }}
+                {% endif %}
+            </div>
+
+            <div class="form-row">
+                {% set type_options = [('OUTPATIENT', 'Outpatient (OPD)'), ('INPATIENT', 'Inpatient (IPD)'), ('EMERGENCY', 'Emergency')] %}
+                {{ macros.select_field('visit_type', 'Visit Type', type_options, visit.visit_type if visit else 'OUTPATIENT', icon='arrows-split-up-and-left') }}
+
+                {% if visit %}
+                {% set status_options = [('OPEN', 'Open'), ('CLOSED', 'Closed'), ('DISCHARGED', 'Discharged')] %}
+                {{ macros.select_field('visit_status', 'Visit Status', status_options, visit.visit_status, icon='circle-info') }}
+                {% endif %}
+            </div>
+
+            <h3 style="margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; color: var(--primary-300);">Vitals & Metrics</h3>
+            <div class="form-row" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
+                {{ macros.number_field('height', 'Height (cm)', visit.height if visit else '', step='0.1', icon='ruler-vertical') }}
+                {{ macros.number_field('weight', 'Weight (kg)', visit.weight if visit else '', step='0.1', icon='weight-scale') }}
+                {{ macros.number_field('temperature', 'Temp (°C)', visit.temperature if visit else '', step='0.1', icon='temperature-half') }}
+            </div>
+            <div class="form-row" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
+                {{ macros.text_field('blood_pressure', 'BP (e.g. 120/80)', visit.blood_pressure if visit else '', placeholder='120/80', icon='heart-pulse') }}
+                {{ macros.number_field('pulse_rate', 'Pulse (bpm)', visit.pulse_rate if visit else '', icon='gauge') }}
+                {{ macros.number_field('oxygen_level', 'SpO2 (%)', visit.oxygen_level if visit else '', icon='wind') }}
+            </div>
+
+            {% if visit and visit.visit_type == 'INPATIENT' or not visit %}
+            <h3 style="margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; color: var(--primary-300);" id="admission-title">Inpatient Stays</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="admission_date"><i class="fas fa-door-open"></i> Admission Date</label>
+                    <input type="datetime-local" id="admission_date" name="admission_date" value="{{ visit.admission_date.strftime('%Y-%m-%dT%H:%M') if visit and visit.admission_date else '' }}">
+                </div>
+                {% if visit %}
+                <div class="form-group">
+                    <label for="discharge_date"><i class="fas fa-door-closed"></i> Discharge Date</label>
+                    <input type="datetime-local" id="discharge_date" name="discharge_date" value="{{ visit.discharge_date.strftime('%Y-%m-%dT%H:%M') if visit and visit.discharge_date else '' }}">
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <h3 style="margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; color: var(--primary-300);">Clinical Notes</h3>
+            {{ macros.textarea_field('chief_complaint', 'Chief Complaint', visit.chief_complaint if visit else '', placeholder='Describe primary issues/reasons for visit...', icon='comment-medical') }}
+            {{ macros.textarea_field('diagnosis', 'Diagnosis', visit.diagnosis if visit else '', placeholder='Medical diagnosis details...', icon='brain') }}
+            {{ macros.textarea_field('treatment_plan', 'Treatment Plan', visit.treatment_plan if visit else '', placeholder='Next clinical actions/care instructions...', icon='rectangle-list') }}
+            {{ macros.textarea_field('notes', 'Additional Clinical Notes', visit.notes if visit else '', placeholder='Internal observations...', icon='align-left') }}
+
+            <div class="form-actions">
+                <a href="{% if visit %}{{ url_for('visits.view_visit', visit_id=visit.visit_id) }}{% else %}{{ url_for('visits.list_visits') }}{% endif %}" class="btn btn-outline">Cancel</a>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Visit Record</button>
+            </div>
+        </form>
+    </div>
+</section>
+
+{% block extra_js %}
+<script>
+    const typeSelect = document.getElementById('visit_type');
+    const admissionTitle = document.getElementById('admission-title');
+    const admissionDateGroup = document.getElementById('admission_date') ? document.getElementById('admission_date').parentElement.parentElement : null;
+
+    if (typeSelect && admissionDateGroup) {
+        const toggleAdmission = () => {
+            if (typeSelect.value === 'INPATIENT') {
+                if (admissionTitle) admissionTitle.style.display = 'block';
+                admissionDateGroup.style.display = 'grid';
+            } else {
+                if (admissionTitle) admissionTitle.style.display = 'none';
+                admissionDateGroup.style.display = 'none';
+            }
+        };
+        typeSelect.addEventListener('change', toggleAdmission);
+        toggleAdmission();
+    }
+</script>
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% import "crud/_form_macros.html" as macros %}
+
+{% block title %}Record Test Result - MedCore HMS{% endblock %}
+
+{% block content %}
+<section class="section-container" style="padding-top: 100px; padding-bottom: 80px;">
+    <div class="form-container">
+        <h1 class="form-title">Record Lab Test Result</h1>
+        <p class="form-subtitle">Add a specific diagnostic test result for Lab Request #{{ lab.lab_id }} (Patient: {{ lab.patient.full_name }}).</p>
+
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="form-row">
+                {% set test_options = [] %}
+                {% for test in tests %}
+                    {% set _ = test_options.append((test.test_id, test.test_name ~ " (" ~ test.test_code ~ ")")) %}
+                {% endfor %}
+                {{ macros.select_field('test_id', 'Select Test Profile', test_options, '', required=true, icon='flask-vial') }}
+
+                {{ macros.text_field('result', 'Observed Result Value', '', required=true, placeholder='e.g. 13.5, Positive, 98', icon='gauge-simple-high') }}
+            </div>
+
+            <div class="form-row">
+                {{ macros.text_field('unit', 'Measurement Unit', '', placeholder='e.g. g/dL, mg/dL, mmol/L', icon='circle-info') }}
+                {{ macros.text_field('reference_range', 'Reference Range (Optional)', '', placeholder='e.g. 12.0 - 16.0', icon='ruler-horizontal') }}
+            </div>
+
+            <div class="form-row">
+                {{ macros.checkbox_field('is_abnormal', 'Mark as Abnormal / Outside Range') }}
+            </div>
+
+            {{ macros.textarea_field('remarks', 'Technician Comments / Remarks', placeholder='Note specific samples remarks...', icon='align-left') }}
+
+            <div class="form-actions">
+                <a href="{{ url_for('laboratory.view_lab', lab_id=lab.lab_id) }}" class="btn btn-outline">Cancel</a>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-file-signature"></i> Save Test Result</button>
+            </div>
+        </form>
+    </div>
+</section>
+
+{% block extra_js %}
+<script>
+    const testSelect = document.getElementById('test_id');
+    const unitInput = document.getElementById('unit');
+    const rangeInput = document.getElementById('reference_range');
+
+    if (testSelect && unitInput && rangeInput) {
+        // Auto-populate normal ranges & units from catalog
+        const catalogMap = {
+            {% for t in tests %}
+            "{{ t.test_id }}": {
+                "unit": "{{ t.unit or '' }}",
+                "range": "{{ t.reference_range or '' }}"
+            },
+            {% endfor %}
+        };
+
+        testSelect.addEventListener('change', () => {
+            const data = catalogMap[testSelect.value];
+            if (data) {
+                unitInput.value = data.unit;
+                rangeInput.value = data.range;
+            }
+        });
+    }
+</script>
+{% endblock %}
+{% endblock %}

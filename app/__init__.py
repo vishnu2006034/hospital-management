@@ -49,9 +49,25 @@ def create_app(config_name='development'):
     # Register blueprints
     from app.routes.main import main_bp
     from app.routes.auth import auth_bp
+    from app.routes.patients import patients_bp
+    from app.routes.visits import visits_bp
+    from app.routes.prescriptions import prescriptions_bp
+    from app.routes.medicines import medicines_bp
+    from app.routes.inventory import inventory_bp
+    from app.routes.laboratory import laboratory_bp
+    from app.routes.reports import reports_bp
+    from app.routes.staff import staff_bp
 
     flask_app.register_blueprint(main_bp)
     flask_app.register_blueprint(auth_bp, url_prefix='/auth')
+    flask_app.register_blueprint(patients_bp)
+    flask_app.register_blueprint(visits_bp)
+    flask_app.register_blueprint(prescriptions_bp)
+    flask_app.register_blueprint(medicines_bp)
+    flask_app.register_blueprint(inventory_bp)
+    flask_app.register_blueprint(laboratory_bp)
+    flask_app.register_blueprint(reports_bp)
+    flask_app.register_blueprint(staff_bp)
 
     # Register CLI commands
     register_cli_commands(flask_app)

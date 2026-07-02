@@ -1,0 +1,286 @@
+{% extends "base.html" %}
+
+{% block title %}Visit Summary #{{ visit.visit_id }} - MedCore HMS{% endblock %}
+
+{% block content %}
+<section class="section-container" style="padding-top: 100px; padding-bottom: 80px;">
+    <!-- Detail Header -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <span class="badge badge-warning" style="margin-bottom: 0.5rem;">Visit Registry</span>
+            <h1 style="font-size: 2rem; font-weight: 800; margin: 0;">Visit #{{ visit.visit_id }}</h1>
+            <p style="color: var(--text-secondary); margin: 0.25rem 0 0 0;">
+                Patient: <strong><a href="{{ url_for('patients.view_patient', patient_id=visit.patient_id) }}">{{ visit.patient.full_name }}</a></strong> ({{ visit.patient.patient_number }})
+                &bull; {{ visit.visit_date.strftime('%Y-%m-%d %H:%M') }}
+            </p>
+        </div>
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+            <a href="{{ url_for('prescriptions.add_prescription', visit_id=visit.visit_id) }}" class="btn btn-primary btn-sm">
+                <i class="fas fa-pills"></i> Add Prescription
+            </a>
+            <a href="{{ url_for('laboratory.add_lab', visit_id=visit.visit_id) }}" class="btn btn-primary btn-sm">
+                <i class="fas fa-microscope"></i> Request Lab Test
+            </a>
+            <a href="{{ url_for('reports.add_report', visit_id=visit.visit_id) }}" class="btn btn-primary btn-sm">
+                <i class="fas fa-notes-medical"></i> Write Consultation Report
+            </a>
+            <a href="{{ url_for('visits.edit_visit', visit_id=visit.visit_id) }}" class="btn btn-outline btn-sm">
+                <i class="fas fa-edit"></i> Edit Visit
+            </a>
+            <a href="{{ url_for('visits.list_visits') }}" class="btn btn-outline btn-sm">
+                <i class="fas fa-arrow-left"></i> Registry
+            </a>
+        </div>
+    </div>
+
+    <div class="detail-grid">
+        <!-- Sidebar: Patient Info, Vitals & Stay details -->
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <div class="detail-card">
+                <h3><i class="fas fa-circle-info"></i> Visit Details</h3>
+                <div class="detail-list">
+                    <div class="detail-item">
+                        <span class="detail-label">Visit Type</span>
+                        <span class="detail-value"><span class="badge badge-primary">{{ visit.visit_type }}</span></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Visit Status</span>
+                        <span class="detail-value"><span class="badge badge-success">{{ visit.visit_status }}</span></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Doctor</span>
+                        <span class="detail-value">Dr. {{ visit.doctor.full_name if visit.doctor else '--' }}</span>
+                    </div>
+                    {% if visit.admission_date %}
+                    <div class="detail-item">
+                        <span class="detail-label">Admission Date</span>
+                        <span class="detail-value">{{ visit.admission_date.strftime('%Y-%m-%d %H:%M') }}</span>
+                    </div>
+                    {% endif %}
+                    {% if visit.discharge_date %}
+                    <div class="detail-item">
+                        <span class="detail-label">Discharge Date</span>
+                        <span class="detail-value">{{ visit.discharge_date.strftime('%Y-%m-%d %H:%M') }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="detail-card" style="border-left: 4px solid var(--accent-500);">
+                <h3><i class="fas fa-heart-pulse" style="color: var(--accent-400);"></i> Patient Vitals</h3>
+                <div class="detail-list">
+                    <div class="detail-item">
+                        <span class="detail-label">Height / Weight</span>
+                        <span class="detail-value">
+                            {{ visit.height ~ ' cm' if visit.height else '--' }} /
+                            {{ visit.weight ~ ' kg' if visit.weight else '--' }}
+                        </span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Temperature</span>
+                        <span class="detail-value">{{ visit.temperature ~ ' °C' if visit.temperature else '--' }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Blood Pressure</span>
+                        <span class="detail-value">{{ visit.blood_pressure or '--' }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Pulse Rate</span>
+                        <span class="detail-value">{{ visit.pulse_rate ~ ' bpm' if visit.pulse_rate else '--' }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Oxygen Level (SpO2)</span>
+                        <span class="detail-value">{{ visit.oxygen_level ~ '%' if visit.oxygen_level else '--' }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Panel: Medical Notes, Prescriptions, Lab reports, Doctor reports -->
+        <div style="display: flex; flex-direction: column; gap: 1.75rem;">
+            <div class="history-card">
+                <h3><i class="fas fa-align-left"></i> Clinical Notes</h3>
+                <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
+                    <div>
+                        <h4 style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.25rem;">Chief Complaint</h4>
+                        <p style="font-size: 0.95rem; line-height: 1.6;">{{ visit.chief_complaint or '--' }}</p>
+                    </div>
+                    <div>
+                        <h4 style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.25rem;">Diagnosis</h4>
+                        <p style="font-size: 0.95rem; line-height: 1.6;">{{ visit.diagnosis or '--' }}</p>
+                    </div>
+                    <div>
+                        <h4 style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.25rem;">Treatment Plan</h4>
+                        <p style="font-size: 0.95rem; line-height: 1.6;">{{ visit.treatment_plan or '--' }}</p>
+                    </div>
+                    {% if visit.notes %}
+                    <div>
+                        <h4 style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.25rem;">Additional Notes</h4>
+                        <p style="font-size: 0.95rem; line-height: 1.6;">{{ visit.notes }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Prescriptions -->
+            <div class="history-card">
+                <h3 style="justify-content: space-between;">
+                    <span><i class="fas fa-pills"></i> Prescriptions</span>
+                    <a href="{{ url_for('prescriptions.add_prescription', visit_id=visit.visit_id) }}" class="btn btn-outline btn-sm">
+                        <i class="fas fa-plus"></i> Add
+                    </a>
+                </h3>
+                <div class="table-responsive" style="margin-top: 1rem; border: none; box-shadow: none;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Medicine</th>
+                                <th>Dosage</th>
+                                <th>Frequency</th>
+                                <th>Duration</th>
+                                <th>Quantity</th>
+                                <th>Instructions</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for pr in prescriptions %}
+                            <tr>
+                                <td>
+                                    <strong>{{ pr.inventory_batch.medicine.medicine_name }}</strong>
+                                    <br>
+                                    <small style="color: var(--text-muted);">Batch: {{ pr.inventory_batch.batch_number }}</small>
+                                </td>
+                                <td>{{ pr.dosage or '--' }}</td>
+                                <td>{{ pr.frequency or '--' }}</td>
+                                <td>{{ pr.duration or '--' }}</td>
+                                <td>{{ pr.quantity or '--' }}</td>
+                                <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ pr.instructions or '--' }}</td>
+                                <td>
+                                    <form method="POST" action="{{ url_for('prescriptions.delete_prescription', prescription_id=pr.prescription_id) }}" style="display:inline;">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Remove prescription?')" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 1.5rem 0;">
+                                    No prescriptions written yet.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Lab Requests -->
+            <div class="history-card">
+                <h3 style="justify-content: space-between;">
+                    <span><i class="fas fa-microscope"></i> Laboratory Requests</span>
+                    <a href="{{ url_for('laboratory.add_lab', visit_id=visit.visit_id) }}" class="btn btn-outline btn-sm">
+                        <i class="fas fa-plus"></i> Request
+                    </a>
+                </h3>
+                <div class="table-responsive" style="margin-top: 1rem; border: none; box-shadow: none;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Request ID</th>
+                                <th>Priority</th>
+                                <th>Sample Type</th>
+                                <th>Status</th>
+                                <th>Remarks</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for lab in lab_requests %}
+                            <tr>
+                                <td><strong><a href="{{ url_for('laboratory.view_lab', lab_id=lab.lab_id) }}">#{{ lab.lab_id }}</a></strong></td>
+                                <td>
+                                    <span class="badge {% if lab.priority == 'HIGH' or lab.priority == 'STAT' %}badge-danger{% else %}badge-info{% endif %}">
+                                        {{ lab.priority }}
+                                    </span>
+                                </td>
+                                <td>{{ lab.sample_type or '--' }}</td>
+                                <td>
+                                    <span class="badge {% if lab.test_status == 'COMPLETED' %}badge-success{% elif lab.test_status == 'PENDING' %}badge-warning{% else %}badge-primary{% endif %}">
+                                        {{ lab.test_status }}
+                                    </span>
+                                </td>
+                                <td>{{ lab.remarks or '--' }}</td>
+                                <td>
+                                    <a href="{{ url_for('laboratory.view_lab', lab_id=lab.lab_id) }}" class="btn btn-outline btn-sm">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 1.5rem 0;">
+                                    No laboratory requests.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Doctor consultation report -->
+            <div class="history-card">
+                <h3 style="justify-content: space-between;">
+                    <span><i class="fas fa-file-invoice"></i> Consultation Reports</span>
+                    <a href="{{ url_for('reports.add_report', visit_id=visit.visit_id) }}" class="btn btn-outline btn-sm">
+                        <i class="fas fa-plus"></i> Write Report
+                    </a>
+                </h3>
+                <div class="table-responsive" style="margin-top: 1rem; border: none; box-shadow: none;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Report Number</th>
+                                <th>Diagnosis</th>
+                                <th>Follow-up</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for rep in doctor_reports %}
+                            <tr>
+                                <td><strong><a href="{{ url_for('reports.view_report', report_id=rep.doctor_report_id) }}">{{ rep.report_number }}</a></strong></td>
+                                <td>{{ rep.diagnosis or '--' }}</td>
+                                <td>
+                                    {% if rep.follow_up_required %}
+                                    <span class="badge badge-warning">Required ({{ rep.follow_up_date }})</span>
+                                    {% else %}
+                                    --
+                                    {% endif %}
+                                </td>
+                                <td>{{ rep.created_at.strftime('%Y-%m-%d') }}</td>
+                                <td>
+                                    <a href="{{ url_for('reports.view_report', report_id=rep.doctor_report_id) }}" class="btn btn-outline btn-sm">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 1.5rem 0;">
+                                    No reports generated yet.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% import "crud/_form_macros.html" as macros %}
+
+{% block title %}Staff Directory - MedCore HMS{% endblock %}
+
+{% block content %}
+<section class="section-container" style="padding-top: 100px; padding-bottom: 80px;">
+    <div class="section-header" style="text-align: left; margin-bottom: 2rem;">
+        <span class="section-badge">Administration</span>
+        <h1 class="section-title">Staff Directory</h1>
+        <p class="section-subtitle" style="margin: 0;">Configure access rights, roles, and profiles for hospital staff.</p>
+    </div>
+
+    <!-- Actions Bar -->
+    <div class="actions-bar">
+        <form method="GET" action="{{ url_for('staff.list_staff') }}" class="search-form">
+            <input type="text" name="q" value="{{ search }}" placeholder="Search by name, code, department, or email..." class="search-input">
+            <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
+            {% if search %}
+            <a href="{{ url_for('staff.list_staff') }}" class="btn btn-outline">Clear</a>
+            {% endif %}
+        </form>
+        <a href="{{ url_for('staff.add_staff') }}" class="btn btn-primary">
+            <i class="fas fa-user-plus"></i> Add Staff Member
+        </a>
+    </div>
+
+    <!-- Table -->
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Emp Code</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Department</th>
+                    <th>Specialization</th>
+                    <th>License Number</th>
+                    <th>Status</th>
+                    <th>Roles</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for member in staff.items %}
+                <tr>
+                    <td><strong>{{ member.employee_code }}</strong></td>
+                    <td><strong>{{ member.full_name }}</strong></td>
+                    <td>{{ member.email or '--' }}</td>
+                    <td>{{ member.department or '--' }}</td>
+                    <td>{{ member.specialization or '--' }}</td>
+                    <td>{{ member.license_number or '--' }}</td>
+                    <td>
+                        <span class="badge {% if member.status == 'ACTIVE' %}badge-success{% else %}badge-danger{% endif %}">
+                            {{ member.status }}
+                        </span>
+                    </td>
+                    <td>
+                        {% for rname in member.role_names %}
+                        <span class="badge badge-primary">{{ rname }}</span>
+                        {% else %}
+                        <span class="badge badge-danger">No Roles</span>
+                        {% endfor %}
+                    </td>
+                    <td class="table-actions">
+                        <a href="{{ url_for('staff.view_staff', user_id=member.user_id) }}" class="btn btn-outline btn-sm">
+                            <i class="fas fa-eye"></i> Profile
+                        </a>
+                        <a href="{{ url_for('staff.edit_staff', user_id=member.user_id) }}" class="btn btn-outline btn-sm">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="9" style="text-align: center; color: var(--text-muted); padding: 3rem 0;">
+                        <i class="fas fa-users-gear" style="font-size: 2.5rem; margin-bottom: 1rem; display: block;"></i>
+                        No staff members found.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {{ macros.pagination(staff, 'staff.list_staff', q=search) }}
+</section>
+{% endblock %}

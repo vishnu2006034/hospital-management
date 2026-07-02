@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% import "crud/_form_macros.html" as macros %}
+
+{% block title %}{% if inv %}Edit Batch{% else %}Add Inventory Batch{% endif %} - MedCore HMS{% endblock %}
+
+{% block content %}
+<section class="section-container" style="padding-top: 100px; padding-bottom: 80px;">
+    <div class="form-container">
+        <h1 class="form-title">{% if inv %}Edit Batch Details{% else %}Register New Inventory Batch{% endif %}</h1>
+        <p class="form-subtitle">{% if inv %}Modify credentials for batch "{{ inv.batch_number }}".{% else %}Register a new stock shipment in the pharmacy.{% endif %}</p>
+
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="form-row">
+                {% if inv %}
+                <div class="form-group">
+                    <label><i class="fas fa-prescription-bottle-medical"></i> Medicine</label>
+                    <input type="text" value="{{ inv.medicine.medicine_name }}" readonly>
+                    <input type="hidden" name="medicine_id" value="{{ inv.medicine_id }}">
+                </div>
+                {% else %}
+                {% set med_options = [] %}
+                {% for med in medicines %}
+                    {% set _ = med_options.append((med.medicine_id, med.medicine_name ~ " (" ~ (med.strength or '') ~ " " ~ (med.dosage_form or '') ~ ")")) %}
+                {% endfor %}
+                {{ macros.select_field('medicine_id', 'Select Medicine', med_options, '', required=true, icon='prescription-bottle-medical') }}
+                {% endif %}
+
+                {{ macros.text_field('batch_number', 'Batch Number', inv.batch_number if inv else '', required=true, placeholder='e.g. BATCH-A104', icon='barcode') }}
+            </div>
+
+            <div class="form-row">
+                {{ macros.date_field('expiry_date', 'Expiry Date', inv.expiry_date|string if inv and inv.expiry_date else '', required=true, icon='calendar') }}
+                {{ macros.text_field('supplier', 'Supplier / Vendor', inv.supplier if inv else '', icon='truck-field') }}
+            </div>
+
+            <div class="form-row">
+                {{ macros.number_field('purchase_price', 'Purchase Price per Unit (₹)', inv.purchase_price if inv else '', step='0.01', icon='indian-rupee-sign') }}
+                {{ macros.number_field('selling_price', 'Selling Price per Unit (₹)', inv.selling_price if inv else '', step='0.01', icon='indian-rupee-sign') }}
+            </div>
+
+            <div class="form-row">
+                {% if not inv %}
+                {{ macros.number_field('quantity_in_stock', 'Initial Quantity in Stock', '0', required=true, min='0', icon='boxes-stacked') }}
+                {% endif %}
+                {{ macros.number_field('minimum_stock', 'Minimum Stock Alert Level', inv.minimum_stock if inv else '10', required=true, min='0', icon='circle-exclamation') }}
+            </div>
+
+            <div class="form-actions">
+                <a href="{{ url_for('inventory.list_inventory') }}" class="btn btn-outline">Cancel</a>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Inventory Batch</button>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

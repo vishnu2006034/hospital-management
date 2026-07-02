@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% import "crud/_form_macros.html" as macros %}
+
+{% block title %}Visits - MedCore HMS{% endblock %}
+
+{% block content %}
+<section class="section-container" style="padding-top: 100px; padding-bottom: 80px;">
+    <div class="section-header" style="text-align: left; margin-bottom: 2rem;">
+        <span class="section-badge">Consultations</span>
+        <h1 class="section-title">Visit Registry</h1>
+        <p class="section-subtitle" style="margin: 0;">Track outpatient appointments and inpatient admissions.</p>
+    </div>
+
+    <!-- Actions Bar -->
+    <div class="actions-bar">
+        <form method="GET" action="{{ url_for('visits.list_visits') }}" class="search-form">
+            <input type="text" name="q" value="{{ search }}" placeholder="Search by patient name or number..." class="search-input">
+            {% set status_options = [('', 'All Statuses'), ('OPEN', 'Open'), ('CLOSED', 'Closed'), ('DISCHARGED', 'Discharged')] %}
+            <select name="status" class="search-input" style="max-width: 150px; padding: 0.5rem;" onchange="this.form.submit()">
+                {% for val, label in status_options %}
+                <option value="{{ val }}" {% if val == status %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
+            {% if search or status %}
+            <a href="{{ url_for('visits.list_visits') }}" class="btn btn-outline">Clear</a>
+            {% endif %}
+        </form>
+        <a href="{{ url_for('visits.add_visit') }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> New Visit Record
+        </a>
+    </div>
+
+    <!-- Table -->
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Visit ID</th>
+                    <th>Date / Time</th>
+                    <th>Patient</th>
+                    <th>Doctor</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Diagnosis</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for visit in visits.items %}
+                <tr>
+                    <td><strong>#{{ visit.visit_id }}</strong></td>
+                    <td>{{ visit.visit_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>
+                        <a href="{{ url_for('patients.view_patient', patient_id=visit.patient_id) }}">
+                            {{ visit.patient.full_name }}
+                        </a>
+                        <br>
+                        <small style="color: var(--text-muted);">{{ visit.patient.patient_number }}</small>
+                    </td>
+                    <td>Dr. {{ visit.doctor.full_name if visit.doctor else '--' }}</td>
+                    <td>
+                        <span class="badge {% if visit.visit_type == 'INPATIENT' %}badge-warning{% else %}badge-primary{% endif %}">
+                            {{ visit.visit_type }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge {% if visit.visit_status == 'OPEN' %}badge-success{% elif visit.visit_status == 'CLOSED' %}badge-danger{% else %}badge-info{% endif %}">
+                            {{ visit.visit_status }}
+                        </span>
+                    </td>
+                    <td>{{ visit.diagnosis or '--' }}</td>
+                    <td class="table-actions">
+                        <a href="{{ url_for('visits.view_visit', visit_id=visit.visit_id) }}" class="btn btn-outline btn-sm">
+                            <i class="fas fa-eye"></i> View
+                        </a>
+                        <a href="{{ url_for('visits.edit_visit', visit_id=visit.visit_id) }}" class="btn btn-outline btn-sm">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        <button class="btn btn-danger btn-sm" onclick="openDeleteModal('{{ url_for('visits.delete_visit', visit_id=visit.visit_id) }}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 3rem 0;">
+                        <i class="fas fa-notes-medical" style="font-size: 2.5rem; margin-bottom: 1rem; display: block;"></i>
+                        No visits recorded.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {{ macros.pagination(visits, 'visits.list_visits', q=search, status=status) }}
+</section>
+
+{% include 'crud/_confirm_delete.html' %}
+{% endblock %}

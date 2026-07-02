@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% import "crud/_form_macros.html" as macros %}
+
+{% block title %}Medicines - MedCore HMS{% endblock %}
+
+{% block content %}
+<section class="section-container" style="padding-top: 100px; padding-bottom: 80px;">
+    <div class="section-header" style="text-align: left; margin-bottom: 2rem;">
+        <span class="section-badge">Inventory Management</span>
+        <h1 class="section-title">Medicine Catalog</h1>
+        <p class="section-subtitle" style="margin: 0;">Master directory of all medicines available in pharmacy.</p>
+    </div>
+
+    <!-- Actions Bar -->
+    <div class="actions-bar">
+        <form method="GET" action="{{ url_for('medicines.list_medicines') }}" class="search-form">
+            <input type="text" name="q" value="{{ search }}" placeholder="Search by medicine or generic name..." class="search-input">
+            <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
+            {% if search %}
+            <a href="{{ url_for('medicines.list_medicines') }}" class="btn btn-outline">Clear</a>
+            {% endif %}
+        </form>
+        <a href="{{ url_for('medicines.add_medicine') }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add New Drug
+        </a>
+    </div>
+
+    <!-- Table -->
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Medicine Name</th>
+                    <th>Generic Name</th>
+                    <th>Category</th>
+                    <th>Dosage Form</th>
+                    <th>Strength</th>
+                    <th>Manufacturer</th>
+                    <th>Unit Price</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for medicine in medicines.items %}
+                <tr>
+                    <td><strong>#{{ medicine.medicine_id }}</strong></td>
+                    <td><strong>{{ medicine.medicine_name }}</strong></td>
+                    <td>{{ medicine.generic_name or '--' }}</td>
+                    <td>
+                        {% if medicine.category %}
+                        <span class="badge badge-primary">{{ medicine.category }}</span>
+                        {% else %}
+                        --
+                        {% endif %}
+                    </td>
+                    <td>{{ medicine.dosage_form or '--' }}</td>
+                    <td>{{ medicine.strength or '--' }}</td>
+                    <td>{{ medicine.manufacturer or '--' }}</td>
+                    <td>₹{{ "{:,.2f}".format(medicine.unit_price) if medicine.unit_price else '--' }}</td>
+                    <td class="table-actions">
+                        <a href="{{ url_for('medicines.edit_medicine', medicine_id=medicine.medicine_id) }}" class="btn btn-outline btn-sm">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        <button class="btn btn-danger btn-sm" onclick="openDeleteModal('{{ url_for('medicines.delete_medicine', medicine_id=medicine.medicine_id) }}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="9" style="text-align: center; color: var(--text-muted); padding: 3rem 0;">
+                        <i class="fas fa-prescription-bottle-medical" style="font-size: 2.5rem; margin-bottom: 1rem; display: block;"></i>
+                        No medicines registered in catalog.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {{ macros.pagination(medicines, 'medicines.list_medicines', q=search) }}
+</section>
+
+{% include 'crud/_confirm_delete.html' %}
+{% endblock %}

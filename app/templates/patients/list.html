@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% import "crud/_form_macros.html" as macros %}
+
+{% block title %}Patients - MedCore HMS{% endblock %}
+
+{% block content %}
+<section class="section-container" style="padding-top: 100px; padding-bottom: 80px;">
+    <div class="section-header" style="text-align: left; margin-bottom: 2rem;">
+        <span class="section-badge">Medical Records</span>
+        <h1 class="section-title">Patient Directory</h1>
+        <p class="section-subtitle" style="margin: 0;">Manage and view all registered patient records.</p>
+    </div>
+
+    <!-- Actions Bar -->
+    <div class="actions-bar">
+        <form method="GET" action="{{ url_for('patients.list_patients') }}" class="search-form">
+            <input type="text" name="q" value="{{ search }}" placeholder="Search by name, number, or phone..." class="search-input">
+            <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
+            {% if search %}
+            <a href="{{ url_for('patients.list_patients') }}" class="btn btn-outline">Clear</a>
+            {% endif %}
+        </form>
+        <a href="{{ url_for('patients.add_patient') }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Register Patient
+        </a>
+    </div>
+
+    <!-- Table -->
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Patient No.</th>
+                    <th>Name</th>
+                    <th>Gender</th>
+                    <th>DOB</th>
+                    <th>Blood Group</th>
+                    <th>Phone</th>
+                    <th>Emergency Contact</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for patient in patients.items %}
+                <tr>
+                    <td><strong>{{ patient.patient_number }}</strong></td>
+                    <td>{{ patient.full_name }}</td>
+                    <td>{{ patient.gender or '--' }}</td>
+                    <td>{{ patient.dob or '--' }}</td>
+                    <td>
+                        {% if patient.blood_group %}
+                        <span class="badge badge-info">{{ patient.blood_group }}</span>
+                        {% else %}
+                        --
+                        {% endif %}
+                    </td>
+                    <td>{{ patient.phone or '--' }}</td>
+                    <td>{{ patient.emergency_contact_name or '--' }} ({{ patient.emergency_contact_phone or '--' }})</td>
+                    <td class="table-actions">
+                        <a href="{{ url_for('patients.view_patient', patient_id=patient.patient_id) }}" class="btn btn-outline btn-sm" title="View Detail">
+                            <i class="fas fa-eye"></i> View
+                        </a>
+                        <a href="{{ url_for('patients.edit_patient', patient_id=patient.patient_id) }}" class="btn btn-outline btn-sm" title="Edit">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        <button class="btn btn-danger btn-sm" onclick="openDeleteModal('{{ url_for('patients.delete_patient', patient_id=patient.patient_id) }}')" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 3rem 0;">
+                        <i class="fas fa-hospital-user" style="font-size: 2.5rem; margin-bottom: 1rem; display: block;"></i>
+                        No patients found.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {{ macros.pagination(patients, 'patients.list_patients', q=search) }}
+</section>
+
+{% include 'crud/_confirm_delete.html' %}
+{% endblock %}

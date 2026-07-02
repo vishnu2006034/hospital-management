@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}{{ patient.full_name }} - Record - MedCore HMS{% endblock %}
+
+{% block content %}
+<section class="section-container" style="padding-top: 100px; padding-bottom: 80px;">
+    <!-- Detail Header -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <span class="badge badge-primary" style="margin-bottom: 0.5rem;">Patient File</span>
+            <h1 style="font-size: 2rem; font-weight: 800; margin: 0;">{{ patient.full_name }}</h1>
+            <p style="color: var(--text-secondary); margin: 0.25rem 0 0 0;">ID: <strong>{{ patient.patient_number }}</strong> &bull; Registered on {{ patient.created_at.strftime('%Y-%m-%d') }}</p>
+        </div>
+        <div style="display: flex; gap: 0.75rem;">
+            <a href="{{ url_for('visits.add_visit', patient_id=patient.patient_id) }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> New Visit
+            </a>
+            <a href="{{ url_for('patients.edit_patient', patient_id=patient.patient_id) }}" class="btn btn-outline">
+                <i class="fas fa-edit"></i> Edit Details
+            </a>
+            <a href="{{ url_for('patients.list_patients') }}" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i> Directory
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Detail Grid -->
+    <div class="detail-grid">
+        <!-- Sidebar: Demographics & Medical Summary -->
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <div class="detail-card">
+                <h3><i class="fas fa-user"></i> Demographics</h3>
+                <div class="detail-list">
+                    <div class="detail-item">
+                        <span class="detail-label">Gender</span>
+                        <span class="detail-value">{{ patient.gender or 'Not Specified' }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Date of Birth</span>
+                        <span class="detail-value">{{ patient.dob or 'Not Specified' }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Blood Group</span>
+                        <span class="detail-value">
+                            {% if patient.blood_group %}
+                            <span class="badge badge-danger">{{ patient.blood_group }}</span>
+                            {% else %}
+                            Not Specified
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Phone</span>
+                        <span class="detail-value">{{ patient.phone or 'Not Specified' }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Email</span>
+                        <span class="detail-value">{{ patient.email or 'Not Specified' }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Address</span>
+                        <span class="detail-value" style="white-space: pre-line;">{{ patient.address or 'Not Specified' }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-card" style="border-left: 4px solid #ef4444;">
+                <h3><i class="fas fa-hand-dots" style="color: #ef4444;"></i> Critical Context</h3>
+                <div class="detail-list">
+                    <div class="detail-item">
+                        <span class="detail-label">Allergies</span>
+                        <span class="detail-value" style="color: #fda4af;">{{ patient.allergies or 'No known allergies.' }}</span>
+                    </div>
+                    <div class="detail-item" style="margin-top: 0.5rem;">
+                        <span class="detail-label">Medical History</span>
+                        <span class="detail-value">{{ patient.medical_history or 'No medical history recorded.' }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-card">
+                <h3><i class="fas fa-user-shield"></i> Emergency Contact</h3>
+                <div class="detail-list">
+                    <div class="detail-item">
+                        <span class="detail-label">Contact Person</span>
+                        <span class="detail-value">{{ patient.emergency_contact_name or 'None' }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Contact Phone</span>
+                        <span class="detail-value">{{ patient.emergency_contact_phone or 'None' }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Panel: Visit Log -->
+        <div class="history-card">
+            <h3>
+                <span><i class="fas fa-notes-medical"></i> Visit History</span>
+                <span class="badge badge-info">{{ visits|length }} Visit(s)</span>
+            </h3>
+            <div class="history-timeline" style="margin-top: 1.5rem;">
+                {% for visit in visits %}
+                <div class="timeline-item">
+                    <div class="timeline-header">
+                        <span class="timeline-title">
+                            <a href="{{ url_for('visits.view_visit', visit_id=visit.visit_id) }}">
+                                {{ visit.visit_type }} Visit - {{ visit.visit_status }}
+                            </a>
+                        </span>
+                        <span class="timeline-date">{{ visit.visit_date.strftime('%Y-%m-%d %H:%M') }}</span>
+                    </div>
+                    <div class="timeline-desc">
+                        <p style="margin-bottom: 0.25rem;"><strong>Doctor:</strong> Dr. {{ visit.doctor.full_name if visit.doctor else '--' }}</p>
+                        {% if visit.chief_complaint %}
+                        <p style="color: var(--text-secondary); margin-bottom: 0.25rem;"><strong>Chief Complaint:</strong> {{ visit.chief_complaint }}</p>
+                        {% endif %}
+                        {% if visit.diagnosis %}
+                        <p style="color: var(--text-secondary);"><strong>Diagnosis:</strong> {{ visit.diagnosis }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% else %}
+                <div style="text-align: center; color: var(--text-muted); padding: 3rem 0;">
+                    <i class="fas fa-folder-open" style="font-size: 2rem; margin-bottom: 0.75rem; display: block;"></i>
+                    No visits recorded for this patient.
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

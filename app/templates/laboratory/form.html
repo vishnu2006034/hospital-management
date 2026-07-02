@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% import "crud/_form_macros.html" as macros %}
+
+{% block title %}{% if lab %}Edit Lab Request{% else %}Request Lab Test{% endif %} - MedCore HMS{% endblock %}
+
+{% block content %}
+<section class="section-container" style="padding-top: 100px; padding-bottom: 80px;">
+    <div class="form-container">
+        <h1 class="form-title">{% if lab %}Edit Lab Request #{{ lab.lab_id }}{% else %}Request Lab Diagnostics{% endif %}</h1>
+        <p class="form-subtitle">{% if lab %}Update priority, sample data, and technician assignments.{% else %}Create a laboratory request linked to a patient visit.{% endif %}</p>
+
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="form-row">
+                {% if lab %}
+                <div class="form-group">
+                    <label><i class="fas fa-user"></i> Patient</label>
+                    <input type="text" value="{{ lab.patient.full_name }} ({{ lab.patient.patient_number }})" readonly>
+                    <input type="hidden" name="patient_id" value="{{ lab.patient_id }}">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-file-medical"></i> Visit ID</label>
+                    <input type="text" value="Visit #{{ lab.visit_id }} - {{ lab.visit.visit_date.strftime('%Y-%m-%d') }}" readonly>
+                    <input type="hidden" name="visit_id" value="{{ lab.visit_id }}">
+                </div>
+                {% else %}
+                {% set visit_options = [] %}
+                {% for v in visits %}
+                    {% set _ = visit_options.append((v.visit_id, "Visit #" ~ v.visit_id ~ " - " ~ v.patient.full_name ~ " (" ~ v.visit_date.strftime('%Y-%m-%d') ~ ")")) %}
+                {% endfor %}
+                {{ macros.select_field('visit_id', 'Select Patient Visit', visit_options, visit_id or '', required=true, icon='file-medical') }}
+
+                {% set patient_options = [] %}
+                {% for p in patients %}
+                    {% set _ = patient_options.append((p.patient_id, p.full_name ~ " (" ~ p.patient_number ~ ")")) %}
+                {% endfor %}
+                {{ macros.select_field('patient_id', 'Confirm Patient', patient_options, '', required=true, icon='user') }}
+                {% endif %}
+            </div>
+
+            <div class="form-row">
+                {% set priority_options = [('NORMAL', 'Normal'), ('HIGH', 'High'), ('STAT', 'Urgent (STAT)')] %}
+                {{ macros.select_field('priority', 'Priority Level', priority_options, lab.priority if lab else 'NORMAL', icon='triangle-exclamation') }}
+
+                {% set tech_options = [] %}
+                {% for tech in technicians %}
+                    {% set _ = tech_options.append((tech.user_id, tech.full_name ~ " (" ~ (tech.department or 'Lab') ~ ")")) %}
+                {% endfor %}
+                {{ macros.select_field('lab_technician_id', 'Assign Technician', tech_options, lab.lab_technician_id if lab else '', icon='user-gear') }}
+            </div>
+
+            <div class="form-row">
+                {{ macros.text_field('sample_type', 'Sample Type Needed', lab.sample_type if lab else '', placeholder='e.g. Blood, Urine, Saliva, Tissue', icon='droplet') }}
+
+                {% if lab %}
+                <div class="form-group">
+                    <label for="sample_collected_at"><i class="fas fa-clock"></i> Sample Collected At</label>
+                    <input type="datetime-local" id="sample_collected_at" name="sample_collected_at" value="{{ lab.sample_collected_at.strftime('%Y-%m-%dT%H:%M') if lab.sample_collected_at else '' }}">
+                </div>
+                {% endif %}
+            </div>
+
+            {% if lab %}
+            <div class="form-row">
+                {% set status_options = [('PENDING', 'Pending'), ('COLLECTED', 'Sample Collected'), ('COMPLETED', 'Completed')] %}
+                {{ macros.select_field('test_status', 'Lab Request Status', status_options, lab.test_status, icon='info') }}
+            </div>
+            {% endif %}
+
+            {{ macros.textarea_field('remarks', 'Clinical Remarks / Requests', lab.remarks if lab else '', placeholder='Note specific test panels or clinical indicators...', icon='align-left') }}
+
+            <div class="form-actions">
+                <a href="{% if lab %}{{ url_for('laboratory.view_lab', lab_id=lab.lab_id) }}{% else %}{{ url_for('laboratory.list_lab') }}{% endif %}" class="btn btn-outline">Cancel</a>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Lab Request</button>
+            </div>
+        </form>
+    </div>
+</section>
+
+{% block extra_js %}
+{% if not lab %}
+<script>
+    const visitSelect = document.getElementById('visit_id');
+    const patientSelect = document.getElementById('patient_id');
+
+    if (visitSelect && patientSelect) {
+        // Auto-match patient from visit selection
+        const visitMap = {
+            {% for v in visits %}
+            "{{ v.visit_id }}": "{{ v.patient_id }}",
+            {% endfor %}
+        };
+
+        visitSelect.addEventListener('change', () => {
+            const patId = visitMap[visitSelect.value];
+            if (patId) {
+                patientSelect.value = patId;
+            }
+        });
+    }
+</script>
+{% endif %}
+{% endblock %}
+{% endblock %}
