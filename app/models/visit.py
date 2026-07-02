@@ -47,13 +47,13 @@ class Visit(db.Model):
     patient = db.relationship('Patient', back_populates='visits')
     doctor = db.relationship('User', back_populates='visits_as_doctor')
     prescriptions = db.relationship(
-        'Prescription', back_populates='visit', lazy='dynamic'
+        'Prescription', back_populates='visit', lazy='dynamic', passive_deletes=True
     )
     lab_requests = db.relationship(
-        'Laboratory', back_populates='visit', lazy='dynamic'
+        'Laboratory', back_populates='visit', lazy='dynamic', passive_deletes=True
     )
     doctor_reports = db.relationship(
-        'DoctorReport', back_populates='visit', lazy='dynamic'
+        'DoctorReport', back_populates='visit', lazy='dynamic', passive_deletes=True
     )
 
     # ------ Indexes (match SQL) ------

@@ -31,7 +31,7 @@ class User(UserMixin, db.Model):
     # ------ Relationships ------
     user_roles = db.relationship(
         'UserRole', back_populates='user',
-        foreign_keys='UserRole.user_id', lazy='dynamic'
+        foreign_keys='UserRole.user_id', lazy='dynamic', passive_deletes=True
     )
     visits_as_doctor = db.relationship(
         'Visit', back_populates='doctor', lazy='dynamic'

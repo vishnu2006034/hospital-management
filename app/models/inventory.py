@@ -29,7 +29,7 @@ class Inventory(db.Model):
         'Prescription', back_populates='inventory_batch', lazy='dynamic'
     )
     transactions = db.relationship(
-        'InventoryTransaction', back_populates='inventory_batch', lazy='dynamic'
+        'InventoryTransaction', back_populates='inventory_batch', lazy='dynamic', passive_deletes=True
     )
 
     # ------ Index (matches SQL) ------

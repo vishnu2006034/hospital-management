@@ -12,7 +12,7 @@ class Role(db.Model):
     created_at = db.Column(db.DateTime, server_default=db.func.now())
 
     # ------ Relationships ------
-    user_roles = db.relationship('UserRole', back_populates='role', lazy='dynamic')
+    user_roles = db.relationship('UserRole', back_populates='role', lazy='dynamic', passive_deletes=True)
 
     def __repr__(self):
         return f'<Role {self.role_name}>'

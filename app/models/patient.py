@@ -26,10 +26,10 @@ class Patient(db.Model):
     )
 
     # ------ Relationships ------
-    visits = db.relationship('Visit', back_populates='patient', lazy='dynamic')
-    lab_requests = db.relationship('Laboratory', back_populates='patient', lazy='dynamic')
-    lab_reports = db.relationship('LabReport', back_populates='patient', lazy='dynamic')
-    doctor_reports = db.relationship('DoctorReport', back_populates='patient', lazy='dynamic')
+    visits = db.relationship('Visit', back_populates='patient', lazy='dynamic', passive_deletes=True)
+    lab_requests = db.relationship('Laboratory', back_populates='patient', lazy='dynamic', passive_deletes=True)
+    lab_reports = db.relationship('LabReport', back_populates='patient', lazy='dynamic', passive_deletes=True)
+    doctor_reports = db.relationship('DoctorReport', back_populates='patient', lazy='dynamic', passive_deletes=True)
 
     @property
     def full_name(self):

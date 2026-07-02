@@ -18,7 +18,7 @@ class Medicine(db.Model):
 
     # ------ Relationships ------
     inventory_batches = db.relationship(
-        'Inventory', back_populates='medicine', lazy='dynamic'
+        'Inventory', back_populates='medicine', lazy='dynamic', passive_deletes=True
     )
 
     def __repr__(self):

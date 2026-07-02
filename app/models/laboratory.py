@@ -44,7 +44,7 @@ class Laboratory(db.Model):
         'User', back_populates='lab_assignments', foreign_keys=[lab_technician_id]
     )
     reports = db.relationship(
-        'LabReport', back_populates='laboratory', lazy='dynamic'
+        'LabReport', back_populates='laboratory', lazy='dynamic', passive_deletes=True
     )
 
     # ------ Indexes (match SQL) ------
