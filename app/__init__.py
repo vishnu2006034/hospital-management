@@ -24,21 +24,21 @@ login_manager.login_message_category = 'warning'
 
 def create_app(config_name='development'):
     """Application factory pattern."""
-    app = Flask(__name__)
-    app.config.from_object(config[config_name])
-    config[config_name].init_app(app)
+    flask_app = Flask(__name__)
+    flask_app.config.from_object(config[config_name])
+    config[config_name].init_app(flask_app)
 
     # Initialize extensions with app
-    db.init_app(app)
-    migrate.init_app(app, db)
-    login_manager.init_app(app)
-    csrf.init_app(app)
-    mail.init_app(app)
-    CORS(app)
+    db.init_app(flask_app)
+    migrate.init_app(flask_app, db)
+    login_manager.init_app(flask_app)
+    csrf.init_app(flask_app)
+    mail.init_app(flask_app)
+    CORS(flask_app)
 
     # Import models so Flask-Migrate can detect them
-    with app.app_context():
-        import app.models  # noqa: F401
+    with flask_app.app_context():
+        from app import models  # noqa: F401
 
     # Flask-Login user loader
     @login_manager.user_loader
@@ -50,16 +50,16 @@ def create_app(config_name='development'):
     from app.routes.main import main_bp
     from app.routes.auth import auth_bp
 
-    app.register_blueprint(main_bp)
-    app.register_blueprint(auth_bp, url_prefix='/auth')
+    flask_app.register_blueprint(main_bp)
+    flask_app.register_blueprint(auth_bp, url_prefix='/auth')
 
     # Register CLI commands
-    register_cli_commands(app)
+    register_cli_commands(flask_app)
 
     # Register error handlers
-    register_error_handlers(app)
+    register_error_handlers(flask_app)
 
-    return app
+    return flask_app
 
 
 def register_cli_commands(app):
