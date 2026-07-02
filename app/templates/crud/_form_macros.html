@@ -76,21 +76,21 @@
 </div>
 {%- endmacro -%}
 
-{%- macro pagination(paginator, endpoint, **kwargs) -%}
+{%- macro pagination(paginator, endpoint, q=None, status=None, filter=None) -%}
 {% if paginator.pages > 1 %}
 <div class="pagination">
     {% if paginator.has_prev %}
-    <a href="{{ url_for(endpoint, page=paginator.prev_num, **kwargs) }}" class="page-btn"><i class="fas fa-chevron-left"></i></a>
+    <a href="{{ url_for(endpoint, page=paginator.prev_num, q=q, status=status, filter=filter) }}" class="page-btn"><i class="fas fa-chevron-left"></i></a>
     {% endif %}
     {% for p in paginator.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
         {% if p %}
-        <a href="{{ url_for(endpoint, page=p, **kwargs) }}" class="page-btn {% if p == paginator.page %}active{% endif %}">{{ p }}</a>
+        <a href="{{ url_for(endpoint, page=p, q=q, status=status, filter=filter) }}" class="page-btn {% if p == paginator.page %}active{% endif %}">{{ p }}</a>
         {% else %}
         <span class="page-ellipsis">…</span>
         {% endif %}
     {% endfor %}
     {% if paginator.has_next %}
-    <a href="{{ url_for(endpoint, page=paginator.next_num, **kwargs) }}" class="page-btn"><i class="fas fa-chevron-right"></i></a>
+    <a href="{{ url_for(endpoint, page=paginator.next_num, q=q, status=status, filter=filter) }}" class="page-btn"><i class="fas fa-chevron-right"></i></a>
     {% endif %}
 </div>
 {% endif %}
