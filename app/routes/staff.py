@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required
 
 from app import db
+from app.decorators import roles_required
 from app.models.user import User
 from app.models.role import Role
 from app.models.user_role import UserRole
@@ -11,6 +12,7 @@ staff_bp = Blueprint('staff', __name__, url_prefix='/staff')
 
 @staff_bp.route('/')
 @login_required
+@roles_required('Administrator')
 def list_staff():
     page = request.args.get('page', 1, type=int)
     search = request.args.get('q', '').strip()
@@ -33,6 +35,7 @@ def list_staff():
 
 @staff_bp.route('/add', methods=['GET', 'POST'])
 @login_required
+@roles_required('Administrator')
 def add_staff():
     if request.method == 'POST':
         last = User.query.order_by(User.user_id.desc()).first()
@@ -72,6 +75,7 @@ def add_staff():
 
 @staff_bp.route('/<int:user_id>')
 @login_required
+@roles_required('Administrator')
 def view_staff(user_id):
     user = User.query.get_or_404(user_id)
     user_roles = UserRole.query.filter_by(user_id=user_id).all()
@@ -80,6 +84,7 @@ def view_staff(user_id):
 
 @staff_bp.route('/<int:user_id>/edit', methods=['GET', 'POST'])
 @login_required
+@roles_required('Administrator')
 def edit_staff(user_id):
     user = User.query.get_or_404(user_id)
     if request.method == 'POST':
@@ -106,6 +111,7 @@ def edit_staff(user_id):
 
 @staff_bp.route('/<int:user_id>/toggle-role', methods=['POST'])
 @login_required
+@roles_required('Administrator')
 def toggle_role(user_id):
     role_id = request.form.get('role_id', type=int)
     if not role_id:

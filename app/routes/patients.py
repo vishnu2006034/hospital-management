@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required
 
 from app import db
+from app.decorators import roles_required
 from app.models.patient import Patient
 from app.models.visit import Visit
 
@@ -10,6 +11,7 @@ patients_bp = Blueprint('patients', __name__, url_prefix='/patients')
 
 @patients_bp.route('/')
 @login_required
+@roles_required('Administrator', 'Doctor', 'Nurse', 'Receptionist')
 def list_patients():
     page = request.args.get('page', 1, type=int)
     search = request.args.get('q', '').strip()
@@ -31,6 +33,7 @@ def list_patients():
 
 @patients_bp.route('/add', methods=['GET', 'POST'])
 @login_required
+@roles_required('Administrator', 'Doctor', 'Nurse', 'Receptionist')
 def add_patient():
     if request.method == 'POST':
         last = Patient.query.order_by(Patient.patient_id.desc()).first()
@@ -62,6 +65,7 @@ def add_patient():
 
 @patients_bp.route('/<int:patient_id>')
 @login_required
+@roles_required('Administrator', 'Doctor', 'Nurse', 'Receptionist')
 def view_patient(patient_id):
     patient = Patient.query.get_or_404(patient_id)
     visits = patient.visits.order_by(Visit.visit_date.desc()).limit(20).all()
@@ -70,6 +74,7 @@ def view_patient(patient_id):
 
 @patients_bp.route('/<int:patient_id>/edit', methods=['GET', 'POST'])
 @login_required
+@roles_required('Administrator', 'Doctor', 'Nurse', 'Receptionist')
 def edit_patient(patient_id):
     patient = Patient.query.get_or_404(patient_id)
     if request.method == 'POST':
@@ -94,6 +99,7 @@ def edit_patient(patient_id):
 
 @patients_bp.route('/<int:patient_id>/delete', methods=['POST'])
 @login_required
+@roles_required('Administrator', 'Doctor', 'Nurse', 'Receptionist')
 def delete_patient(patient_id):
     patient = Patient.query.get_or_404(patient_id)
     name = patient.full_name

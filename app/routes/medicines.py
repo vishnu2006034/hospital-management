@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required
 
 from app import db
+from app.decorators import roles_required
 from app.models.medicine import Medicine
 
 medicines_bp = Blueprint('medicines', __name__, url_prefix='/medicines')
@@ -9,6 +10,7 @@ medicines_bp = Blueprint('medicines', __name__, url_prefix='/medicines')
 
 @medicines_bp.route('/')
 @login_required
+@roles_required('Administrator', 'Pharmacist', 'Inventory Manager', 'Doctor', 'Nurse')
 def list_medicines():
     page = request.args.get('page', 1, type=int)
     search = request.args.get('q', '').strip()
@@ -29,6 +31,7 @@ def list_medicines():
 
 @medicines_bp.route('/add', methods=['GET', 'POST'])
 @login_required
+@roles_required('Administrator', 'Pharmacist', 'Inventory Manager')
 def add_medicine():
     if request.method == 'POST':
         medicine = Medicine(
@@ -50,6 +53,7 @@ def add_medicine():
 
 @medicines_bp.route('/<int:medicine_id>/edit', methods=['GET', 'POST'])
 @login_required
+@roles_required('Administrator', 'Pharmacist', 'Inventory Manager')
 def edit_medicine(medicine_id):
     medicine = Medicine.query.get_or_404(medicine_id)
     if request.method == 'POST':
@@ -69,6 +73,7 @@ def edit_medicine(medicine_id):
 
 @medicines_bp.route('/<int:medicine_id>/delete', methods=['POST'])
 @login_required
+@roles_required('Administrator', 'Pharmacist', 'Inventory Manager')
 def delete_medicine(medicine_id):
     medicine = Medicine.query.get_or_404(medicine_id)
     name = medicine.medicine_name

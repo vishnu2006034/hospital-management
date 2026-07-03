@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 
 from app import db
+from app.decorators import roles_required
 from app.models.inventory import Inventory
 from app.models.inventory_transaction import InventoryTransaction
 from app.models.medicine import Medicine
@@ -11,6 +12,7 @@ inventory_bp = Blueprint('inventory', __name__, url_prefix='/inventory')
 
 @inventory_bp.route('/')
 @login_required
+@roles_required('Administrator', 'Inventory Manager')
 def list_inventory():
     page = request.args.get('page', 1, type=int)
     search = request.args.get('q', '').strip()
@@ -39,6 +41,7 @@ def list_inventory():
 
 @inventory_bp.route('/add', methods=['GET', 'POST'])
 @login_required
+@roles_required('Administrator', 'Inventory Manager')
 def add_inventory():
     if request.method == 'POST':
         inv = Inventory(
@@ -76,6 +79,7 @@ def add_inventory():
 
 @inventory_bp.route('/<int:inventory_id>/edit', methods=['GET', 'POST'])
 @login_required
+@roles_required('Administrator', 'Inventory Manager')
 def edit_inventory(inventory_id):
     inv = Inventory.query.get_or_404(inventory_id)
     if request.method == 'POST':
@@ -95,6 +99,7 @@ def edit_inventory(inventory_id):
 
 @inventory_bp.route('/<int:inventory_id>/transaction', methods=['GET', 'POST'])
 @login_required
+@roles_required('Administrator', 'Inventory Manager')
 def add_transaction(inventory_id):
     inv = Inventory.query.get_or_404(inventory_id)
     if request.method == 'POST':

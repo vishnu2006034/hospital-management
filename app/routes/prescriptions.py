@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 
 from app import db
+from app.decorators import roles_required
 from app.models.prescription import Prescription
 from app.models.visit import Visit
 from app.models.inventory import Inventory
@@ -12,6 +13,7 @@ prescriptions_bp = Blueprint('prescriptions', __name__, url_prefix='/prescriptio
 
 @prescriptions_bp.route('/')
 @login_required
+@roles_required('Administrator', 'Doctor', 'Nurse', 'Pharmacist')
 def list_prescriptions():
     page = request.args.get('page', 1, type=int)
     search = request.args.get('q', '').strip()
@@ -34,6 +36,7 @@ def list_prescriptions():
 
 @prescriptions_bp.route('/add', methods=['GET', 'POST'])
 @login_required
+@roles_required('Administrator', 'Doctor')
 def add_prescription():
     if request.method == 'POST':
         prescription = Prescription(
@@ -69,6 +72,7 @@ def add_prescription():
 
 @prescriptions_bp.route('/<int:prescription_id>/delete', methods=['POST'])
 @login_required
+@roles_required('Administrator', 'Doctor')
 def delete_prescription(prescription_id):
     prescription = Prescription.query.get_or_404(prescription_id)
     visit_id = prescription.visit_id

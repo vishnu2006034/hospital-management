@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 
 from app import db
+from app.decorators import roles_required
 from app.models.doctor_report import DoctorReport
 from app.models.visit import Visit
 from app.models.patient import Patient
@@ -11,6 +12,7 @@ reports_bp = Blueprint('reports', __name__, url_prefix='/reports')
 
 @reports_bp.route('/')
 @login_required
+@roles_required('Administrator', 'Doctor')
 def list_reports():
     page = request.args.get('page', 1, type=int)
     search = request.args.get('q', '').strip()
@@ -32,6 +34,7 @@ def list_reports():
 
 @reports_bp.route('/add', methods=['GET', 'POST'])
 @login_required
+@roles_required('Administrator', 'Doctor')
 def add_report():
     if request.method == 'POST':
         last = DoctorReport.query.order_by(DoctorReport.doctor_report_id.desc()).first()
@@ -67,6 +70,7 @@ def add_report():
 
 @reports_bp.route('/<int:report_id>')
 @login_required
+@roles_required('Administrator', 'Doctor')
 def view_report(report_id):
     report = DoctorReport.query.get_or_404(report_id)
     return render_template('reports/detail.html', report=report)
@@ -74,6 +78,7 @@ def view_report(report_id):
 
 @reports_bp.route('/<int:report_id>/edit', methods=['GET', 'POST'])
 @login_required
+@roles_required('Administrator', 'Doctor')
 def edit_report(report_id):
     report = DoctorReport.query.get_or_404(report_id)
     if request.method == 'POST':

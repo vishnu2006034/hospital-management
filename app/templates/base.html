@@ -31,25 +31,43 @@
                 {% if current_user.is_authenticated %}
                 <a href="{{ url_for('main.dashboard') }}" class="nav-link">Dashboard</a>
                 
+                {% if current_user.has_role('Doctor') or current_user.has_role('Nurse') or current_user.has_role('Receptionist') or current_user.has_role('Pharmacist') or current_user.has_role('Administrator') %}
                 <div class="nav-dropdown">
                     <button class="dropdown-toggle nav-link">Medical <i class="fas fa-chevron-down"></i></button>
                     <div class="dropdown-menu">
+                        {% if current_user.has_role('Doctor') or current_user.has_role('Nurse') or current_user.has_role('Receptionist') or current_user.has_role('Administrator') %}
                         <a href="{{ url_for('patients.list_patients') }}"><i class="fas fa-hospital-user"></i> Patients</a>
                         <a href="{{ url_for('visits.list_visits') }}"><i class="fas fa-file-medical"></i> Visits</a>
+                        {% endif %}
+                        {% if current_user.has_role('Doctor') or current_user.has_role('Nurse') or current_user.has_role('Pharmacist') or current_user.has_role('Administrator') %}
                         <a href="{{ url_for('prescriptions.list_prescriptions') }}"><i class="fas fa-pills"></i> Prescriptions</a>
+                        {% endif %}
+                        {% if current_user.has_role('Doctor') or current_user.has_role('Administrator') %}
                         <a href="{{ url_for('reports.list_reports') }}"><i class="fas fa-notes-medical"></i> Reports</a>
+                        {% endif %}
                     </div>
                 </div>
+                {% endif %}
 
+                {% if current_user.has_role('Doctor') or current_user.has_role('Nurse') or current_user.has_role('Pharmacist') or current_user.has_role('Inventory Manager') or current_user.has_role('Lab Technician') or current_user.has_role('Administrator') %}
                 <div class="nav-dropdown">
                     <button class="dropdown-toggle nav-link">Logistics <i class="fas fa-chevron-down"></i></button>
                     <div class="dropdown-menu">
+                        {% if current_user.has_role('Doctor') or current_user.has_role('Nurse') or current_user.has_role('Pharmacist') or current_user.has_role('Inventory Manager') or current_user.has_role('Administrator') %}
                         <a href="{{ url_for('medicines.list_medicines') }}"><i class="fas fa-prescription-bottle-medical"></i> Medicines</a>
+                        {% endif %}
+                        {% if current_user.has_role('Inventory Manager') or current_user.has_role('Administrator') %}
                         <a href="{{ url_for('inventory.list_inventory') }}"><i class="fas fa-boxes-stacked"></i> Inventory</a>
+                        {% endif %}
+                        {% if current_user.has_role('Doctor') or current_user.has_role('Nurse') or current_user.has_role('Lab Technician') or current_user.has_role('Administrator') %}
                         <a href="{{ url_for('laboratory.list_lab') }}"><i class="fas fa-microscope"></i> Laboratory</a>
+                        {% endif %}
+                        {% if current_user.has_role('Administrator') %}
                         <a href="{{ url_for('staff.list_staff') }}"><i class="fas fa-users-gear"></i> Staff</a>
+                        {% endif %}
                     </div>
                 </div>
+                {% endif %}
 
                 <span class="user-badge" title="{{ current_user.email }}">
                     <i class="fas fa-user-circle"></i> {{ current_user.first_name }}

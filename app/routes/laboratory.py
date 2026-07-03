@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 
 from app import db
+from app.decorators import roles_required
 from app.models.laboratory import Laboratory
 from app.models.lab_report import LabReport
 from app.models.lab_test_catalog import LabTestCatalog
@@ -16,6 +17,7 @@ laboratory_bp = Blueprint('laboratory', __name__, url_prefix='/laboratory')
 
 @laboratory_bp.route('/')
 @login_required
+@roles_required('Administrator', 'Doctor', 'Nurse', 'Lab Technician')
 def list_lab():
     page = request.args.get('page', 1, type=int)
     status = request.args.get('status', '').strip()
@@ -39,6 +41,7 @@ def list_lab():
 
 @laboratory_bp.route('/add', methods=['GET', 'POST'])
 @login_required
+@roles_required('Administrator', 'Doctor', 'Nurse')
 def add_lab():
     if request.method == 'POST':
         lab = Laboratory(
@@ -65,6 +68,7 @@ def add_lab():
 
 @laboratory_bp.route('/<int:lab_id>')
 @login_required
+@roles_required('Administrator', 'Doctor', 'Nurse', 'Lab Technician')
 def view_lab(lab_id):
     lab = Laboratory.query.get_or_404(lab_id)
     reports = lab.reports.all()
@@ -73,6 +77,7 @@ def view_lab(lab_id):
 
 @laboratory_bp.route('/<int:lab_id>/edit', methods=['GET', 'POST'])
 @login_required
+@roles_required('Administrator', 'Doctor', 'Nurse')
 def edit_lab(lab_id):
     lab = Laboratory.query.get_or_404(lab_id)
     if request.method == 'POST':
@@ -101,6 +106,7 @@ def edit_lab(lab_id):
 
 @laboratory_bp.route('/<int:lab_id>/report/add', methods=['GET', 'POST'])
 @login_required
+@roles_required('Administrator', 'Lab Technician')
 def add_report(lab_id):
     lab = Laboratory.query.get_or_404(lab_id)
     if request.method == 'POST':
@@ -133,6 +139,7 @@ def add_report(lab_id):
 
 @laboratory_bp.route('/catalog')
 @login_required
+@roles_required('Administrator', 'Doctor', 'Nurse', 'Lab Technician')
 def list_catalog():
     page = request.args.get('page', 1, type=int)
     search = request.args.get('q', '').strip()
@@ -153,6 +160,7 @@ def list_catalog():
 
 @laboratory_bp.route('/catalog/add', methods=['GET', 'POST'])
 @login_required
+@roles_required('Administrator', 'Lab Technician')
 def add_catalog():
     if request.method == 'POST':
         test = LabTestCatalog(
@@ -177,6 +185,7 @@ def add_catalog():
 
 @laboratory_bp.route('/catalog/<int:test_id>/edit', methods=['GET', 'POST'])
 @login_required
+@roles_required('Administrator', 'Lab Technician')
 def edit_catalog(test_id):
     test = LabTestCatalog.query.get_or_404(test_id)
     if request.method == 'POST':

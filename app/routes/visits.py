@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 
 from app import db
+from app.decorators import roles_required
 from app.models.visit import Visit
 from app.models.patient import Patient
 from app.models.user import User
@@ -13,6 +14,7 @@ visits_bp = Blueprint('visits', __name__, url_prefix='/visits')
 
 @visits_bp.route('/')
 @login_required
+@roles_required('Administrator', 'Doctor', 'Nurse', 'Receptionist')
 def list_visits():
     page = request.args.get('page', 1, type=int)
     status = request.args.get('status', '').strip()
@@ -36,6 +38,7 @@ def list_visits():
 
 @visits_bp.route('/add', methods=['GET', 'POST'])
 @login_required
+@roles_required('Administrator', 'Doctor', 'Nurse', 'Receptionist')
 def add_visit():
     if request.method == 'POST':
         visit = Visit(
@@ -80,6 +83,7 @@ def add_visit():
 
 @visits_bp.route('/<int:visit_id>')
 @login_required
+@roles_required('Administrator', 'Doctor', 'Nurse', 'Receptionist')
 def view_visit(visit_id):
     visit = Visit.query.get_or_404(visit_id)
     prescriptions = visit.prescriptions.all()
@@ -92,6 +96,7 @@ def view_visit(visit_id):
 
 @visits_bp.route('/<int:visit_id>/edit', methods=['GET', 'POST'])
 @login_required
+@roles_required('Administrator', 'Doctor', 'Nurse', 'Receptionist')
 def edit_visit(visit_id):
     visit = Visit.query.get_or_404(visit_id)
     if request.method == 'POST':
@@ -122,6 +127,7 @@ def edit_visit(visit_id):
 
 @visits_bp.route('/<int:visit_id>/delete', methods=['POST'])
 @login_required
+@roles_required('Administrator', 'Doctor', 'Nurse', 'Receptionist')
 def delete_visit(visit_id):
     visit = Visit.query.get_or_404(visit_id)
     db.session.delete(visit)

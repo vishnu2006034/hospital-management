@@ -93,7 +93,16 @@ def register():
 
         # Assign role if provided
         if role_name:
-            role = Role.query.filter_by(role_name=role_name).first()
+            role_map = {
+                'admin': 'Administrator',
+                'doctor': 'Doctor',
+                'nurse': 'Nurse',
+                'receptionist': 'Receptionist',
+                'pharmacist': 'Pharmacist',
+                'lab_technician': 'Lab Technician',
+            }
+            db_role_name = role_map.get(role_name.lower(), role_name)
+            role = Role.query.filter_by(role_name=db_role_name).first()
             if role:
                 db.session.add(
                     UserRole(user_id=user.user_id, role_id=role.role_id)
