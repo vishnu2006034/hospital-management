@@ -34,8 +34,4 @@ class InventoryTransaction(db.Model):
         db.Index('idx_inventory_txn', 'inventory_id'),
     )
 
-    def __repr__(self):
-        return (
-            f'<InventoryTransaction {self.transaction_id} '
-            f'type={self.transaction_type} qty={self.quantity}>'
-        )
+

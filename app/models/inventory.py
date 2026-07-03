@@ -46,5 +46,4 @@ class Inventory(db.Model):
         from datetime import date
         return self.expiry_date and self.expiry_date < date.today()
 
-    def __repr__(self):
-        return f'<Inventory batch={self.batch_number} qty={self.quantity_in_stock}>'
+

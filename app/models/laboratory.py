@@ -55,5 +55,4 @@ class Laboratory(db.Model):
         db.Index('idx_lab_requested_by', 'requested_by'),
     )
 
-    def __repr__(self):
-        return f'<Laboratory {self.lab_id} status={self.test_status}>'
+

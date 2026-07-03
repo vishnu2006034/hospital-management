@@ -62,5 +62,4 @@ class Visit(db.Model):
         db.Index('idx_visit_doctor', 'doctor_id'),
     )
 
-    def __repr__(self):
-        return f'<Visit {self.visit_id} type={self.visit_type} status={self.visit_status}>'
+

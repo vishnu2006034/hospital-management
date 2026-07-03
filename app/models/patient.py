@@ -36,5 +36,4 @@ class Patient(db.Model):
         parts = [self.first_name, self.last_name]
         return ' '.join(p for p in parts if p)
 
-    def __repr__(self):
-        return f'<Patient {self.patient_number} – {self.full_name}>'
+

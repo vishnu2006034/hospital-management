@@ -21,5 +21,4 @@ class Medicine(db.Model):
         'Inventory', back_populates='medicine', lazy='dynamic', passive_deletes=True
     )
 
-    def __repr__(self):
-        return f'<Medicine {self.medicine_name}>'
+

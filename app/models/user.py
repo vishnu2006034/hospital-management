@@ -51,10 +51,6 @@ class User(UserMixin, db.Model):
         'DoctorReport', back_populates='doctor', lazy='dynamic'
     )
 
-    def __init__(self, **kwargs):
-        for key, value in kwargs.items():
-            setattr(self, key, value)
-
     # ---- Flask-Login integration ----
     def get_id(self):
         """Return the user_id as a string for Flask-Login."""
@@ -85,5 +81,4 @@ class User(UserMixin, db.Model):
     def has_role(self, role_name):
         return role_name in self.role_names
 
-    def __repr__(self):
-        return f'<User {self.employee_code} – {self.full_name}>'
+

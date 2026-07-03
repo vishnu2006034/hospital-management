@@ -14,5 +14,4 @@ class Role(db.Model):
     # ------ Relationships ------
     user_roles = db.relationship('UserRole', back_populates='role', lazy='dynamic', passive_deletes=True)
 
-    def __repr__(self):
-        return f'<Role {self.role_name}>'
+

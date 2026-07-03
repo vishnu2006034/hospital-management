@@ -50,5 +50,4 @@ class DoctorReport(db.Model):
         db.Index('idx_doctor_report_doctor', 'doctor_id'),
     )
 
-    def __repr__(self):
-        return f'<DoctorReport {self.report_number}>'
+

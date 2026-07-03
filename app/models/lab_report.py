@@ -56,5 +56,4 @@ class LabReport(db.Model):
         db.Index('idx_lab_report_doctor', 'doctor_id'),
     )
 
-    def __repr__(self):
-        return f'<LabReport {self.report_number} abnormal={self.is_abnormal}>'
+

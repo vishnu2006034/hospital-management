@@ -39,5 +39,4 @@ class Prescription(db.Model):
         db.Index('idx_prescription_visit', 'visit_id'),
     )
 
-    def __repr__(self):
-        return f'<Prescription {self.prescription_id} visit={self.visit_id}>'
+

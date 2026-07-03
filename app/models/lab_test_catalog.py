@@ -25,5 +25,4 @@ class LabTestCatalog(db.Model):
         'LabReport', back_populates='test', lazy='dynamic'
     )
 
-    def __repr__(self):
-        return f'<LabTestCatalog {self.test_code} – {self.test_name}>'
+
