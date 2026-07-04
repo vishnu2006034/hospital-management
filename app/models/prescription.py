@@ -1,43 +1,64 @@
+"""Prescription database model."""
+
+from datetime import datetime
+from typing import TYPE_CHECKING, Optional
+
 from app import db
+
+if TYPE_CHECKING:
+    from app.models.visit import Visit
+    from app.models.inventory import Inventory
+    from app.models.user import User
 
 
 class Prescription(db.Model):
-    """Medicine prescribed during a visit, linked to a specific inventory batch."""
+    """Medicine prescribed during a visit, linked to a specific inventory batch.
 
-    __tablename__ = 'prescriptions'
+    Connects a patient visit to a specific medicine batch and tracks
+    dosage, frequency, and duration of the prescription.
+    """
 
-    prescription_id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
-    visit_id = db.Column(
+    __tablename__: str = 'prescriptions'
+
+    # ── Primary Key ──────────────────────────────────────────────
+    prescription_id: int = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
+
+    # ── Foreign Keys ─────────────────────────────────────────────
+    visit_id: int = db.Column(
         db.BigInteger,
         db.ForeignKey('visits.visit_id', ondelete='CASCADE'),
         nullable=False,
     )
-    inventory_id = db.Column(
+    inventory_id: int = db.Column(
         db.BigInteger,
         db.ForeignKey('inventory.inventory_id'),
         nullable=False,
     )
-    prescribed_by = db.Column(
+    prescribed_by: int = db.Column(
         db.BigInteger,
         db.ForeignKey('users.user_id'),
         nullable=False,
     )
-    dosage = db.Column(db.String(100))
-    frequency = db.Column(db.String(100))
-    duration = db.Column(db.String(50))
-    quantity = db.Column(db.Integer)
-    instructions = db.Column(db.Text)
-    created_at = db.Column(db.DateTime, server_default=db.func.now())
 
-    # ------ Relationships ------
-    visit = db.relationship('Visit', back_populates='prescriptions')
-    inventory_batch = db.relationship('Inventory', back_populates='prescriptions')
-    prescriber = db.relationship('User', back_populates='prescriptions_written')
+    # ── Prescription Details ─────────────────────────────────────
+    dosage: Optional[str] = db.Column(db.String(100))
+    frequency: Optional[str] = db.Column(db.String(100))
+    duration: Optional[str] = db.Column(db.String(50))
+    quantity: Optional[int] = db.Column(db.Integer)
+    instructions: Optional[str] = db.Column(db.Text)
 
-    # ------ Index (match SQL) ------
+    # ── Timestamps ───────────────────────────────────────────────
+    created_at: datetime = db.Column(db.DateTime, server_default=db.func.now())
+
+    # ── Relationships ────────────────────────────────────────────
+    visit: 'Visit' = db.relationship('Visit', back_populates='prescriptions')
+    inventory_batch: 'Inventory' = db.relationship('Inventory', back_populates='prescriptions')
+    prescriber: 'User' = db.relationship('User', back_populates='prescriptions_written')
+
+    # ── Indexes ──────────────────────────────────────────────────
     __table_args__ = (
         db.Index('idx_prescription_visit', 'visit_id'),
     )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<Prescription {self.prescription_id} visit={self.visit_id}>'

@@ -1,0 +1,166 @@
+"""Inventory service for business logic."""
+
+from typing import Dict, List, Optional, Any
+
+from app.models.inventory import Inventory
+from app.models.inventory_transaction import InventoryTransaction
+from app.repositories.inventory_repository import inventory_repository
+
+
+class InventoryService:
+    """Service layer for Inventory business operations."""
+
+    @staticmethod
+    def get_all_inventory(
+        page: int = 1,
+        per_page: int = 15,
+        search: Optional[str] = None,
+        filter_type: Optional[str] = None,
+    ):
+        """Get paginated list of inventory items.
+
+        Args:
+            page: Page number.
+            per_page: Items per page.
+            search: Optional search term.
+            filter_type: Optional filter ('low', 'expired').
+
+        Returns:
+            Paginated inventory results.
+        """
+        return inventory_repository.search(
+            search, filter_type=filter_type, page=page, per_page=per_page
+        )
+
+    @staticmethod
+    def get_inventory_by_id(inventory_id: int) -> Inventory:
+        """Get an inventory item by ID.
+
+        Args:
+            inventory_id: The inventory item's ID.
+
+        Returns:
+            The inventory entity.
+
+        Raises:
+            404: If inventory item not found.
+        """
+        return inventory_repository.get_by_id(inventory_id)
+
+    @staticmethod
+    def create_inventory(
+        data: Dict[str, Any], performed_by: Optional[int] = None
+    ) -> Inventory:
+        """Create a new inventory item.
+
+        Args:
+            data: Inventory data dictionary.
+            performed_by: Optional user ID for initial stock entry.
+
+        Returns:
+            The created inventory entity.
+        """
+        cleaned = {k: (None if (isinstance(v, str) and not v.strip()) else v) for k, v in data.items()}
+
+        qty_stock = cleaned.get('quantity_in_stock')
+        min_stock = cleaned.get('minimum_stock')
+
+        inv: Inventory = Inventory(
+            medicine_id=cleaned['medicine_id'],
+            batch_number=cleaned['batch_number'],
+            expiry_date=cleaned.get('expiry_date'),
+            purchase_price=cleaned.get('purchase_price'),
+            selling_price=cleaned.get('selling_price'),
+            quantity_in_stock=int(qty_stock) if qty_stock is not None else 0,
+            minimum_stock=int(min_stock) if min_stock is not None else 0,
+            supplier=cleaned.get('supplier'),
+        )
+        inventory_repository.add(inv)
+
+        if inv.quantity_in_stock > 0:
+            inventory_repository.create_transaction(
+                inventory_id=inv.inventory_id,
+                transaction_type='IN',
+                quantity=inv.quantity_in_stock,
+                reference_type='PURCHASE',
+                performed_by=performed_by,
+                remarks='Initial stock entry',
+            )
+
+        inventory_repository.commit()
+        return inv
+
+    @staticmethod
+    def update_inventory(inv: Inventory, data: Dict[str, Any]) -> Inventory:
+        """Update an existing inventory item.
+
+        Args:
+            inv: The inventory entity to update.
+            data: Updated inventory data.
+
+        Returns:
+            The updated inventory entity.
+        """
+        cleaned = {k: (None if (isinstance(v, str) and not v.strip()) else v) for k, v in data.items()}
+
+        min_stock = cleaned.get('minimum_stock')
+
+        inv.batch_number = cleaned['batch_number']
+        inv.expiry_date = cleaned.get('expiry_date')
+        inv.purchase_price = cleaned.get('purchase_price')
+        inv.selling_price = cleaned.get('selling_price')
+        inv.minimum_stock = int(min_stock) if min_stock is not None else 0
+        inv.supplier = cleaned.get('supplier')
+        inventory_repository.commit()
+        return inv
+
+    @staticmethod
+    def add_transaction(
+        inv: Inventory, data: Dict[str, Any], performed_by: int
+    ) -> None:
+        """Add a stock transaction.
+
+        Args:
+            inv: The inventory entity.
+            data: Transaction data.
+            performed_by: User performing the transaction.
+        """
+        cleaned = {k: (None if (isinstance(v, str) and not v.strip()) else v) for k, v in data.items()}
+
+        txn_type: str = cleaned['transaction_type']
+        qty: int = int(cleaned['quantity'])
+
+        inventory_repository.create_transaction(
+            inventory_id=inv.inventory_id,
+            transaction_type=txn_type,
+            quantity=qty,
+            reference_type=cleaned.get('reference_type'),
+            reference_id=cleaned.get('reference_id'),
+            performed_by=performed_by,
+            remarks=cleaned.get('remarks'),
+        )
+
+        inventory_repository.update_stock(inv.inventory_id, txn_type, qty)
+        inventory_repository.commit()
+
+    @staticmethod
+    def get_recent_transactions(inv: Inventory, limit: int = 20) -> List[InventoryTransaction]:
+        """Get recent transactions for an inventory item.
+
+        Args:
+            inv: The inventory entity.
+            limit: Maximum number of transactions.
+
+        Returns:
+            List of recent transactions.
+        """
+        return inventory_repository.get_recent_transactions(inv.inventory_id, limit)
+
+    @staticmethod
+    def get_all_medicines() -> List:
+        """Get all medicines.
+
+        Returns:
+            List of all medicines.
+        """
+        return inventory_repository.get_medicines()

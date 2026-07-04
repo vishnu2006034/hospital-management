@@ -1,50 +1,82 @@
+"""Inventory database model."""
+
+from datetime import date, datetime
+from decimal import Decimal
+from typing import TYPE_CHECKING, List
+
 from app import db
+
+if TYPE_CHECKING:
+    from app.models.medicine import Medicine
+    from app.models.prescription import Prescription
+    from app.models.inventory_transaction import InventoryTransaction
 
 
 class Inventory(db.Model):
-    """Inventory batch for a medicine — tracks stock per batch."""
+    """Inventory batch for a medicine — tracks stock per batch.
 
-    __tablename__ = 'inventory'
+    Each medicine can have multiple inventory batches with different
+    batch numbers, expiry dates, and stock levels. This model tracks
+    the actual physical stock available.
+    """
 
-    inventory_id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
-    medicine_id = db.Column(
+    __tablename__: str = 'inventory'
+
+    # ── Primary Key ──────────────────────────────────────────────
+    inventory_id: int = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
+
+    # ── Foreign Keys ─────────────────────────────────────────────
+    medicine_id: int = db.Column(
         db.BigInteger,
         db.ForeignKey('medicines.medicine_id', ondelete='CASCADE'),
         nullable=False,
     )
-    batch_number = db.Column(db.String(50), nullable=False)
-    expiry_date = db.Column(db.Date)
-    purchase_price = db.Column(db.Numeric(10, 2))
-    selling_price = db.Column(db.Numeric(10, 2))
-    quantity_in_stock = db.Column(db.Integer, default=0)
-    minimum_stock = db.Column(db.Integer, default=0)
-    supplier = db.Column(db.String(100))
-    last_updated = db.Column(
+
+    # ── Batch Information ────────────────────────────────────────
+    batch_number: str = db.Column(db.String(50), nullable=False)
+    expiry_date: date = db.Column(db.Date)
+
+    # ── Pricing ──────────────────────────────────────────────────
+    purchase_price: Decimal = db.Column(db.Numeric(10, 2))
+    selling_price: Decimal = db.Column(db.Numeric(10, 2))
+
+    # ── Stock Levels ─────────────────────────────────────────────
+    quantity_in_stock: int = db.Column(db.Integer, default=0)
+    minimum_stock: int = db.Column(db.Integer, default=0)
+
+    # ── Supplier Information ─────────────────────────────────────
+    supplier: str = db.Column(db.String(100))
+
+    # ── Timestamps ───────────────────────────────────────────────
+    last_updated: datetime = db.Column(
         db.DateTime, server_default=db.func.now(), onupdate=db.func.now()
     )
 
-    # ------ Relationships ------
-    medicine = db.relationship('Medicine', back_populates='inventory_batches')
-    prescriptions = db.relationship(
+    # ── Relationships ────────────────────────────────────────────
+    medicine: 'Medicine' = db.relationship('Medicine', back_populates='inventory_batches')
+    prescriptions: List['Prescription'] = db.relationship(
         'Prescription', back_populates='inventory_batch', lazy='dynamic'
     )
-    transactions = db.relationship(
-        'InventoryTransaction', back_populates='inventory_batch', lazy='dynamic', passive_deletes=True
+    transactions: List['InventoryTransaction'] = db.relationship(
+        'InventoryTransaction', back_populates='inventory_batch',
+        lazy='dynamic', passive_deletes=True
     )
 
-    # ------ Index (matches SQL) ------
+    # ── Indexes ──────────────────────────────────────────────────
     __table_args__ = (
         db.Index('idx_inventory_medicine', 'medicine_id'),
     )
 
+    # ── Computed Properties ──────────────────────────────────────
     @property
-    def is_low_stock(self):
+    def is_low_stock(self) -> bool:
+        """Check if stock is at or below minimum threshold."""
         return self.quantity_in_stock <= self.minimum_stock
 
     @property
-    def is_expired(self):
-        from datetime import date
-        return self.expiry_date and self.expiry_date < date.today()
+    def is_expired(self) -> bool:
+        """Check if this batch has expired."""
+        return self.expiry_date is not None and self.expiry_date < date.today()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<Inventory batch={self.batch_number} qty={self.quantity_in_stock}>'

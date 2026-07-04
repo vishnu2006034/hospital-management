@@ -1,60 +1,33 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+"""Patient routes."""
+
+from typing import Dict
+
+from flask import Blueprint, render_template, request, redirect, url_for, flash, Response
 from flask_login import login_required
 
-from app import db
-from app.models.patient import Patient
-from app.models.visit import Visit
+from app.services.patient_service import PatientService
 
-patients_bp = Blueprint('patients', __name__, url_prefix='/patients')
+patients_bp: Blueprint = Blueprint('patients', __name__, url_prefix='/patients')
 
 
 @patients_bp.route('/')
 @login_required
-def list_patients():
-    page = request.args.get('page', 1, type=int)
-    search = request.args.get('q', '').strip()
-
-    query = Patient.query
-    if search:
-        query = query.filter(
-            db.or_(
-                Patient.first_name.ilike(f'%{search}%'),
-                Patient.last_name.ilike(f'%{search}%'),
-                Patient.patient_number.ilike(f'%{search}%'),
-                Patient.phone.ilike(f'%{search}%'),
-            )
-        )
-    query = query.order_by(Patient.created_at.desc())
-    patients = query.paginate(page=page, per_page=15, error_out=False)
+def list_patients() -> str:
+    """List patients with search and pagination."""
+    page: int = request.args.get('page', 1, type=int)
+    search: str = request.args.get('q', '').strip()
+    patients = PatientService.get_all_patients(page=page, search=search)
     return render_template('patients/list.html', patients=patients, search=search)
 
 
 @patients_bp.route('/add', methods=['GET', 'POST'])
 @login_required
-def add_patient():
+def add_patient() -> str | Response:
+    """Add a new patient."""
     if request.method == 'POST':
-        last = Patient.query.order_by(Patient.patient_id.desc()).first()
-        next_num = (last.patient_id + 1) if last else 1
-        patient_number = f'PAT{next_num:06d}'
-
-        patient = Patient(
-            patient_number=patient_number,
-            first_name=request.form['first_name'],
-            last_name=request.form.get('last_name') or None,
-            gender=request.form.get('gender') or None,
-            dob=request.form.get('dob') or None,
-            blood_group=request.form.get('blood_group') or None,
-            phone=request.form.get('phone') or None,
-            email=request.form.get('email') or None,
-            address=request.form.get('address') or None,
-            emergency_contact_name=request.form.get('emergency_contact_name') or None,
-            emergency_contact_phone=request.form.get('emergency_contact_phone') or None,
-            allergies=request.form.get('allergies') or None,
-            medical_history=request.form.get('medical_history') or None,
-        )
-        db.session.add(patient)
-        db.session.commit()
-        flash(f'Patient {patient.full_name} registered as {patient_number}.', 'success')
+        data: Dict[str, str] = request.form.to_dict()
+        patient = PatientService.create_patient(data)
+        flash(f'Patient {patient.full_name} registered as {patient.patient_number}.', 'success')
         return redirect(url_for('patients.view_patient', patient_id=patient.patient_id))
 
     return render_template('patients/form.html', patient=None)
@@ -62,30 +35,21 @@ def add_patient():
 
 @patients_bp.route('/<int:patient_id>')
 @login_required
-def view_patient(patient_id):
-    patient = Patient.query.get_or_404(patient_id)
-    visits = patient.visits.order_by(Visit.visit_date.desc()).limit(20).all()
+def view_patient(patient_id: int) -> str:
+    """View a single patient with recent visits."""
+    patient = PatientService.get_patient_by_id(patient_id)
+    visits = PatientService.get_patient_visits(patient)
     return render_template('patients/detail.html', patient=patient, visits=visits)
 
 
 @patients_bp.route('/<int:patient_id>/edit', methods=['GET', 'POST'])
 @login_required
-def edit_patient(patient_id):
-    patient = Patient.query.get_or_404(patient_id)
+def edit_patient(patient_id: int) -> str | Response:
+    """Edit an existing patient."""
+    patient = PatientService.get_patient_by_id(patient_id)
     if request.method == 'POST':
-        patient.first_name = request.form['first_name']
-        patient.last_name = request.form.get('last_name') or None
-        patient.gender = request.form.get('gender') or None
-        patient.dob = request.form.get('dob') or None
-        patient.blood_group = request.form.get('blood_group') or None
-        patient.phone = request.form.get('phone') or None
-        patient.email = request.form.get('email') or None
-        patient.address = request.form.get('address') or None
-        patient.emergency_contact_name = request.form.get('emergency_contact_name') or None
-        patient.emergency_contact_phone = request.form.get('emergency_contact_phone') or None
-        patient.allergies = request.form.get('allergies') or None
-        patient.medical_history = request.form.get('medical_history') or None
-        db.session.commit()
+        data: Dict[str, str] = request.form.to_dict()
+        PatientService.update_patient(patient, data)
         flash(f'Patient {patient.full_name} updated.', 'success')
         return redirect(url_for('patients.view_patient', patient_id=patient.patient_id))
 
@@ -94,10 +58,10 @@ def edit_patient(patient_id):
 
 @patients_bp.route('/<int:patient_id>/delete', methods=['POST'])
 @login_required
-def delete_patient(patient_id):
-    patient = Patient.query.get_or_404(patient_id)
-    name = patient.full_name
-    db.session.delete(patient)
-    db.session.commit()
+def delete_patient(patient_id: int) -> Response:
+    """Delete a patient."""
+    patient = PatientService.get_patient_by_id(patient_id)
+    name: str = patient.full_name
+    PatientService.delete_patient(patient)
     flash(f'Patient {name} deleted.', 'success')
     return redirect(url_for('patients.list_patients'))

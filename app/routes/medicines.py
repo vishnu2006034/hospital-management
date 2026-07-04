@@ -1,47 +1,32 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+"""Medicine routes."""
+
+from typing import Dict
+
+from flask import Blueprint, render_template, request, redirect, url_for, flash, Response
 from flask_login import login_required
 
-from app import db
-from app.models.medicine import Medicine
+from app.services.medicine_service import MedicineService
 
-medicines_bp = Blueprint('medicines', __name__, url_prefix='/medicines')
+medicines_bp: Blueprint = Blueprint('medicines', __name__, url_prefix='/medicines')
 
 
 @medicines_bp.route('/')
 @login_required
-def list_medicines():
-    page = request.args.get('page', 1, type=int)
-    search = request.args.get('q', '').strip()
-
-    query = Medicine.query
-    if search:
-        query = query.filter(
-            db.or_(
-                Medicine.medicine_name.ilike(f'%{search}%'),
-                Medicine.generic_name.ilike(f'%{search}%'),
-                Medicine.category.ilike(f'%{search}%'),
-            )
-        )
-    query = query.order_by(Medicine.medicine_name)
-    medicines = query.paginate(page=page, per_page=15, error_out=False)
+def list_medicines() -> str:
+    """List medicines with search and pagination."""
+    page: int = request.args.get('page', 1, type=int)
+    search: str = request.args.get('q', '').strip()
+    medicines = MedicineService.get_all_medicines(page=page, search=search)
     return render_template('medicines/list.html', medicines=medicines, search=search)
 
 
 @medicines_bp.route('/add', methods=['GET', 'POST'])
 @login_required
-def add_medicine():
+def add_medicine() -> str | Response:
+    """Add a new medicine."""
     if request.method == 'POST':
-        medicine = Medicine(
-            medicine_name=request.form['medicine_name'],
-            generic_name=request.form.get('generic_name') or None,
-            category=request.form.get('category') or None,
-            dosage_form=request.form.get('dosage_form') or None,
-            strength=request.form.get('strength') or None,
-            manufacturer=request.form.get('manufacturer') or None,
-            unit_price=request.form.get('unit_price') or None,
-        )
-        db.session.add(medicine)
-        db.session.commit()
+        data: Dict[str, str] = request.form.to_dict()
+        medicine = MedicineService.create_medicine(data)
         flash(f'Medicine "{medicine.medicine_name}" added.', 'success')
         return redirect(url_for('medicines.list_medicines'))
 
@@ -50,17 +35,12 @@ def add_medicine():
 
 @medicines_bp.route('/<int:medicine_id>/edit', methods=['GET', 'POST'])
 @login_required
-def edit_medicine(medicine_id):
-    medicine = Medicine.query.get_or_404(medicine_id)
+def edit_medicine(medicine_id: int) -> str | Response:
+    """Edit an existing medicine."""
+    medicine = MedicineService.get_medicine_by_id(medicine_id)
     if request.method == 'POST':
-        medicine.medicine_name = request.form['medicine_name']
-        medicine.generic_name = request.form.get('generic_name') or None
-        medicine.category = request.form.get('category') or None
-        medicine.dosage_form = request.form.get('dosage_form') or None
-        medicine.strength = request.form.get('strength') or None
-        medicine.manufacturer = request.form.get('manufacturer') or None
-        medicine.unit_price = request.form.get('unit_price') or None
-        db.session.commit()
+        data: Dict[str, str] = request.form.to_dict()
+        MedicineService.update_medicine(medicine, data)
         flash(f'Medicine "{medicine.medicine_name}" updated.', 'success')
         return redirect(url_for('medicines.list_medicines'))
 
@@ -69,10 +49,10 @@ def edit_medicine(medicine_id):
 
 @medicines_bp.route('/<int:medicine_id>/delete', methods=['POST'])
 @login_required
-def delete_medicine(medicine_id):
-    medicine = Medicine.query.get_or_404(medicine_id)
-    name = medicine.medicine_name
-    db.session.delete(medicine)
-    db.session.commit()
+def delete_medicine(medicine_id: int) -> Response:
+    """Delete a medicine."""
+    medicine = MedicineService.get_medicine_by_id(medicine_id)
+    name: str = medicine.medicine_name
+    MedicineService.delete_medicine(medicine)
     flash(f'Medicine "{name}" deleted.', 'success')
     return redirect(url_for('medicines.list_medicines'))
