@@ -25,41 +25,41 @@ class User(UserMixin, db.Model):
 
     __tablename__: str = 'users'
 
-    # ── Primary Key ──────────────────────────────────────────────
+    # Primary Key
     user_id: int = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
 
-    # ── Identification ───────────────────────────────────────────
+    # Identification
     employee_code: str = db.Column(db.String(20), unique=True, nullable=False)
 
-    # ── Personal Information ─────────────────────────────────────
+    # Personal Information
     first_name: str = db.Column(db.String(50), nullable=False)
     last_name: Optional[str] = db.Column(db.String(50))
     gender: Optional[str] = db.Column(db.String(10))
     dob: Optional[date] = db.Column(db.Date)
 
-    # ── Contact Information ──────────────────────────────────────
+    # Contact Information
     phone: Optional[str] = db.Column(db.String(15), unique=True)
     email: Optional[str] = db.Column(db.String(100), unique=True)
 
-    # ── Authentication ───────────────────────────────────────────
+    # Authentication
     password_hash: str = db.Column(db.Text, nullable=False)
 
-    # ── Professional Information ─────────────────────────────────
+    # Professional Information
     department: Optional[str] = db.Column(db.String(100))
     specialization: Optional[str] = db.Column(db.String(100))
     license_number: Optional[str] = db.Column(db.String(60))
     joining_date: Optional[date] = db.Column(db.Date)
 
-    # ── Status ───────────────────────────────────────────────────
+    # Status
     status: str = db.Column(db.String(20), default='ACTIVE')
 
-    # ── Timestamps ───────────────────────────────────────────────
+    # Timestamps
     created_at: datetime = db.Column(db.DateTime, server_default=db.func.now())
     updated_at: datetime = db.Column(
         db.DateTime, server_default=db.func.now(), onupdate=db.func.now()
     )
 
-    # ── Relationships ────────────────────────────────────────────
+    # Relationships
     user_roles: List['UserRole'] = db.relationship(
         'UserRole', back_populates='user',
         foreign_keys='UserRole.user_id', lazy='dynamic', passive_deletes=True
@@ -86,12 +86,12 @@ class User(UserMixin, db.Model):
         for key, value in kwargs.items():
             setattr(self, key, value)
 
-    # ── Flask-Login Integration ──────────────────────────────────
+    # Flask-Login Integration
     def get_id(self) -> str:
         """Return the user_id as a string for Flask-Login."""
         return str(self.user_id)
 
-    # ── Password Helpers ─────────────────────────────────────────
+    # Password Helpers
     def set_password(self, password: str) -> None:
         """Hash and set the user's password."""
         self.password_hash = generate_password_hash(password)
@@ -100,7 +100,7 @@ class User(UserMixin, db.Model):
         """Verify a password against the stored hash."""
         return check_password_hash(self.password_hash, password)
 
-    # ── Convenience Properties ───────────────────────────────────
+    # Convenience Properties
     @property
     def full_name(self) -> str:
         """Return concatenated first and last name."""
@@ -120,5 +120,3 @@ class User(UserMixin, db.Model):
         """Check if user has a specific role."""
         return role_name in self.role_names
 
-    def __repr__(self) -> str:
-        return f'<User {self.employee_code} – {self.full_name}>'

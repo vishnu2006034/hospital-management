@@ -21,10 +21,10 @@ class LabReport(db.Model):
 
     __tablename__: str = 'lab_report'
 
-    # ── Primary Key ──────────────────────────────────────────────
+    # Primary Key
     lab_report_id: int = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
 
-    # ── Foreign Keys ─────────────────────────────────────────────
+    # Foreign Keys
     lab_id: int = db.Column(
         db.BigInteger,
         db.ForeignKey('laboratory.lab_id', ondelete='CASCADE'),
@@ -50,7 +50,7 @@ class LabReport(db.Model):
         db.ForeignKey('users.user_id'),
     )
 
-    # ── Report Information ───────────────────────────────────────
+    # Report Information
     report_number: str = db.Column(db.String(30), unique=True, nullable=False)
     result: str = db.Column(db.Text, nullable=False)
     unit: Optional[str] = db.Column(db.String(30))
@@ -58,23 +58,23 @@ class LabReport(db.Model):
     is_abnormal: bool = db.Column(db.Boolean, default=False)
     remarks: Optional[str] = db.Column(db.Text)
 
-    # ── Verification ─────────────────────────────────────────────
+    # Verification
     verified_at: Optional[datetime] = db.Column(db.DateTime)
 
-    # ── File Storage ─────────────────────────────────────────────
+    # File Storage
     report_file: Optional[str] = db.Column(db.Text)
 
-    # ── Timestamps ───────────────────────────────────────────────
+    # Timestamps
     created_at: datetime = db.Column(db.DateTime, server_default=db.func.now())
 
-    # ── Relationships ────────────────────────────────────────────
+    # Relationships
     laboratory: 'Laboratory' = db.relationship('Laboratory', back_populates='reports')
     test: 'LabTestCatalog' = db.relationship('LabTestCatalog', back_populates='lab_reports')
     patient: 'Patient' = db.relationship('Patient', back_populates='lab_reports')
     doctor: 'User' = db.relationship('User', foreign_keys=[doctor_id])
     verifier: Optional['User'] = db.relationship('User', foreign_keys=[verified_by])
 
-    # ── Indexes ──────────────────────────────────────────────────
+    # Indexes
     __table_args__ = (
         db.Index('idx_lab_report_lab', 'lab_id'),
         db.Index('idx_lab_report_test', 'test_id'),
@@ -82,5 +82,3 @@ class LabReport(db.Model):
         db.Index('idx_lab_report_doctor', 'doctor_id'),
     )
 
-    def __repr__(self) -> str:
-        return f'<LabReport {self.report_number} abnormal={self.is_abnormal}>'

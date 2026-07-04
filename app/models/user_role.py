@@ -22,10 +22,10 @@ class UserRole(db.Model):
         db.UniqueConstraint('user_id', 'role_id', name='uq_user_role'),
     )
 
-    # ── Primary Key ──────────────────────────────────────────────
+    # Primary Key
     user_role_id: int = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
 
-    # ── Foreign Keys ─────────────────────────────────────────────
+    # Foreign Keys
     user_id: int = db.Column(
         db.BigInteger,
         db.ForeignKey('users.user_id', ondelete='CASCADE'),
@@ -41,11 +41,11 @@ class UserRole(db.Model):
         db.ForeignKey('users.user_id', ondelete='SET NULL'),
     )
 
-    # ── Metadata ─────────────────────────────────────────────────
+    # Metadata
     assigned_at: datetime = db.Column(db.DateTime, server_default=db.func.now())
     is_active: bool = db.Column(db.Boolean, default=True)
 
-    # ── Relationships ────────────────────────────────────────────
+    # Relationships
     user: 'User' = db.relationship(
         'User', back_populates='user_roles', foreign_keys=[user_id]
     )
@@ -56,5 +56,3 @@ class UserRole(db.Model):
         for key, value in kwargs.items():
             setattr(self, key, value)
 
-    def __repr__(self) -> str:
-        return f'<UserRole user={self.user_id} role={self.role_id}>'

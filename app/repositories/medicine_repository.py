@@ -16,16 +16,7 @@ class MedicineRepository(BaseRepository[Medicine]):
     def search(
         self, search: Optional[str], page: int = 1, per_page: int = 15
     ):
-        """Search medicines with pagination.
-
-        Args:
-            search: Search term for name, generic name, or category.
-            page: Page number.
-            per_page: Items per page.
-
-        Returns:
-            Paginated medicine results.
-        """
+        """Search medicines with pagination."""
         query = Medicine.query
         if search:
             query = query.filter(
@@ -38,14 +29,5 @@ class MedicineRepository(BaseRepository[Medicine]):
         query = query.order_by(Medicine.medicine_name)
         return query.paginate(page=page, per_page=per_page, error_out=False)
 
-    def get_all_ordered(self) -> List[Medicine]:
-        """Get all medicines ordered by name.
-
-        Returns:
-            List of all medicines.
-        """
-        return Medicine.query.order_by(Medicine.medicine_name).all()
-
 
 medicine_repository: MedicineRepository = MedicineRepository()
-

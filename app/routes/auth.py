@@ -12,7 +12,6 @@ auth_bp: Blueprint = Blueprint('auth', __name__)
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login() -> str | Response:
-    """User login."""
     if current_user.is_authenticated:
         return redirect(url_for('main.dashboard'))
 
@@ -42,7 +41,6 @@ def login() -> str | Response:
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register() -> str | Response:
-    """User registration."""
     if current_user.is_authenticated:
         return redirect(url_for('main.dashboard'))
 
@@ -72,7 +70,6 @@ def register() -> str | Response:
 @auth_bp.route('/logout')
 @login_required
 def logout() -> Response:
-    """User logout."""
     AuthService.logout()
     flash('You have been logged out.', 'success')
     return redirect(url_for('main.index'))

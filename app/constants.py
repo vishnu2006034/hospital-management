@@ -7,7 +7,7 @@ used throughout the application. Import from here instead of hardcoding.
 from enum import Enum
 
 
-# ── Database Constants ───────────────────────────────────────────
+# Database Constants
 MAX_VARCHAR_LENGTH: int = 255
 PATIENT_NUMBER_FORMAT: str = 'PAT{}'
 EMPLOYEE_NUMBER_FORMAT: str = 'EMP{}'
@@ -15,7 +15,7 @@ LAB_REPORT_NUMBER_FORMAT: str = 'LR{}'
 DOCTOR_REPORT_NUMBER_FORMAT: str = 'DR{}'
 
 
-# ── Visit Constants ──────────────────────────────────────────────
+# Visit Constants
 class VisitType(str, Enum):
     """Visit type enumeration."""
     OUTPATIENT = 'OUTPATIENT'
@@ -30,7 +30,7 @@ class VisitStatus(str, Enum):
     CANCELLED = 'CANCELLED'
 
 
-# ── User Constants ───────────────────────────────────────────────
+# User Constants
 class UserStatus(str, Enum):
     """User status enumeration."""
     ACTIVE = 'ACTIVE'
@@ -38,7 +38,7 @@ class UserStatus(str, Enum):
     SUSPENDED = 'SUSPENDED'
 
 
-# ── Role Names ───────────────────────────────────────────────────
+# Role Names
 class RoleName(str, Enum):
     """Standard role names."""
     ADMINISTRATOR = 'Administrator'
@@ -52,7 +52,7 @@ class RoleName(str, Enum):
     PATIENT = 'Patient'
 
 
-# ── Inventory Constants ─────────────────────────────────────────
+# Inventory Constants
 class TransactionType(str, Enum):
     """Inventory transaction type."""
     IN = 'IN'
@@ -69,7 +69,7 @@ class ReferenceType(str, Enum):
     ADJUSTMENT = 'ADJUSTMENT'
 
 
-# ── Lab Constants ────────────────────────────────────────────────
+# Lab Constants
 class LabPriority(str, Enum):
     """Lab request priority."""
     NORMAL = 'NORMAL'
@@ -86,7 +86,7 @@ class LabStatus(str, Enum):
     CANCELLED = 'CANCELLED'
 
 
-# ── Application Constants ────────────────────────────────────────
+# Application Constants
 DEFAULT_PAGE_SIZE: int = 15
 MAX_PAGE_SIZE: int = 100
 HOSPITAL_BED_CAPACITY: int = 100
@@ -95,7 +95,7 @@ DEFAULT_PASSWORD: str = 'changeme123'
 INVENTORY_EXPIRY_DAYS: int = 365
 
 
-# ── Flash Message Categories ────────────────────────────────────
+# Flash Message Categories
 class FlashCategory(str, Enum):
     """Flash message categories."""
     SUCCESS = 'success'

@@ -23,7 +23,6 @@ def list_medicines() -> str:
 @medicines_bp.route('/add', methods=['GET', 'POST'])
 @login_required
 def add_medicine() -> str | Response:
-    """Add a new medicine."""
     if request.method == 'POST':
         data: Dict[str, str] = request.form.to_dict()
         medicine = MedicineService.create_medicine(data)
@@ -36,7 +35,6 @@ def add_medicine() -> str | Response:
 @medicines_bp.route('/<int:medicine_id>/edit', methods=['GET', 'POST'])
 @login_required
 def edit_medicine(medicine_id: int) -> str | Response:
-    """Edit an existing medicine."""
     medicine = MedicineService.get_medicine_by_id(medicine_id)
     if request.method == 'POST':
         data: Dict[str, str] = request.form.to_dict()
@@ -50,7 +48,6 @@ def edit_medicine(medicine_id: int) -> str | Response:
 @medicines_bp.route('/<int:medicine_id>/delete', methods=['POST'])
 @login_required
 def delete_medicine(medicine_id: int) -> Response:
-    """Delete a medicine."""
     medicine = MedicineService.get_medicine_by_id(medicine_id)
     name: str = medicine.medicine_name
     MedicineService.delete_medicine(medicine)

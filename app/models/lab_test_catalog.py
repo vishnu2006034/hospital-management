@@ -19,14 +19,14 @@ class LabTestCatalog(db.Model):
 
     __tablename__: str = 'lab_test_catalog'
 
-    # ── Primary Key ──────────────────────────────────────────────
+    # Primary Key
     test_id: int = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
 
-    # ── Test Identification ──────────────────────────────────────
+    # Test Identification
     test_code: str = db.Column(db.String(20), unique=True, nullable=False)
     test_name: str = db.Column(db.String(100), nullable=False)
 
-    # ── Test Details ─────────────────────────────────────────────
+    # Test Details
     category: Optional[str] = db.Column(db.String(50))
     sample_type: Optional[str] = db.Column(db.String(50))
     unit: Optional[str] = db.Column(db.String(30))
@@ -34,22 +34,20 @@ class LabTestCatalog(db.Model):
     normal_min: Optional[Decimal] = db.Column(db.Numeric(10, 2))
     normal_max: Optional[Decimal] = db.Column(db.Numeric(10, 2))
 
-    # ── Pricing ──────────────────────────────────────────────────
+    # Pricing
     default_price: Optional[Decimal] = db.Column(db.Numeric(10, 2))
 
-    # ── Description ──────────────────────────────────────────────
+    # Description
     description: Optional[str] = db.Column(db.Text)
 
-    # ── Status ───────────────────────────────────────────────────
+    # Status
     is_active: bool = db.Column(db.Boolean, default=True)
 
-    # ── Timestamps ───────────────────────────────────────────────
+    # Timestamps
     created_at: datetime = db.Column(db.DateTime, server_default=db.func.now())
 
-    # ── Relationships ────────────────────────────────────────────
+    # Relationships
     lab_reports: List['LabReport'] = db.relationship(
         'LabReport', back_populates='test', lazy='dynamic'
     )
 
-    def __repr__(self) -> str:
-        return f'<LabTestCatalog {self.test_code} – {self.test_name}>'

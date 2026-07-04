@@ -19,10 +19,10 @@ class Medicine(db.Model):
 
     __tablename__: str = 'medicines'
 
-    # ── Primary Key ──────────────────────────────────────────────
+    # Primary Key
     medicine_id: int = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
 
-    # ── Medicine Information ─────────────────────────────────────
+    # Medicine Information
     medicine_name: str = db.Column(db.String(100), nullable=False)
     generic_name: str = db.Column(db.String(100))
     category: str = db.Column(db.String(50))
@@ -31,13 +31,11 @@ class Medicine(db.Model):
     manufacturer: str = db.Column(db.String(100))
     unit_price: Decimal = db.Column(db.Numeric(10, 2))
 
-    # ── Timestamps ───────────────────────────────────────────────
+    # Timestamps
     created_at: datetime = db.Column(db.DateTime, server_default=db.func.now())
 
-    # ── Relationships ────────────────────────────────────────────
+    # Relationships
     inventory_batches: List['Inventory'] = db.relationship(
         'Inventory', back_populates='medicine', lazy='dynamic', passive_deletes=True
     )
 
-    def __repr__(self) -> str:
-        return f'<Medicine {self.medicine_name}>'

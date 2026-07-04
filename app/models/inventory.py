@@ -22,37 +22,37 @@ class Inventory(db.Model):
 
     __tablename__: str = 'inventory'
 
-    # ── Primary Key ──────────────────────────────────────────────
+    # Primary Key
     inventory_id: int = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
 
-    # ── Foreign Keys ─────────────────────────────────────────────
+    # Foreign Keys
     medicine_id: int = db.Column(
         db.BigInteger,
         db.ForeignKey('medicines.medicine_id', ondelete='CASCADE'),
         nullable=False,
     )
 
-    # ── Batch Information ────────────────────────────────────────
+    # Batch Information
     batch_number: str = db.Column(db.String(50), nullable=False)
     expiry_date: date = db.Column(db.Date)
 
-    # ── Pricing ──────────────────────────────────────────────────
+    # Pricing
     purchase_price: Decimal = db.Column(db.Numeric(10, 2))
     selling_price: Decimal = db.Column(db.Numeric(10, 2))
 
-    # ── Stock Levels ─────────────────────────────────────────────
+    # Stock Levels
     quantity_in_stock: int = db.Column(db.Integer, default=0)
     minimum_stock: int = db.Column(db.Integer, default=0)
 
-    # ── Supplier Information ─────────────────────────────────────
+    # Supplier Information
     supplier: str = db.Column(db.String(100))
 
-    # ── Timestamps ───────────────────────────────────────────────
+    # Timestamps
     last_updated: datetime = db.Column(
         db.DateTime, server_default=db.func.now(), onupdate=db.func.now()
     )
 
-    # ── Relationships ────────────────────────────────────────────
+    # Relationships
     medicine: 'Medicine' = db.relationship('Medicine', back_populates='inventory_batches')
     prescriptions: List['Prescription'] = db.relationship(
         'Prescription', back_populates='inventory_batch', lazy='dynamic'
@@ -62,12 +62,12 @@ class Inventory(db.Model):
         lazy='dynamic', passive_deletes=True
     )
 
-    # ── Indexes ──────────────────────────────────────────────────
+    # Indexes
     __table_args__ = (
         db.Index('idx_inventory_medicine', 'medicine_id'),
     )
 
-    # ── Computed Properties ──────────────────────────────────────
+    # Computed Properties
     @property
     def is_low_stock(self) -> bool:
         """Check if stock is at or below minimum threshold."""
@@ -78,5 +78,3 @@ class Inventory(db.Model):
         """Check if this batch has expired."""
         return self.expiry_date is not None and self.expiry_date < date.today()
 
-    def __repr__(self) -> str:
-        return f'<Inventory batch={self.batch_number} qty={self.quantity_in_stock}>'

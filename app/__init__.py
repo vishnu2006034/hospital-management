@@ -6,7 +6,7 @@ from config import Config
 from app.extensions import db, migrate, csrf
 from app.errors import register_error_handlers
 
-# ── Authentication ───────────────────────────────────────────────
+# Authentication
 login_manager: LoginManager = LoginManager()
 login_manager.login_view = 'auth.login'
 login_manager.login_message = 'Please log in to access this page.'

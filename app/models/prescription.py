@@ -20,10 +20,10 @@ class Prescription(db.Model):
 
     __tablename__: str = 'prescriptions'
 
-    # ── Primary Key ──────────────────────────────────────────────
+    # Primary Key
     prescription_id: int = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
 
-    # ── Foreign Keys ─────────────────────────────────────────────
+    # Foreign Keys
     visit_id: int = db.Column(
         db.BigInteger,
         db.ForeignKey('visits.visit_id', ondelete='CASCADE'),
@@ -40,25 +40,23 @@ class Prescription(db.Model):
         nullable=False,
     )
 
-    # ── Prescription Details ─────────────────────────────────────
+    # Prescription Details
     dosage: Optional[str] = db.Column(db.String(100))
     frequency: Optional[str] = db.Column(db.String(100))
     duration: Optional[str] = db.Column(db.String(50))
     quantity: Optional[int] = db.Column(db.Integer)
     instructions: Optional[str] = db.Column(db.Text)
 
-    # ── Timestamps ───────────────────────────────────────────────
+    # Timestamps
     created_at: datetime = db.Column(db.DateTime, server_default=db.func.now())
 
-    # ── Relationships ────────────────────────────────────────────
+    # Relationships
     visit: 'Visit' = db.relationship('Visit', back_populates='prescriptions')
     inventory_batch: 'Inventory' = db.relationship('Inventory', back_populates='prescriptions')
     prescriber: 'User' = db.relationship('User', back_populates='prescriptions_written')
 
-    # ── Indexes ──────────────────────────────────────────────────
+    # Indexes
     __table_args__ = (
         db.Index('idx_prescription_visit', 'visit_id'),
     )
 
-    def __repr__(self) -> str:
-        return f'<Prescription {self.prescription_id} visit={self.visit_id}>'

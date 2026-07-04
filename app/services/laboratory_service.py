@@ -22,47 +22,19 @@ class LaboratoryService:
         status: Optional[str] = None,
         search: Optional[str] = None,
     ):
-        """Get paginated list of lab requests.
-
-        Args:
-            page: Page number.
-            per_page: Items per page.
-            status: Optional status filter.
-            search: Optional search term.
-
-        Returns:
-            Paginated lab request results.
-        """
+        """Get paginated list of lab requests."""
         return laboratory_repository.search(
             search, status=status, page=page, per_page=per_page
         )
 
     @staticmethod
     def get_lab_by_id(lab_id: int) -> Laboratory:
-        """Get a lab request by ID.
-
-        Args:
-            lab_id: The lab request's ID.
-
-        Returns:
-            The laboratory entity.
-
-        Raises:
-            404: If lab request not found.
-        """
+        """Get a lab request by ID."""
         return laboratory_repository.get_by_id(lab_id)
 
     @staticmethod
     def create_lab_request(data: Dict[str, Any], requested_by: int) -> Laboratory:
-        """Create a new lab request.
-
-        Args:
-            data: Lab request data dictionary.
-            requested_by: ID of the requesting doctor.
-
-        Returns:
-            The created laboratory entity.
-        """
+        """Create a new lab request."""
         cleaned = {k: (None if (isinstance(v, str) and not v.strip()) else v) for k, v in data.items()}
 
         lab: Laboratory = Laboratory(
@@ -80,15 +52,7 @@ class LaboratoryService:
 
     @staticmethod
     def update_lab_request(lab: Laboratory, data: Dict[str, Any]) -> Laboratory:
-        """Update an existing lab request.
-
-        Args:
-            lab: The laboratory entity to update.
-            data: Updated lab request data.
-
-        Returns:
-            The updated laboratory entity.
-        """
+        """Update an existing lab request."""
         cleaned = {k: (None if (isinstance(v, str) and not v.strip()) else v) for k, v in data.items()}
 
         lab.test_status = cleaned.get('test_status') or lab.test_status
@@ -104,24 +68,12 @@ class LaboratoryService:
 
     @staticmethod
     def generate_report_number() -> str:
-        """Generate a new lab report number.
-
-        Returns:
-            A unique report number.
-        """
+        """Generate a new lab report number."""
         return laboratory_repository.generate_report_number()
 
     @staticmethod
     def add_report(lab: Laboratory, data: Dict[str, Any]) -> LabReport:
-        """Add a report to a lab request.
-
-        Args:
-            lab: The laboratory entity.
-            data: Report data dictionary.
-
-        Returns:
-            The created lab report entity.
-        """
+        """Add a report to a lab request."""
         cleaned = {k: (None if (isinstance(v, str) and not v.strip()) else v) for k, v in data.items()}
 
         report_number: str = laboratory_repository.generate_report_number()
@@ -143,59 +95,26 @@ class LaboratoryService:
 
     @staticmethod
     def get_lab_reports(lab: Laboratory) -> List[LabReport]:
-        """Get all reports for a lab request.
-
-        Args:
-            lab: The laboratory entity.
-
-        Returns:
-            List of lab reports.
-        """
+        """Get all reports for a lab request."""
         return laboratory_repository.get_lab_reports(lab)
 
     @staticmethod
     def get_all_catalog_tests(
         page: int = 1, per_page: int = 15, search: Optional[str] = None
     ):
-        """Get paginated list of catalog tests.
-
-        Args:
-            page: Page number.
-            per_page: Items per page.
-            search: Optional search term.
-
-        Returns:
-            Paginated catalog test results.
-        """
+        """Get paginated list of catalog tests."""
         return lab_test_catalog_repository.search(
             search, page=page, per_page=per_page
         )
 
     @staticmethod
     def get_catalog_test_by_id(test_id: int) -> LabTestCatalog:
-        """Get a catalog test by ID.
-
-        Args:
-            test_id: The test's ID.
-
-        Returns:
-            The lab test catalog entity.
-
-        Raises:
-            404: If test not found.
-        """
+        """Get a catalog test by ID."""
         return lab_test_catalog_repository.get_by_id(test_id)
 
     @staticmethod
     def create_catalog_test(data: Dict[str, Any]) -> LabTestCatalog:
-        """Create a new catalog test.
-
-        Args:
-            data: Test data dictionary.
-
-        Returns:
-            The created lab test catalog entity.
-        """
+        """Create a new catalog test."""
         cleaned = {k: (None if (isinstance(v, str) and not v.strip()) else v) for k, v in data.items()}
 
         test: LabTestCatalog = LabTestCatalog(
@@ -218,15 +137,7 @@ class LaboratoryService:
     def update_catalog_test(
         test: LabTestCatalog, data: Dict[str, Any]
     ) -> LabTestCatalog:
-        """Update an existing catalog test.
-
-        Args:
-            test: The lab test catalog entity to update.
-            data: Updated test data.
-
-        Returns:
-            The updated lab test catalog entity.
-        """
+        """Update an existing catalog test."""
         cleaned = {k: (None if (isinstance(v, str) and not v.strip()) else v) for k, v in data.items()}
 
         test.test_code = cleaned['test_code']
@@ -245,30 +156,14 @@ class LaboratoryService:
 
     @staticmethod
     def get_recent_visits(limit: int = 50) -> List:
-        """Get recent visits.
-
-        Args:
-            limit: Maximum number of visits.
-
-        Returns:
-            List of recent visits.
-        """
+        """Get recent visits."""
         return laboratory_repository.get_recent_visits(limit)
 
     @staticmethod
     def get_all_patients() -> List:
-        """Get all patients.
-
-        Returns:
-            List of all patients.
-        """
         return laboratory_repository.get_all_patients()
 
     @staticmethod
     def get_all_technicians() -> List:
-        """Get all active technicians.
-
-        Returns:
-            List of active users.
-        """
+        """Get all active technicians."""
         return laboratory_repository.get_all_technicians()

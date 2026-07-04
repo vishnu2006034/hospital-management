@@ -12,9 +12,9 @@ from flask_wtf.csrf import CSRFProtect
 class BaseModel(DeclarativeBase):
     __allow_unmapped__ = True
 
-# ── Database ─────────────────────────────────────────────────────
+# Database
 db: SQLAlchemy = SQLAlchemy(model_class=BaseModel)
 migrate: Migrate = Migrate()
 
-# ── Security ─────────────────────────────────────────────────────
+# Security
 csrf: CSRFProtect = CSRFProtect()

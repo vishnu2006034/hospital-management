@@ -18,20 +18,18 @@ class Role(db.Model):
 
     __tablename__: str = 'roles'
 
-    # ── Primary Key ──────────────────────────────────────────────
+    # Primary Key
     role_id: int = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
 
-    # ── Role Information ─────────────────────────────────────────
+    # Role Information
     role_name: str = db.Column(db.String(50), unique=True, nullable=False)
     description: str = db.Column(db.Text)
 
-    # ── Timestamps ───────────────────────────────────────────────
+    # Timestamps
     created_at: datetime = db.Column(db.DateTime, server_default=db.func.now())
 
-    # ── Relationships ────────────────────────────────────────────
+    # Relationships
     user_roles: List['UserRole'] = db.relationship(
         'UserRole', back_populates='role', lazy='dynamic', passive_deletes=True
     )
 
-    def __repr__(self) -> str:
-        return f'<Role {self.role_name}>'

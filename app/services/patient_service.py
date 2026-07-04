@@ -13,52 +13,21 @@ class PatientService:
     def get_all_patients(
         page: int = 1, per_page: int = 15, search: Optional[str] = None
     ):
-        """Get paginated list of patients.
-
-        Args:
-            page: Page number.
-            per_page: Items per page.
-            search: Optional search term.
-
-        Returns:
-            Paginated patient results.
-        """
+        """Get paginated list of patients."""
         return patient_repository.search(search, page=page, per_page=per_page)
 
     @staticmethod
     def get_patient_by_id(patient_id: int) -> Patient:
-        """Get a patient by ID.
-
-        Args:
-            patient_id: The patient's ID.
-
-        Returns:
-            The patient entity.
-
-        Raises:
-            404: If patient not found.
-        """
+        """Get a patient by ID."""
         return patient_repository.get_by_id(patient_id)
 
     @staticmethod
     def generate_patient_number() -> str:
-        """Generate a new patient number.
-
-        Returns:
-            A unique patient number.
-        """
         return patient_repository.get_next_patient_number()
 
     @staticmethod
     def create_patient(data: Dict[str, Any]) -> Patient:
-        """Create a new patient.
-
-        Args:
-            data: Patient data dictionary.
-
-        Returns:
-            The created patient entity.
-        """
+        """Create a new patient."""
         cleaned = {k: (None if (isinstance(v, str) and not v.strip()) else v) for k, v in data.items()}
 
         patient: Patient = Patient(
@@ -82,15 +51,7 @@ class PatientService:
 
     @staticmethod
     def update_patient(patient: Patient, data: Dict[str, Any]) -> Patient:
-        """Update an existing patient.
-
-        Args:
-            patient: The patient entity to update.
-            data: Updated patient data.
-
-        Returns:
-            The updated patient entity.
-        """
+        """Update an existing patient."""
         cleaned = {k: (None if (isinstance(v, str) and not v.strip()) else v) for k, v in data.items()}
 
         patient.first_name = cleaned['first_name']
@@ -110,23 +71,11 @@ class PatientService:
 
     @staticmethod
     def delete_patient(patient: Patient) -> None:
-        """Delete a patient.
-
-        Args:
-            patient: The patient entity to delete.
-        """
+        """Delete a patient."""
         patient_repository.delete(patient)
         patient_repository.commit()
 
     @staticmethod
     def get_patient_visits(patient: Patient, limit: int = 20) -> List:
-        """Get recent visits for a patient.
-
-        Args:
-            patient: The patient entity.
-            limit: Maximum number of visits.
-
-        Returns:
-            List of recent visits.
-        """
+        """Get recent visits for a patient."""
         return patient_repository.get_patient_visits(patient, limit)

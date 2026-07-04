@@ -13,43 +13,17 @@ class MedicineService:
     def get_all_medicines(
         page: int = 1, per_page: int = 15, search: Optional[str] = None
     ):
-        """Get paginated list of medicines.
-
-        Args:
-            page: Page number.
-            per_page: Items per page.
-            search: Optional search term.
-
-        Returns:
-            Paginated medicine results.
-        """
+        """Get paginated list of medicines."""
         return medicine_repository.search(search, page=page, per_page=per_page)
 
     @staticmethod
     def get_medicine_by_id(medicine_id: int) -> Medicine:
-        """Get a medicine by ID.
-
-        Args:
-            medicine_id: The medicine's ID.
-
-        Returns:
-            The medicine entity.
-
-        Raises:
-            404: If medicine not found.
-        """
+        """Get a medicine by ID."""
         return medicine_repository.get_by_id(medicine_id)
 
     @staticmethod
     def create_medicine(data: Dict[str, Any]) -> Medicine:
-        """Create a new medicine.
-
-        Args:
-            data: Medicine data dictionary.
-
-        Returns:
-            The created medicine entity.
-        """
+        """Create a new medicine."""
         cleaned = {k: (None if (isinstance(v, str) and not v.strip()) else v) for k, v in data.items()}
 
         medicine: Medicine = Medicine(
@@ -67,15 +41,7 @@ class MedicineService:
 
     @staticmethod
     def update_medicine(medicine: Medicine, data: Dict[str, Any]) -> Medicine:
-        """Update an existing medicine.
-
-        Args:
-            medicine: The medicine entity to update.
-            data: Updated medicine data.
-
-        Returns:
-            The updated medicine entity.
-        """
+        """Update an existing medicine."""
         cleaned = {k: (None if (isinstance(v, str) and not v.strip()) else v) for k, v in data.items()}
 
         medicine.medicine_name = cleaned['medicine_name']
@@ -90,10 +56,6 @@ class MedicineService:
 
     @staticmethod
     def delete_medicine(medicine: Medicine) -> None:
-        """Delete a medicine.
-
-        Args:
-            medicine: The medicine entity to delete.
-        """
+        """Delete a medicine."""
         medicine_repository.delete(medicine)
         medicine_repository.commit()

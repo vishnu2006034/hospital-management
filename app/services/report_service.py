@@ -13,53 +13,22 @@ class ReportService:
     def get_all_reports(
         page: int = 1, per_page: int = 15, search: Optional[str] = None
     ):
-        """Get paginated list of doctor reports.
-
-        Args:
-            page: Page number.
-            per_page: Items per page.
-            search: Optional search term.
-
-        Returns:
-            Paginated report results.
-        """
+        """Get paginated list of doctor reports."""
         return report_repository.search(search, page=page, per_page=per_page)
 
     @staticmethod
     def get_report_by_id(report_id: int) -> DoctorReport:
-        """Get a doctor report by ID.
-
-        Args:
-            report_id: The report's ID.
-
-        Returns:
-            The doctor report entity.
-
-        Raises:
-            404: If report not found.
-        """
+        """Get a doctor report by ID."""
         return report_repository.get_by_id(report_id)
 
     @staticmethod
     def generate_report_number() -> str:
-        """Generate a new doctor report number.
-
-        Returns:
-            A unique report number.
-        """
+        """Generate a new doctor report number."""
         return report_repository.generate_report_number()
 
     @staticmethod
     def create_report(data: Dict[str, Any], doctor_id: int) -> DoctorReport:
-        """Create a new doctor report.
-
-        Args:
-            data: Report data dictionary.
-            doctor_id: ID of the doctor creating the report.
-
-        Returns:
-            The created doctor report entity.
-        """
+        """Create a new doctor report."""
         cleaned = {k: (None if (isinstance(v, str) and not v.strip()) else v) for k, v in data.items()}
 
         report_number: str = report_repository.generate_report_number()
@@ -86,15 +55,7 @@ class ReportService:
     def update_report(
         report: DoctorReport, data: Dict[str, Any]
     ) -> DoctorReport:
-        """Update an existing doctor report.
-
-        Args:
-            report: The doctor report entity to update.
-            data: Updated report data.
-
-        Returns:
-            The updated doctor report entity.
-        """
+        """Update an existing doctor report."""
         cleaned = {k: (None if (isinstance(v, str) and not v.strip()) else v) for k, v in data.items()}
 
         report.chief_complaint = cleaned.get('chief_complaint')
@@ -111,21 +72,9 @@ class ReportService:
 
     @staticmethod
     def get_recent_visits(limit: int = 50) -> List:
-        """Get recent visits.
-
-        Args:
-            limit: Maximum number of visits.
-
-        Returns:
-            List of recent visits.
-        """
+        """Get recent visits."""
         return report_repository.get_recent_visits(limit)
 
     @staticmethod
     def get_all_patients() -> List:
-        """Get all patients.
-
-        Returns:
-            List of all patients.
-        """
         return report_repository.get_all_patients()

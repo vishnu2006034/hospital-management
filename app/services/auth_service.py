@@ -13,15 +13,7 @@ class AuthService:
 
     @staticmethod
     def authenticate_user(email: str, password: str) -> Optional[User]:
-        """Authenticate a user by email and password.
-
-        Args:
-            email: User's email address.
-            password: User's password.
-
-        Returns:
-            The authenticated user, or None if invalid.
-        """
+        """Authenticate a user by email and password."""
         user: Optional[User] = user_repository.get_by_email(email)
         if user is None or not user.check_password(password):
             return None
@@ -31,29 +23,15 @@ class AuthService:
 
     @staticmethod
     def login(user: User, remember: bool = False) -> None:
-        """Log in a user.
-
-        Args:
-            user: The user to log in.
-            remember: Whether to remember the user session.
-        """
         login_user(user, remember=remember)
 
     @staticmethod
     def logout() -> None:
-        """Log out the current user."""
         logout_user()
 
     @staticmethod
     def validate_registration(data: Dict[str, str]) -> List[str]:
-        """Validate registration data.
-
-        Args:
-            data: Registration form data.
-
-        Returns:
-            List of validation error messages (empty if valid).
-        """
+        """Validate registration data."""
         errors: List[str] = []
         if not data.get('first_name'):
             errors.append('First name is required.')
@@ -71,23 +49,11 @@ class AuthService:
 
     @staticmethod
     def generate_employee_code() -> str:
-        """Generate a new employee code.
-
-        Returns:
-            A unique employee code.
-        """
         return user_repository.get_next_employee_code()
 
     @staticmethod
     def create_user(data: Dict[str, str]) -> User:
-        """Create a new user account.
-
-        Args:
-            data: User registration data.
-
-        Returns:
-            The created user entity.
-        """
+        """Create a new user account."""
         user: User = User(
             employee_code=user_repository.get_next_employee_code(),
             first_name=data['first_name'],

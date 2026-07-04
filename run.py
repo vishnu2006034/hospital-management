@@ -10,7 +10,7 @@ from typing import NoReturn
 from app import create_app
 from app.logging_config import setup_logging, get_logger
 
-# ── Setup Logging ────────────────────────────────────────────────
+# Setup Logging
 log_level: str = os.getenv('LOG_LEVEL', 'INFO')
 setup_logging(log_level)
 logger = get_logger(__name__)

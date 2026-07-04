@@ -26,17 +26,7 @@ class LaboratoryRepository(BaseRepository[Laboratory]):
         page: int = 1,
         per_page: int = 15,
     ):
-        """Search lab requests with optional status filter and pagination.
-
-        Args:
-            search: Search term for patient name or number.
-            status: Filter by test status.
-            page: Page number.
-            per_page: Items per page.
-
-        Returns:
-            Paginated lab request results.
-        """
+        """Search lab requests with optional status filter and pagination."""
         query = Laboratory.query.join(Patient)
         if status:
             query = query.filter(Laboratory.test_status == status)
@@ -52,49 +42,23 @@ class LaboratoryRepository(BaseRepository[Laboratory]):
         return query.paginate(page=page, per_page=per_page, error_out=False)
 
     def get_lab_reports(self, lab: Laboratory) -> List[LabReport]:
-        """Get all reports for a lab request.
-
-        Args:
-            lab: The laboratory entity.
-
-        Returns:
-            List of lab reports.
-        """
+        """Get all reports for a lab request."""
         return lab.reports.all()
 
     def get_recent_visits(self, limit: int = 50) -> List[Visit]:
-        """Get recent visits.
-
-        Args:
-            limit: Maximum number of visits.
-
-        Returns:
-            List of recent visits.
-        """
+        """Get recent visits."""
         return Visit.query.order_by(Visit.visit_date.desc()).limit(limit).all()
 
     def get_all_patients(self) -> List[Patient]:
-        """Get all patients ordered by first name.
-
-        Returns:
-            List of all patients.
-        """
+        """Get all patients ordered by first name."""
         return Patient.query.order_by(Patient.first_name).all()
 
     def get_all_technicians(self) -> List[User]:
-        """Get all active lab technicians.
-
-        Returns:
-            List of active users.
-        """
+        """Get all active lab technicians."""
         return User.query.filter_by(status='ACTIVE').order_by(User.first_name).all()
 
     def generate_report_number(self) -> str:
-        """Generate the next lab report number.
-
-        Returns:
-            A new report number in format LR000001.
-        """
+        """Generate the next lab report number."""
         last: Optional[LabReport] = LabReport.query.order_by(
             LabReport.lab_report_id.desc()
         ).first()
@@ -102,11 +66,7 @@ class LaboratoryRepository(BaseRepository[Laboratory]):
         return f'LR{next_num}'
 
     def update_completion_time(self, lab: Laboratory) -> None:
-        """Set completion time if test is marked completed.
-
-        Args:
-            lab: The laboratory entity to update.
-        """
+        """Set completion time if test is marked completed."""
         if lab.test_status == 'COMPLETED' and not lab.completed_at:
             lab.completed_at = datetime.utcnow()
 
@@ -127,16 +87,7 @@ class LabTestCatalogRepository(BaseRepository[LabTestCatalog]):
     def search(
         self, search: Optional[str], page: int = 1, per_page: int = 15
     ):
-        """Search lab test catalog with pagination.
-
-        Args:
-            search: Search term for test name, code, or category.
-            page: Page number.
-            per_page: Items per page.
-
-        Returns:
-            Paginated catalog results.
-        """
+        """Search lab test catalog with pagination."""
         query = LabTestCatalog.query
         if search:
             query = query.filter(
@@ -149,18 +100,9 @@ class LabTestCatalogRepository(BaseRepository[LabTestCatalog]):
         query = query.order_by(LabTestCatalog.test_name)
         return query.paginate(page=page, per_page=per_page, error_out=False)
 
-    def get_active_tests(self) -> List[LabTestCatalog]:
-        """Get all active tests in the catalog.
-
-        Returns:
-            List of active lab tests.
-        """
-        return LabTestCatalog.query.filter_by(is_active=True).order_by(
-            LabTestCatalog.test_name
-        ).all()
-
 
 laboratory_repository: LaboratoryRepository = LaboratoryRepository()
 lab_report_repository: LabReportRepository = LabReportRepository()
 lab_test_catalog_repository: LabTestCatalogRepository = LabTestCatalogRepository()
+
 

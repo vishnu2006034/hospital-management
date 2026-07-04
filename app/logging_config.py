@@ -13,21 +13,17 @@ def setup_logging(log_level: Optional[str] = None) -> None:
 
     Sets up structured logging with appropriate formatters and handlers
     for both development and production environments.
-
-    Args:
-        log_level: Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL).
-                   Defaults to INFO.
     """
     level: int = getattr(logging, (log_level or 'INFO').upper(), logging.INFO)
 
-    # ── Formatters ──────────────────────────────────────────────
+    # Formatters
     detailed_format: str = (
         '[%(asctime)s] %(levelname)-8s %(name)s:%(lineno)d - %(message)s'
     )
     simple_format: str = '%(levelname)-8s %(message)s'
     console_format: str = '%(levelname)-8s %(name)s - %(message)s'
 
-    # ── Handlers ────────────────────────────────────────────────
+    # Handlers
     handlers: list[logging.Handler] = []
 
     # Console handler
@@ -43,7 +39,7 @@ def setup_logging(log_level: Optional[str] = None) -> None:
         file_handler.setFormatter(logging.Formatter(detailed_format))
         handlers.append(file_handler)
 
-    # ── Root Logger Configuration ───────────────────────────────
+    # Root Logger Configuration
     logging.basicConfig(
         level=level,
         format=detailed_format,
@@ -51,19 +47,12 @@ def setup_logging(log_level: Optional[str] = None) -> None:
         force=True,
     )
 
-    # ── Reduce noise from third-party libraries ─────────────────
+    # Reduce noise from third-party libraries
     logging.getLogger('werkzeug').setLevel(logging.WARNING)
     logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)
     logging.getLogger('urllib3').setLevel(logging.WARNING)
 
 
 def get_logger(name: str) -> logging.Logger:
-    """Get a named logger instance.
-
-    Args:
-        name: Logger name (typically __name__).
-
-    Returns:
-        Configured logger instance.
-    """
+    """Get a named logger instance."""
     return logging.getLogger(name)

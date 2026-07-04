@@ -10,7 +10,7 @@ from app.services.laboratory_service import LaboratoryService
 laboratory_bp: Blueprint = Blueprint('laboratory', __name__, url_prefix='/laboratory')
 
 
-# ==================== LAB REQUESTS ====================
+# LAB REQUESTS
 
 @laboratory_bp.route('/')
 @login_required
@@ -68,7 +68,7 @@ def edit_lab(lab_id: int) -> str | Response:
                            patients=patients, technicians=technicians, visit_id='')
 
 
-# ==================== LAB REPORTS ====================
+# LAB REPORTS
 
 @laboratory_bp.route('/<int:lab_id>/report/add', methods=['GET', 'POST'])
 @login_required
@@ -88,7 +88,7 @@ def add_report(lab_id: int) -> str | Response:
     return render_template('laboratory/report_form.html', lab=lab, report=None, tests=tests)
 
 
-# ==================== LAB TEST CATALOG ====================
+# LAB TEST CATALOG
 
 @laboratory_bp.route('/catalog')
 @login_required

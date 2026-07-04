@@ -17,49 +17,21 @@ class InventoryService:
         search: Optional[str] = None,
         filter_type: Optional[str] = None,
     ):
-        """Get paginated list of inventory items.
-
-        Args:
-            page: Page number.
-            per_page: Items per page.
-            search: Optional search term.
-            filter_type: Optional filter ('low', 'expired').
-
-        Returns:
-            Paginated inventory results.
-        """
+        """Get paginated list of inventory items."""
         return inventory_repository.search(
             search, filter_type=filter_type, page=page, per_page=per_page
         )
 
     @staticmethod
     def get_inventory_by_id(inventory_id: int) -> Inventory:
-        """Get an inventory item by ID.
-
-        Args:
-            inventory_id: The inventory item's ID.
-
-        Returns:
-            The inventory entity.
-
-        Raises:
-            404: If inventory item not found.
-        """
+        """Get an inventory item by ID."""
         return inventory_repository.get_by_id(inventory_id)
 
     @staticmethod
     def create_inventory(
         data: Dict[str, Any], performed_by: Optional[int] = None
     ) -> Inventory:
-        """Create a new inventory item.
-
-        Args:
-            data: Inventory data dictionary.
-            performed_by: Optional user ID for initial stock entry.
-
-        Returns:
-            The created inventory entity.
-        """
+        """Create a new inventory item."""
         cleaned = {k: (None if (isinstance(v, str) and not v.strip()) else v) for k, v in data.items()}
 
         qty_stock = cleaned.get('quantity_in_stock')
@@ -92,15 +64,7 @@ class InventoryService:
 
     @staticmethod
     def update_inventory(inv: Inventory, data: Dict[str, Any]) -> Inventory:
-        """Update an existing inventory item.
-
-        Args:
-            inv: The inventory entity to update.
-            data: Updated inventory data.
-
-        Returns:
-            The updated inventory entity.
-        """
+        """Update an existing inventory item."""
         cleaned = {k: (None if (isinstance(v, str) and not v.strip()) else v) for k, v in data.items()}
 
         min_stock = cleaned.get('minimum_stock')
@@ -118,13 +82,7 @@ class InventoryService:
     def add_transaction(
         inv: Inventory, data: Dict[str, Any], performed_by: int
     ) -> None:
-        """Add a stock transaction.
-
-        Args:
-            inv: The inventory entity.
-            data: Transaction data.
-            performed_by: User performing the transaction.
-        """
+        """Add a stock transaction."""
         cleaned = {k: (None if (isinstance(v, str) and not v.strip()) else v) for k, v in data.items()}
 
         txn_type: str = cleaned['transaction_type']
@@ -145,22 +103,9 @@ class InventoryService:
 
     @staticmethod
     def get_recent_transactions(inv: Inventory, limit: int = 20) -> List[InventoryTransaction]:
-        """Get recent transactions for an inventory item.
-
-        Args:
-            inv: The inventory entity.
-            limit: Maximum number of transactions.
-
-        Returns:
-            List of recent transactions.
-        """
+        """Get recent transactions for an inventory item."""
         return inventory_repository.get_recent_transactions(inv.inventory_id, limit)
 
     @staticmethod
     def get_all_medicines() -> List:
-        """Get all medicines.
-
-        Returns:
-            List of all medicines.
-        """
         return inventory_repository.get_medicines()

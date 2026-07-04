@@ -21,10 +21,10 @@ class Laboratory(db.Model):
 
     __tablename__: str = 'laboratory'
 
-    # ── Primary Key ──────────────────────────────────────────────
+    # Primary Key
     lab_id: int = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
 
-    # ── Foreign Keys ─────────────────────────────────────────────
+    # Foreign Keys
     visit_id: int = db.Column(
         db.BigInteger,
         db.ForeignKey('visits.visit_id', ondelete='CASCADE'),
@@ -45,18 +45,18 @@ class Laboratory(db.Model):
         db.ForeignKey('users.user_id'),
     )
 
-    # ── Lab Request Information ──────────────────────────────────
+    # Lab Request Information
     priority: str = db.Column(db.String(20), default='NORMAL')
     sample_type: Optional[str] = db.Column(db.String(50))
     sample_collected_at: Optional[datetime] = db.Column(db.DateTime)
     test_status: str = db.Column(db.String(30), default='PENDING')
     remarks: Optional[str] = db.Column(db.Text)
 
-    # ── Timestamps ───────────────────────────────────────────────
+    # Timestamps
     created_at: datetime = db.Column(db.DateTime, server_default=db.func.now())
     completed_at: Optional[datetime] = db.Column(db.DateTime)
 
-    # ── Relationships ────────────────────────────────────────────
+    # Relationships
     visit: 'Visit' = db.relationship('Visit', back_populates='lab_requests')
     patient: 'Patient' = db.relationship('Patient', back_populates='lab_requests')
     requester: 'User' = db.relationship(
@@ -69,13 +69,10 @@ class Laboratory(db.Model):
         'LabReport', back_populates='laboratory', lazy='dynamic', passive_deletes=True
     )
 
-    # ── Indexes ──────────────────────────────────────────────────
+    # Indexes
     __table_args__ = (
         db.Index('idx_lab_visit', 'visit_id'),
         db.Index('idx_lab_patient', 'patient_id'),
         db.Index('idx_lab_status', 'test_status'),
         db.Index('idx_lab_requested_by', 'requested_by'),
     )
-
-    def __repr__(self) -> str:
-        return f'<Laboratory {self.lab_id} status={self.test_status}>'

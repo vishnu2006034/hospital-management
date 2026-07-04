@@ -21,39 +21,39 @@ class Patient(db.Model):
 
     __tablename__: str = 'patients'
 
-    # ── Primary Key ──────────────────────────────────────────────
+    # Primary Key
     patient_id: int = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
 
-    # ── Identification ───────────────────────────────────────────
+    # Identification
     patient_number: str = db.Column(db.String(20), unique=True, nullable=False)
 
-    # ── Personal Information ─────────────────────────────────────
+    # Personal Information
     first_name: str = db.Column(db.String(50), nullable=False)
     last_name: Optional[str] = db.Column(db.String(50))
     gender: Optional[str] = db.Column(db.String(10))
     dob: Optional[date] = db.Column(db.Date)
     blood_group: Optional[str] = db.Column(db.String(5))
 
-    # ── Contact Information ──────────────────────────────────────
+    # Contact Information
     phone: Optional[str] = db.Column(db.String(15))
     email: Optional[str] = db.Column(db.String(100))
     address: Optional[str] = db.Column(db.Text)
 
-    # ── Emergency Contact ────────────────────────────────────────
+    # Emergency Contact
     emergency_contact_name: Optional[str] = db.Column(db.String(100))
     emergency_contact_phone: Optional[str] = db.Column(db.String(15))
 
-    # ── Medical Information ──────────────────────────────────────
+    # Medical Information
     allergies: Optional[str] = db.Column(db.Text)
     medical_history: Optional[str] = db.Column(db.Text)
 
-    # ── Timestamps ───────────────────────────────────────────────
+    # Timestamps
     created_at: datetime = db.Column(db.DateTime, server_default=db.func.now())
     updated_at: datetime = db.Column(
         db.DateTime, server_default=db.func.now(), onupdate=db.func.now()
     )
 
-    # ── Relationships ────────────────────────────────────────────
+    # Relationships
     visits: List['Visit'] = db.relationship(
         'Visit', back_populates='patient', lazy='dynamic', passive_deletes=True
     )
@@ -73,5 +73,3 @@ class Patient(db.Model):
         parts: List[Optional[str]] = [self.first_name, self.last_name]
         return ' '.join(p for p in parts if p)
 
-    def __repr__(self) -> str:
-        return f'<Patient {self.patient_number} – {self.full_name}>'

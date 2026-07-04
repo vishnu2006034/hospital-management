@@ -18,16 +18,7 @@ class ReportRepository(BaseRepository[DoctorReport]):
     def search(
         self, search: Optional[str], page: int = 1, per_page: int = 15
     ):
-        """Search doctor reports with pagination.
-
-        Args:
-            search: Search term for patient name, report number, or diagnosis.
-            page: Page number.
-            per_page: Items per page.
-
-        Returns:
-            Paginated report results.
-        """
+        """Search doctor reports with pagination."""
         query = DoctorReport.query.join(Patient)
         if search:
             query = query.filter(
@@ -42,11 +33,7 @@ class ReportRepository(BaseRepository[DoctorReport]):
         return query.paginate(page=page, per_page=per_page, error_out=False)
 
     def generate_report_number(self) -> str:
-        """Generate the next doctor report number.
-
-        Returns:
-            A new report number in format DR000001.
-        """
+        """Generate the next doctor report number."""
         last: Optional[DoctorReport] = DoctorReport.query.order_by(
             DoctorReport.doctor_report_id.desc()
         ).first()
@@ -54,22 +41,11 @@ class ReportRepository(BaseRepository[DoctorReport]):
         return f'DR{next_num}'
 
     def get_recent_visits(self, limit: int = 50) -> List[Visit]:
-        """Get recent visits.
-
-        Args:
-            limit: Maximum number of visits.
-
-        Returns:
-            List of recent visits.
-        """
+        """Get recent visits."""
         return Visit.query.order_by(Visit.visit_date.desc()).limit(limit).all()
 
     def get_all_patients(self) -> List[Patient]:
-        """Get all patients ordered by first name.
-
-        Returns:
-            List of all patients.
-        """
+        """Get all patients ordered by first name."""
         return Patient.query.order_by(Patient.first_name).all()
 
 

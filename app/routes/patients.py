@@ -23,7 +23,6 @@ def list_patients() -> str:
 @patients_bp.route('/add', methods=['GET', 'POST'])
 @login_required
 def add_patient() -> str | Response:
-    """Add a new patient."""
     if request.method == 'POST':
         data: Dict[str, str] = request.form.to_dict()
         patient = PatientService.create_patient(data)
@@ -45,7 +44,6 @@ def view_patient(patient_id: int) -> str:
 @patients_bp.route('/<int:patient_id>/edit', methods=['GET', 'POST'])
 @login_required
 def edit_patient(patient_id: int) -> str | Response:
-    """Edit an existing patient."""
     patient = PatientService.get_patient_by_id(patient_id)
     if request.method == 'POST':
         data: Dict[str, str] = request.form.to_dict()
@@ -59,7 +57,6 @@ def edit_patient(patient_id: int) -> str | Response:
 @patients_bp.route('/<int:patient_id>/delete', methods=['POST'])
 @login_required
 def delete_patient(patient_id: int) -> Response:
-    """Delete a patient."""
     patient = PatientService.get_patient_by_id(patient_id)
     name: str = patient.full_name
     PatientService.delete_patient(patient)

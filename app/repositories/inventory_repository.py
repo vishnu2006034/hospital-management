@@ -23,17 +23,7 @@ class InventoryRepository(BaseRepository[Inventory]):
         page: int = 1,
         per_page: int = 15,
     ):
-        """Search inventory with optional filters and pagination.
-
-        Args:
-            search: Search term for medicine name, batch, or supplier.
-            filter_type: Filter type ('low' for low stock, 'expired').
-            page: Page number.
-            per_page: Items per page.
-
-        Returns:
-            Paginated inventory results.
-        """
+        """Search inventory with optional filters and pagination."""
         query = Inventory.query.join(Medicine)
         if search:
             query = query.filter(
@@ -50,56 +40,14 @@ class InventoryRepository(BaseRepository[Inventory]):
         query = query.order_by(Medicine.medicine_name, Inventory.batch_number)
         return query.paginate(page=page, per_page=per_page, error_out=False)
 
-    def get_low_stock_items(self) -> List[Inventory]:
-        """Get all inventory items at or below minimum stock level.
-
-        Returns:
-            List of low-stock inventory items.
-        """
-        return Inventory.query.filter(
-            Inventory.quantity_in_stock <= Inventory.minimum_stock
-        ).all()
-
-    def get_expired_items(self) -> List[Inventory]:
-        """Get all expired inventory items.
-
-        Returns:
-            List of expired inventory items.
-        """
-        return Inventory.query.filter(
-            Inventory.expiry_date < date.today()
-        ).all()
-
-    def get_available_inventory(self) -> List[Inventory]:
-        """Get all inventory with stock greater than zero.
-
-        Returns:
-            List of available inventory items.
-        """
-        return Inventory.query.join(Medicine).filter(
-            Inventory.quantity_in_stock > 0
-        ).order_by(Medicine.medicine_name).all()
-
     def get_medicines(self) -> List[Medicine]:
-        """Get all medicines ordered by name.
-
-        Returns:
-            List of all medicines.
-        """
+        """Get all medicines ordered by name."""
         return Medicine.query.order_by(Medicine.medicine_name).all()
 
     def get_recent_transactions(
         self, inventory_id: int, limit: int = 20
     ) -> List[InventoryTransaction]:
-        """Get recent transactions for an inventory item.
-
-        Args:
-            inventory_id: The inventory item's ID.
-            limit: Maximum number of transactions.
-
-        Returns:
-            List of recent transactions ordered by date descending.
-        """
+        """Get recent transactions for an inventory item."""
         inv: Optional[Inventory] = self.get_by_id(inventory_id)
         if inv:
             return inv.transactions.order_by(
@@ -117,20 +65,7 @@ class InventoryRepository(BaseRepository[Inventory]):
         performed_by: Optional[int] = None,
         remarks: Optional[str] = None,
     ) -> InventoryTransaction:
-        """Create a new inventory transaction.
-
-        Args:
-            inventory_id: The inventory item's ID.
-            transaction_type: Type of transaction (IN/OUT/ADJUSTMENT).
-            quantity: Quantity for this transaction.
-            reference_type: Reference type (PRESCRIPTION/PURCHASE).
-            reference_id: Reference entity ID.
-            performed_by: User who performed the transaction.
-            remarks: Additional notes.
-
-        Returns:
-            The created transaction entity.
-        """
+        """Create a new inventory transaction."""
         txn: InventoryTransaction = InventoryTransaction(
             inventory_id=inventory_id,
             transaction_type=transaction_type,
@@ -146,16 +81,7 @@ class InventoryRepository(BaseRepository[Inventory]):
     def update_stock(
         self, inventory_id: int, transaction_type: str, quantity: int
     ) -> Optional[Inventory]:
-        """Update stock level for an inventory item.
-
-        Args:
-            inventory_id: The inventory item's ID.
-            transaction_type: Type of transaction (IN/OUT/ADJUSTMENT).
-            quantity: Quantity to adjust.
-
-        Returns:
-            The updated inventory item, or None if not found.
-        """
+        """Update stock level for an inventory item."""
         inv: Optional[Inventory] = self.get_by_id(inventory_id)
         if inv:
             if transaction_type == 'IN':

@@ -23,7 +23,6 @@ def list_prescriptions() -> str:
 @prescriptions_bp.route('/add', methods=['GET', 'POST'])
 @login_required
 def add_prescription() -> str | Response:
-    """Add a new prescription."""
     if request.method == 'POST':
         data: Dict[str, str] = request.form.to_dict()
         PrescriptionService.create_prescription(data, prescribed_by=current_user.user_id)
@@ -40,7 +39,6 @@ def add_prescription() -> str | Response:
 @prescriptions_bp.route('/<int:prescription_id>/delete', methods=['POST'])
 @login_required
 def delete_prescription(prescription_id: int) -> Response:
-    """Delete a prescription."""
     prescription = PrescriptionService.get_prescription_by_id(prescription_id)
     visit_id: int = prescription.visit_id
     PrescriptionService.delete_prescription(prescription)

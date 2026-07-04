@@ -16,49 +16,21 @@ class VisitService:
         status: Optional[str] = None,
         search: Optional[str] = None,
     ):
-        """Get paginated list of visits.
-
-        Args:
-            page: Page number.
-            per_page: Items per page.
-            status: Optional status filter.
-            search: Optional search term.
-
-        Returns:
-            Paginated visit results.
-        """
+        """Get paginated list of visits."""
         return visit_repository.search(
             search, status=status, page=page, per_page=per_page
         )
 
     @staticmethod
     def get_visit_by_id(visit_id: int) -> Visit:
-        """Get a visit by ID.
-
-        Args:
-            visit_id: The visit's ID.
-
-        Returns:
-            The visit entity.
-
-        Raises:
-            404: If visit not found.
-        """
+        """Get a visit by ID."""
         return visit_repository.get_by_id(visit_id)
 
     @staticmethod
     def create_visit(
         data: Dict[str, Any], admission_date: Optional[str] = None
     ) -> Visit:
-        """Create a new visit.
-
-        Args:
-            data: Visit data dictionary.
-            performed_by: Optional user ID for initial stock entry.
-
-        Returns:
-            The created visit entity.
-        """
+        """Create a new visit."""
         cleaned = {k: (None if (isinstance(v, str) and not v.strip()) else v) for k, v in data.items()}
         admission_date = admission_date if (admission_date and admission_date.strip()) else None
 
@@ -91,17 +63,7 @@ class VisitService:
         admission_date: Optional[str] = None,
         discharge_date: Optional[str] = None,
     ) -> Visit:
-        """Update an existing visit.
-
-        Args:
-            visit: The visit entity to update.
-            data: Updated visit data.
-            admission_date: Optional admission date.
-            discharge_date: Optional discharge date.
-
-        Returns:
-            The updated visit entity.
-        """
+        """Update an existing visit."""
         cleaned = {k: (None if (isinstance(v, str) and not v.strip()) else v) for k, v in data.items()}
         admission_date = admission_date if (admission_date and admission_date.strip()) else None
         discharge_date = discharge_date if (discharge_date and discharge_date.strip()) else None
@@ -128,40 +90,20 @@ class VisitService:
 
     @staticmethod
     def delete_visit(visit: Visit) -> None:
-        """Delete a visit.
-
-        Args:
-            visit: The visit entity to delete.
-        """
+        """Delete a visit."""
         visit_repository.delete(visit)
         visit_repository.commit()
 
     @staticmethod
     def get_all_patients() -> List:
-        """Get all patients.
-
-        Returns:
-            List of all patients.
-        """
         return visit_repository.get_all_patients()
 
     @staticmethod
     def get_all_doctors() -> List:
-        """Get all doctors.
-
-        Returns:
-            List of doctor users.
-        """
+        """Get all doctors."""
         return visit_repository.get_all_doctors()
 
     @staticmethod
     def get_visit_details(visit: Visit) -> Dict[str, List]:
-        """Get all related entities for a visit.
-
-        Args:
-            visit: The visit entity.
-
-        Returns:
-            Dictionary with prescriptions, lab_requests, and doctor_reports.
-        """
+        """Get all related entities for a visit."""
         return visit_repository.get_visit_details(visit)

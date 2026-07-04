@@ -13,44 +13,17 @@ class PrescriptionService:
     def get_all_prescriptions(
         page: int = 1, per_page: int = 15, search: Optional[str] = None
     ):
-        """Get paginated list of prescriptions.
-
-        Args:
-            page: Page number.
-            per_page: Items per page.
-            search: Optional search term.
-
-        Returns:
-            Paginated prescription results.
-        """
+        """Get paginated list of prescriptions."""
         return prescription_repository.search(search, page=page, per_page=per_page)
 
     @staticmethod
     def get_prescription_by_id(prescription_id: int) -> Prescription:
-        """Get a prescription by ID.
-
-        Args:
-            prescription_id: The prescription's ID.
-
-        Returns:
-            The prescription entity.
-
-        Raises:
-            404: If prescription not found.
-        """
+        """Get a prescription by ID."""
         return prescription_repository.get_by_id(prescription_id)
 
     @staticmethod
     def create_prescription(data: Dict[str, Any], prescribed_by: int) -> Prescription:
-        """Create a new prescription.
-
-        Args:
-            data: Prescription data dictionary.
-            prescribed_by: ID of the prescribing doctor.
-
-        Returns:
-            The created prescription entity.
-        """
+        """Create a new prescription."""
         cleaned = {k: (None if (isinstance(v, str) and not v.strip()) else v) for k, v in data.items()}
 
         qty_val = cleaned.get('quantity')
@@ -79,31 +52,16 @@ class PrescriptionService:
 
     @staticmethod
     def delete_prescription(prescription: Prescription) -> None:
-        """Delete a prescription.
-
-        Args:
-            prescription: The prescription entity to delete.
-        """
+        """Delete a prescription."""
         prescription_repository.delete(prescription)
         prescription_repository.commit()
 
     @staticmethod
     def get_available_inventory() -> List:
-        """Get all available inventory items.
-
-        Returns:
-            List of inventory items with stock > 0.
-        """
+        """Get all available inventory items."""
         return prescription_repository.get_available_inventory()
 
     @staticmethod
     def get_recent_visits(limit: int = 50) -> List:
-        """Get recent visits.
-
-        Args:
-            limit: Maximum number of visits.
-
-        Returns:
-            List of recent visits.
-        """
+        """Get recent visits."""
         return prescription_repository.get_recent_visits(limit)

@@ -17,16 +17,7 @@ class PatientRepository(BaseRepository[Patient]):
     def search(
         self, search: Optional[str], page: int = 1, per_page: int = 15
     ):
-        """Search patients with pagination.
-
-        Args:
-            search: Search term for name, number, or phone.
-            page: Page number.
-            per_page: Items per page.
-
-        Returns:
-            Paginated patient results.
-        """
+        """Search patients with pagination."""
         query = Patient.query
         if search:
             query = query.filter(
@@ -40,23 +31,8 @@ class PatientRepository(BaseRepository[Patient]):
         query = query.order_by(Patient.created_at.desc())
         return query.paginate(page=page, per_page=per_page, error_out=False)
 
-    def get_by_patient_number(self, patient_number: str) -> Optional[Patient]:
-        """Get a patient by their unique patient number.
-
-        Args:
-            patient_number: The patient number to search for.
-
-        Returns:
-            The patient if found, None otherwise.
-        """
-        return Patient.query.filter_by(patient_number=patient_number).first()
-
     def get_next_patient_number(self) -> str:
-        """Generate the next available patient number.
-
-        Returns:
-            A new patient number in format PAT000001.
-        """
+        """Generate the next available patient number."""
         last: Optional[Patient] = Patient.query.order_by(
             Patient.patient_id.desc()
         ).first()
@@ -64,15 +40,7 @@ class PatientRepository(BaseRepository[Patient]):
         return f'PAT{next_num}'
 
     def get_patient_visits(self, patient: Patient, limit: int = 20) -> List[Visit]:
-        """Get recent visits for a patient.
-
-        Args:
-            patient: The patient entity.
-            limit: Maximum number of visits to return.
-
-        Returns:
-            List of recent visits ordered by date descending.
-        """
+        """Get recent visits for a patient."""
         return patient.visits.order_by(Visit.visit_date.desc()).limit(limit).all()
 
 

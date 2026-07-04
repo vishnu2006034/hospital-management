@@ -22,14 +22,12 @@ main_bp: Blueprint = Blueprint('main', __name__)
 
 @main_bp.route('/')
 def index() -> str:
-    """Landing page."""
     return render_template('index.html')
 
 
 @main_bp.route('/dashboard')
 @login_required
 def dashboard() -> str:
-    """Main dashboard with key metrics."""
     total_patients: int = Patient.query.count()
 
     # Count active doctors

@@ -10,11 +10,7 @@ from app.extensions import db
 
 
 def register_error_handlers(app) -> None:
-    """Register error handlers with the Flask application.
-
-    Args:
-        app: The Flask application instance.
-    """
+    """Register error handlers with the Flask application."""
 
     @app.errorhandler(404)
     def not_found(error) -> ResponseReturnValue:

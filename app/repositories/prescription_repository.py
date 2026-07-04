@@ -19,16 +19,7 @@ class PrescriptionRepository(BaseRepository[Prescription]):
     def search(
         self, search: Optional[str], page: int = 1, per_page: int = 15
     ):
-        """Search prescriptions with pagination.
-
-        Args:
-            search: Search term for medicine name.
-            page: Page number.
-            per_page: Items per page.
-
-        Returns:
-            Paginated prescription results.
-        """
+        """Search prescriptions with pagination."""
         query = Prescription.query.join(Visit).join(
             Inventory, Prescription.inventory_id == Inventory.inventory_id
         ).join(Medicine, Inventory.medicine_id == Medicine.medicine_id)
@@ -43,33 +34,17 @@ class PrescriptionRepository(BaseRepository[Prescription]):
         return query.paginate(page=page, per_page=per_page, error_out=False)
 
     def get_available_inventory(self) -> List[Inventory]:
-        """Get all inventory items with stock greater than zero.
-
-        Returns:
-            List of available inventory items.
-        """
+        """Get all inventory items with stock greater than zero."""
         return Inventory.query.join(Medicine).filter(
             Inventory.quantity_in_stock > 0
         ).order_by(Medicine.medicine_name).all()
 
     def get_recent_visits(self, limit: int = 50) -> List[Visit]:
-        """Get recent visits.
-
-        Args:
-            limit: Maximum number of visits.
-
-        Returns:
-            List of recent visits ordered by date descending.
-        """
+        """Get recent visits."""
         return Visit.query.order_by(Visit.visit_date.desc()).limit(limit).all()
 
     def deduct_stock(self, inventory_id: int, quantity: int) -> None:
-        """Deduct stock from an inventory item.
-
-        Args:
-            inventory_id: The inventory item's ID.
-            quantity: Quantity to deduct.
-        """
+        """Deduct stock from an inventory item."""
         inv: Optional[Inventory] = Inventory.query.get(inventory_id)
         if inv:
             inv.quantity_in_stock = max(0, inv.quantity_in_stock - quantity)

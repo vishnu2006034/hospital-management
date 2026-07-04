@@ -13,52 +13,21 @@ class StaffService:
     def get_all_staff(
         page: int = 1, per_page: int = 15, search: Optional[str] = None
     ):
-        """Get paginated list of staff members.
-
-        Args:
-            page: Page number.
-            per_page: Items per page.
-            search: Optional search term.
-
-        Returns:
-            Paginated staff results.
-        """
+        """Get paginated list of staff members."""
         return user_repository.search(search, page=page, per_page=per_page)
 
     @staticmethod
     def get_user_by_id(user_id: int) -> User:
-        """Get a user by ID.
-
-        Args:
-            user_id: The user's ID.
-
-        Returns:
-            The user entity.
-
-        Raises:
-            404: If user not found.
-        """
+        """Get a user by ID."""
         return user_repository.get_by_id(user_id)
 
     @staticmethod
     def generate_employee_code() -> str:
-        """Generate a new employee code.
-
-        Returns:
-            A unique employee code.
-        """
         return user_repository.get_next_employee_code()
 
     @staticmethod
     def create_staff(data: Dict[str, Any]) -> User:
-        """Create a new staff member.
-
-        Args:
-            data: Staff data dictionary.
-
-        Returns:
-            The created user entity.
-        """
+        """Create a new staff member."""
         cleaned = {k: (None if (isinstance(v, str) and not v.strip()) else v) for k, v in data.items()}
 
         user: User = User(
@@ -75,7 +44,7 @@ class StaffService:
             joining_date=cleaned.get('joining_date'),
             status=cleaned.get('status') or 'ACTIVE',
         )
-        user.set_password(cleaned.get('password') or 'changeme123')
+        user.set_password(cleaned.get('password'))
         user_repository.add(user)
 
         role_id: Optional[int] = cleaned.get('role_id')
@@ -87,15 +56,7 @@ class StaffService:
 
     @staticmethod
     def update_staff(user: User, data: Dict[str, Any]) -> User:
-        """Update an existing staff member.
-
-        Args:
-            user: The user entity to update.
-            data: Updated staff data.
-
-        Returns:
-            The updated user entity.
-        """
+        """Update an existing staff member."""
         cleaned = {k: (None if (isinstance(v, str) and not v.strip()) else v) for k, v in data.items()}
 
         user.first_name = cleaned['first_name']
@@ -116,46 +77,20 @@ class StaffService:
 
     @staticmethod
     def get_user_roles(user_id: int) -> List:
-        """Get all role assignments for a user.
-
-        Args:
-            user_id: The user's ID.
-
-        Returns:
-            List of UserRole associations.
-        """
+        """Get all role assignments for a user."""
         return user_repository.get_user_roles(user_id)
 
     @staticmethod
     def toggle_role(user_id: int, role_id: int) -> str:
-        """Toggle a role's active status for a user.
-
-        Args:
-            user_id: The user's ID.
-            role_id: The role's ID.
-
-        Returns:
-            Action performed: 'activated', 'deactivated', or 'assigned'.
-        """
+        """Toggle a role's active status for a user."""
         return user_repository.toggle_role(user_id, role_id)
 
     @staticmethod
     def get_all_roles() -> List:
-        """Get all available roles.
-
-        Returns:
-            List of all roles.
-        """
+        """Get all available roles."""
         return user_repository.get_all_roles()
 
     @staticmethod
     def get_role_by_id(role_id: int):
-        """Get a role by ID.
-
-        Args:
-            role_id: The role's ID.
-
-        Returns:
-            The role entity, or None if not found.
-        """
+        """Get a role by ID."""
         return user_repository.get_role_by_id(role_id)

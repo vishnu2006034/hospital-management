@@ -22,10 +22,10 @@ class InventoryTransaction(db.Model):
 
     __tablename__: str = 'inventory_transactions'
 
-    # ── Primary Key ──────────────────────────────────────────────
+    # Primary Key
     transaction_id: int = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
 
-    # ── Foreign Keys ─────────────────────────────────────────────
+    # Foreign Keys
     inventory_id: int = db.Column(
         db.BigInteger,
         db.ForeignKey('inventory.inventory_id', ondelete='CASCADE'),
@@ -36,29 +36,24 @@ class InventoryTransaction(db.Model):
         db.ForeignKey('users.user_id'),
     )
 
-    # ── Transaction Information ──────────────────────────────────
+    # Transaction Information
     transaction_type: str = db.Column(db.String(20))  # IN / OUT / ADJUSTMENT
     quantity: int = db.Column(db.Integer, nullable=False)
     reference_type: str = db.Column(db.String(30))  # PRESCRIPTION / PURCHASE / etc.
     reference_id: Optional[int] = db.Column(db.BigInteger)
     remarks: str = db.Column(db.Text)
 
-    # ── Timestamps ───────────────────────────────────────────────
+    # Timestamps
     transaction_date: datetime = db.Column(db.DateTime, server_default=db.func.now())
 
-    # ── Relationships ────────────────────────────────────────────
+    # Relationships
     inventory_batch: 'Inventory' = db.relationship(
         'Inventory', back_populates='transactions'
     )
     performer: Optional['User'] = db.relationship('User')
 
-    # ── Indexes ──────────────────────────────────────────────────
+    # Indexes
     __table_args__ = (
         db.Index('idx_inventory_txn', 'inventory_id'),
     )
 
-    def __repr__(self) -> str:
-        return (
-            f'<InventoryTransaction {self.transaction_id} '
-            f'type={self.transaction_type} qty={self.quantity}>'
-        )

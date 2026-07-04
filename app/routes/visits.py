@@ -24,7 +24,6 @@ def list_visits() -> str:
 @visits_bp.route('/add', methods=['GET', 'POST'])
 @login_required
 def add_visit() -> str | Response:
-    """Add a new visit."""
     if request.method == 'POST':
         data: Dict[str, str] = request.form.to_dict()
         admission_date = request.form.get('admission_date')
@@ -54,7 +53,6 @@ def view_visit(visit_id: int) -> str:
 @visits_bp.route('/<int:visit_id>/edit', methods=['GET', 'POST'])
 @login_required
 def edit_visit(visit_id: int) -> str | Response:
-    """Edit an existing visit."""
     visit = VisitService.get_visit_by_id(visit_id)
     if request.method == 'POST':
         data: Dict[str, str] = request.form.to_dict()
@@ -74,7 +72,6 @@ def edit_visit(visit_id: int) -> str | Response:
 @visits_bp.route('/<int:visit_id>/delete', methods=['POST'])
 @login_required
 def delete_visit(visit_id: int) -> Response:
-    """Delete a visit."""
     visit = VisitService.get_visit_by_id(visit_id)
     VisitService.delete_visit(visit)
     flash('Visit deleted.', 'success')

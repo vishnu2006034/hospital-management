@@ -24,17 +24,7 @@ class VisitRepository(BaseRepository[Visit]):
         page: int = 1,
         per_page: int = 15,
     ):
-        """Search visits with optional status filter and pagination.
-
-        Args:
-            search: Search term for patient name or number.
-            status: Filter by visit status.
-            page: Page number.
-            per_page: Items per page.
-
-        Returns:
-            Paginated visit results.
-        """
+        """Search visits with optional status filter and pagination."""
         query = Visit.query.join(Patient).join(User, Visit.doctor_id == User.user_id)
         if status:
             query = query.filter(Visit.visit_status == status)
@@ -50,14 +40,7 @@ class VisitRepository(BaseRepository[Visit]):
         return query.paginate(page=page, per_page=per_page, error_out=False)
 
     def get_visit_details(self, visit: Visit) -> dict:
-        """Get all related entities for a visit.
-
-        Args:
-            visit: The visit entity.
-
-        Returns:
-            Dictionary with prescriptions, lab_requests, and doctor_reports.
-        """
+        """Get all related entities for a visit."""
         return {
             'prescriptions': visit.prescriptions.all(),
             'lab_requests': visit.lab_requests.all(),
@@ -65,20 +48,11 @@ class VisitRepository(BaseRepository[Visit]):
         }
 
     def get_all_patients(self) -> List[Patient]:
-        """Get all patients ordered by first name.
-
-        Returns:
-            List of all patients.
-        """
+        """Get all patients ordered by first name."""
         return Patient.query.order_by(Patient.first_name).all()
 
     def get_all_doctors(self) -> List[User]:
-        """Get all active doctors.
-
-        Returns:
-            List of doctor users. Falls back to all active users if
-            no doctors have the role assigned.
-        """
+        """Get all active doctors."""
         doctors: List[User] = User.query.join(
             UserRole, User.user_id == UserRole.user_id
         ).join(
