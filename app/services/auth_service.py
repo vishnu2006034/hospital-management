@@ -17,10 +17,11 @@ class AuthService:
         user: Optional[User] = user_repository.get_by_email(email)
         if user is None or not user.check_password(password):
             return None
-        if user.status != 'ACTIVE':
-            return None
+        
+        def can_login(self) -> bool:
+            return self.status == "ACTIVE"
         return user
-
+    
     @staticmethod
     def login(user: User, remember: bool = False) -> None:
         login_user(user, remember=remember)
@@ -61,7 +62,7 @@ class AuthService:
             email=data['email'],
             status='ACTIVE',
         )
-        user.set_password(data['password'])
+        user.password(data['password'])
         user_repository.add(user)
 
         role_name: Optional[str] = data.get('role')

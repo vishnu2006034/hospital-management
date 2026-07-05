@@ -35,3 +35,8 @@ class BaseRepository(Generic[T]):
     def exists(self, **kwargs: Any) -> bool:
         return self.model.query.filter_by(**kwargs).first() is not None
 
+    def rollback(self) -> None:
+        self.session.rollback()
+
+    def refresh(self, entity: T) -> None:
+        self.session.refresh(entity)

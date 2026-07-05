@@ -19,22 +19,54 @@ class UserRepository(BaseRepository[User]):
         super().__init__(User)
 
     def search(
-        self, search: Optional[str], page: int = 1, per_page: int = 15
+        self,
+        search: Optional[str],
+        page: int = 1,
+        per_page: int = 15,
+        sort_by: str = "created_at",
+        descending: bool = True,
     ) -> "Pagination[User]":
         """Search users with pagination."""
+
         query = User.query
+
         if search:
             query = query.filter(
                 db.or_(
-                    User.first_name.ilike(f'%{search}%'),
-                    User.last_name.ilike(f'%{search}%'),
-                    User.employee_code.ilike(f'%{search}%'),
-                    User.email.ilike(f'%{search}%'),
-                    User.department.ilike(f'%{search}%'),
+                    User.first_name.ilike(f"%{search}%"),
+                    User.last_name.ilike(f"%{search}%"),
+                    User.employee_code.ilike(f"%{search}%"),
+                    User.email.ilike(f"%{search}%"),
+                    User.department.ilike(f"%{search}%"),
                 )
             )
-        query = query.order_by(User.created_at.desc())
-        return query.paginate(page=page, per_page=per_page, error_out=False)
+
+        # Whitelist sortable fields
+        allowed_sort_fields = (
+            "created_at",
+            "first_name",
+            "last_name",
+            "employee_code",
+            "email",
+            "department",
+            "joining_date",
+            "status",
+        )
+
+        if sort_by not in allowed_sort_fields:
+            sort_by = "created_at"
+
+        column = getattr(User, sort_by)
+
+        query = query.order_by(
+            column.desc() if descending else column.asc()
+        )
+
+        return query.paginate(
+            page=page,
+            per_page=per_page,
+            error_out=False,
+        )
 
     def get_by_email(self, email: str) -> Optional[User]:
         """Get a user by their email address."""

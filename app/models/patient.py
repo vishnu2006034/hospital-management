@@ -67,6 +67,12 @@ class Patient(db.Model):
         'DoctorReport', back_populates='patient', lazy='dynamic', passive_deletes=True
     )
 
+    def update_name(self, first_name: str, last_name: Optional[str] = None) -> None:
+        self.first_name = first_name.strip()
+        self.last_name = last_name.strip() if last_name else None
+
+    
+    
     @property
     def full_name(self) -> str:
         """Return concatenated first and last name."""

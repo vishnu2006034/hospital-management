@@ -36,21 +36,23 @@ class PatientService:
 
         patient: Patient = Patient(
             patient_number=patient_repository.get_next_patient_number(),
-            first_name=cleaned['first_name'],
-            last_name=cleaned.get('last_name'),
-            gender=cleaned.get('gender'),
-            dob=cleaned.get('dob'),
-            blood_group=cleaned.get('blood_group'),
-            phone=cleaned.get('phone'),
-            email=cleaned.get('email'),
-            address=cleaned.get('address'),
-            emergency_contact_name=cleaned.get('emergency_contact_name'),
-            emergency_contact_phone=cleaned.get('emergency_contact_phone'),
-            allergies=cleaned.get('allergies'),
-            medical_history=cleaned.get('medical_history'),
+            first_name=cleaned["first_name"],
+            last_name=cleaned.get("last_name"),
+            gender=cleaned.get("gender"),
+            dob=cleaned.get("dob"),
+            blood_group=cleaned.get("blood_group"),
+            phone=cleaned.get("phone"),
+            email=cleaned.get("email"),
+            address=cleaned.get("address"),
+            emergency_contact_name=cleaned.get("emergency_contact_name"),
+            emergency_contact_phone=cleaned.get("emergency_contact_phone"),
+            allergies=cleaned.get("allergies"),
+            medical_history=cleaned.get("medical_history"),
         )
+
         patient_repository.add(patient)
         patient_repository.commit()
+
         return patient
 
     @staticmethod
@@ -58,19 +60,27 @@ class PatientService:
         """Update an existing patient."""
         cleaned = clean_input_data(data)
 
-        patient.first_name = cleaned['first_name']
-        patient.last_name = cleaned.get('last_name')
-        patient.gender = cleaned.get('gender')
-        patient.dob = cleaned.get('dob')
-        patient.blood_group = cleaned.get('blood_group')
-        patient.phone = cleaned.get('phone')
-        patient.email = cleaned.get('email')
-        patient.address = cleaned.get('address')
-        patient.emergency_contact_name = cleaned.get('emergency_contact_name')
-        patient.emergency_contact_phone = cleaned.get('emergency_contact_phone')
-        patient.allergies = cleaned.get('allergies')
-        patient.medical_history = cleaned.get('medical_history')
+        editable_fields = (
+            "first_name",
+            "last_name",
+            "gender",
+            "dob",
+            "blood_group",
+            "phone",
+            "email",
+            "address",
+            "emergency_contact_name",
+            "emergency_contact_phone",
+            "allergies",
+            "medical_history",
+        )
+
+        for field in editable_fields:
+            if field in cleaned:
+                setattr(patient, field, cleaned[field])
+
         patient_repository.commit()
+
         return patient
 
     @staticmethod

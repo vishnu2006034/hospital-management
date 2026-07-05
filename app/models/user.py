@@ -82,10 +82,6 @@ class User(UserMixin, db.Model):
         'DoctorReport', back_populates='doctor', lazy='dynamic'
     )
 
-    def __init__(self, **kwargs) -> None:
-        for key, value in kwargs.items():
-            setattr(self, key, value)
-
     # Flask-Login Integration
     def get_id(self) -> str:
         """Return the user_id as a string for Flask-Login."""
@@ -99,6 +95,14 @@ class User(UserMixin, db.Model):
     def check_password(self, password: str) -> bool:
         """Verify a password against the stored hash."""
         return check_password_hash(self.password_hash, password)
+
+
+    def update_email(self, email: str) -> None:
+        self.email = email.strip().lower()
+    
+    def update_name(self, first_name: str, last_name: Optional[str] = None) -> None:
+        self.first_name = first_name.strip()
+        self.last_name = last_name.strip() if last_name else None
 
     # Convenience Properties
     @property
@@ -119,4 +123,12 @@ class User(UserMixin, db.Model):
     def has_role(self, role_name: str) -> bool:
         """Check if user has a specific role."""
         return role_name in self.role_names
+    
+    @property
+    def password(self):
+        raise AttributeError("Password is write-only.")
+
+    @password.setter
+    def password(self, password: str):
+        self.set_password(password)
 

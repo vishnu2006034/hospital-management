@@ -64,19 +64,36 @@ class StaffService:
         """Update an existing staff member."""
         cleaned = clean_input_data(data)
 
-        user.first_name = cleaned['first_name']
-        user.last_name = cleaned.get('last_name')
-        user.gender = cleaned.get('gender')
-        user.dob = cleaned.get('dob')
-        user.phone = cleaned.get('phone')
-        user.email = cleaned.get('email')
-        user.department = cleaned.get('department')
-        user.specialization = cleaned.get('specialization')
-        user.license_number = cleaned.get('license_number')
-        user.joining_date = cleaned.get('joining_date')
-        user.status = cleaned.get('status') or 'ACTIVE'
-        if cleaned.get('password'):
-            user.set_password(cleaned['password'])
+        editable_fields = (
+            "first_name",
+            "last_name",
+            "gender",
+            "dob",
+            "phone",
+            "email",
+            "department",
+            "specialization",
+            "license_number",
+            "joining_date",
+        )
+
+        for field in editable_fields:
+            if field in cleaned:
+                setattr(user, field, cleaned[field])
+
+        # Update status using encapsulated methods
+        status = cleaned.get("status")
+        if status == "ACTIVE":
+            user.activate()
+        elif status == "INACTIVE":
+            user.deactivate()
+        elif status == "SUSPENDED":
+            user.suspend()
+
+        # Update password using the write-only property
+        if cleaned.get("password"):
+            user.password = cleaned["password"]
+
         user_repository.commit()
         return user
 
