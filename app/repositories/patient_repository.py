@@ -2,10 +2,13 @@
 
 from typing import List, Optional
 
+from flask_sqlalchemy.pagination import Pagination
+
 from app import db
 from app.models.patient import Patient
 from app.models.visit import Visit
 from app.repositories.base_repository import BaseRepository
+from app.utils import generate_sequential_code
 
 
 class PatientRepository(BaseRepository[Patient]):
@@ -16,7 +19,7 @@ class PatientRepository(BaseRepository[Patient]):
 
     def search(
         self, search: Optional[str], page: int = 1, per_page: int = 15
-    ):
+    ) -> "Pagination[Patient]":
         """Search patients with pagination."""
         query = Patient.query
         if search:
@@ -33,15 +36,15 @@ class PatientRepository(BaseRepository[Patient]):
 
     def get_next_patient_number(self) -> str:
         """Generate the next available patient number."""
-        last: Optional[Patient] = Patient.query.order_by(
-            Patient.patient_id.desc()
-        ).first()
-        next_num: int = (last.patient_id + 1) if last else 1
-        return f'PAT{next_num}'
+        return generate_sequential_code(Patient, 'patient_id', 'PAT')
 
     def get_patient_visits(self, patient: Patient, limit: int = 20) -> List[Visit]:
         """Get recent visits for a patient."""
         return patient.visits.order_by(Visit.visit_date.desc()).limit(limit).all()
+
+    def get_all_patients(self) -> List[Patient]:
+        """Get all patients ordered by first name."""
+        return Patient.query.order_by(Patient.first_name).all()
 
 
 patient_repository: PatientRepository = PatientRepository()

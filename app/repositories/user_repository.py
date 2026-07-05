@@ -2,11 +2,14 @@
 
 from typing import List, Optional
 
+from flask_sqlalchemy.pagination import Pagination
+
 from app import db
 from app.models.user import User
 from app.models.role import Role
 from app.models.user_role import UserRole
 from app.repositories.base_repository import BaseRepository
+from app.utils import generate_sequential_code
 
 
 class UserRepository(BaseRepository[User]):
@@ -17,7 +20,7 @@ class UserRepository(BaseRepository[User]):
 
     def search(
         self, search: Optional[str], page: int = 1, per_page: int = 15
-    ):
+    ) -> "Pagination[User]":
         """Search users with pagination."""
         query = User.query
         if search:
@@ -39,9 +42,7 @@ class UserRepository(BaseRepository[User]):
 
     def get_next_employee_code(self) -> str:
         """Generate the next available employee code."""
-        last: Optional[User] = User.query.order_by(User.user_id.desc()).first()
-        next_num: int = (last.user_id + 1) if last else 1
-        return f'EMP{next_num}'
+        return generate_sequential_code(User, 'user_id', 'EMP')
 
     def get_user_roles(self, user_id: int) -> List[UserRole]:
         """Get all role assignments for a user."""
@@ -76,6 +77,26 @@ class UserRepository(BaseRepository[User]):
     def get_all_roles(self) -> List[Role]:
         """Get all available roles."""
         return Role.query.order_by(Role.role_name).all()
+
+    def get_all_doctors(self) -> List[User]:
+        """Get all active doctors."""
+        doctors: List[User] = User.query.join(
+            UserRole, User.user_id == UserRole.user_id
+        ).join(
+            Role, UserRole.role_id == Role.role_id
+        ).filter(
+            Role.role_name == 'Doctor',
+            User.status == 'ACTIVE'
+        ).all()
+        if not doctors:
+            doctors = User.query.filter_by(status='ACTIVE').order_by(
+                User.first_name
+            ).all()
+        return doctors
+
+    def get_all_technicians(self) -> List[User]:
+        """Get all active lab technicians."""
+        return User.query.filter_by(status='ACTIVE').order_by(User.first_name).all()
 
 
 user_repository: UserRepository = UserRepository()

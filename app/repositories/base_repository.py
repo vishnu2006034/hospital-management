@@ -1,6 +1,6 @@
 """Base repository with generic CRUD operations."""
 
-from typing import TypeVar, Generic, Type, Optional
+from typing import TypeVar, Generic, Type, Optional, Any
 
 from app import db
 
@@ -32,6 +32,6 @@ class BaseRepository(Generic[T]):
     def commit(self) -> None:
         db.session.commit()
 
-    def exists(self, **kwargs) -> bool:
+    def exists(self, **kwargs: Any) -> bool:
         return self.model.query.filter_by(**kwargs).first() is not None
 

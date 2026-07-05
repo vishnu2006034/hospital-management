@@ -3,13 +3,13 @@
 Registers custom error pages for common HTTP status codes.
 """
 
-from flask import jsonify
+from flask import jsonify, Flask
 from flask.typing import ResponseReturnValue
 
 from app.extensions import db
 
 
-def register_error_handlers(app) -> None:
+def register_error_handlers(app: Flask) -> None:
     """Register error handlers with the Flask application."""
 
     @app.errorhandler(404)

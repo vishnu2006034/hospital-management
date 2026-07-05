@@ -2,9 +2,13 @@
 
 from typing import Dict, List, Optional, Any
 
+from flask_sqlalchemy.pagination import Pagination
+
 from app.models.inventory import Inventory
 from app.models.inventory_transaction import InventoryTransaction
+from app.models.medicine import Medicine
 from app.repositories.inventory_repository import inventory_repository
+from app.utils import clean_input_data
 
 
 class InventoryService:
@@ -16,7 +20,7 @@ class InventoryService:
         per_page: int = 15,
         search: Optional[str] = None,
         filter_type: Optional[str] = None,
-    ):
+    ) -> "Pagination[Inventory]":
         """Get paginated list of inventory items."""
         return inventory_repository.search(
             search, filter_type=filter_type, page=page, per_page=per_page
@@ -32,7 +36,7 @@ class InventoryService:
         data: Dict[str, Any], performed_by: Optional[int] = None
     ) -> Inventory:
         """Create a new inventory item."""
-        cleaned = {k: (None if (isinstance(v, str) and not v.strip()) else v) for k, v in data.items()}
+        cleaned = clean_input_data(data)
 
         qty_stock = cleaned.get('quantity_in_stock')
         min_stock = cleaned.get('minimum_stock')
@@ -65,7 +69,7 @@ class InventoryService:
     @staticmethod
     def update_inventory(inv: Inventory, data: Dict[str, Any]) -> Inventory:
         """Update an existing inventory item."""
-        cleaned = {k: (None if (isinstance(v, str) and not v.strip()) else v) for k, v in data.items()}
+        cleaned = clean_input_data(data)
 
         min_stock = cleaned.get('minimum_stock')
 
@@ -83,7 +87,7 @@ class InventoryService:
         inv: Inventory, data: Dict[str, Any], performed_by: int
     ) -> None:
         """Add a stock transaction."""
-        cleaned = {k: (None if (isinstance(v, str) and not v.strip()) else v) for k, v in data.items()}
+        cleaned = clean_input_data(data)
 
         txn_type: str = cleaned['transaction_type']
         qty: int = int(cleaned['quantity'])
@@ -107,5 +111,5 @@ class InventoryService:
         return inventory_repository.get_recent_transactions(inv.inventory_id, limit)
 
     @staticmethod
-    def get_all_medicines() -> List:
+    def get_all_medicines() -> List[Medicine]:
         return inventory_repository.get_medicines()

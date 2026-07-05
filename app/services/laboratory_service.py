@@ -2,14 +2,23 @@
 
 from typing import Dict, List, Optional, Any
 
+from flask_sqlalchemy.pagination import Pagination
+
 from app.models.laboratory import Laboratory
 from app.models.lab_report import LabReport
 from app.models.lab_test_catalog import LabTestCatalog
+from app.models.visit import Visit
+from app.models.patient import Patient
+from app.models.user import User
+from app.utils import clean_input_data
 from app.repositories.laboratory_repository import (
     laboratory_repository,
     lab_report_repository,
     lab_test_catalog_repository,
 )
+from app.repositories.visit_repository import visit_repository
+from app.repositories.patient_repository import patient_repository
+from app.repositories.user_repository import user_repository
 
 
 class LaboratoryService:
@@ -21,7 +30,7 @@ class LaboratoryService:
         per_page: int = 15,
         status: Optional[str] = None,
         search: Optional[str] = None,
-    ):
+    ) -> "Pagination[Laboratory]":
         """Get paginated list of lab requests."""
         return laboratory_repository.search(
             search, status=status, page=page, per_page=per_page
@@ -35,7 +44,7 @@ class LaboratoryService:
     @staticmethod
     def create_lab_request(data: Dict[str, Any], requested_by: int) -> Laboratory:
         """Create a new lab request."""
-        cleaned = {k: (None if (isinstance(v, str) and not v.strip()) else v) for k, v in data.items()}
+        cleaned = clean_input_data(data)
 
         lab: Laboratory = Laboratory(
             visit_id=cleaned['visit_id'],
@@ -53,7 +62,7 @@ class LaboratoryService:
     @staticmethod
     def update_lab_request(lab: Laboratory, data: Dict[str, Any]) -> Laboratory:
         """Update an existing lab request."""
-        cleaned = {k: (None if (isinstance(v, str) and not v.strip()) else v) for k, v in data.items()}
+        cleaned = clean_input_data(data)
 
         lab.test_status = cleaned.get('test_status') or lab.test_status
         lab.priority = cleaned.get('priority') or lab.priority
@@ -74,7 +83,7 @@ class LaboratoryService:
     @staticmethod
     def add_report(lab: Laboratory, data: Dict[str, Any]) -> LabReport:
         """Add a report to a lab request."""
-        cleaned = {k: (None if (isinstance(v, str) and not v.strip()) else v) for k, v in data.items()}
+        cleaned = clean_input_data(data)
 
         report_number: str = laboratory_repository.generate_report_number()
         report: LabReport = LabReport(
@@ -101,7 +110,7 @@ class LaboratoryService:
     @staticmethod
     def get_all_catalog_tests(
         page: int = 1, per_page: int = 15, search: Optional[str] = None
-    ):
+    ) -> "Pagination[LabTestCatalog]":
         """Get paginated list of catalog tests."""
         return lab_test_catalog_repository.search(
             search, page=page, per_page=per_page
@@ -115,7 +124,7 @@ class LaboratoryService:
     @staticmethod
     def create_catalog_test(data: Dict[str, Any]) -> LabTestCatalog:
         """Create a new catalog test."""
-        cleaned = {k: (None if (isinstance(v, str) and not v.strip()) else v) for k, v in data.items()}
+        cleaned = clean_input_data(data)
 
         test: LabTestCatalog = LabTestCatalog(
             test_code=cleaned['test_code'],
@@ -138,7 +147,7 @@ class LaboratoryService:
         test: LabTestCatalog, data: Dict[str, Any]
     ) -> LabTestCatalog:
         """Update an existing catalog test."""
-        cleaned = {k: (None if (isinstance(v, str) and not v.strip()) else v) for k, v in data.items()}
+        cleaned = clean_input_data(data)
 
         test.test_code = cleaned['test_code']
         test.test_name = cleaned['test_name']
@@ -155,15 +164,15 @@ class LaboratoryService:
         return test
 
     @staticmethod
-    def get_recent_visits(limit: int = 50) -> List:
+    def get_recent_visits(limit: int = 50) -> List[Visit]:
         """Get recent visits."""
-        return laboratory_repository.get_recent_visits(limit)
+        return visit_repository.get_recent_visits(limit)
 
     @staticmethod
-    def get_all_patients() -> List:
-        return laboratory_repository.get_all_patients()
+    def get_all_patients() -> List[Patient]:
+        return patient_repository.get_all_patients()
 
     @staticmethod
-    def get_all_technicians() -> List:
+    def get_all_technicians() -> List[User]:
         """Get all active technicians."""
-        return laboratory_repository.get_all_technicians()
+        return user_repository.get_all_technicians()

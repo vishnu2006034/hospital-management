@@ -3,6 +3,8 @@
 from datetime import date
 from typing import List, Optional
 
+from flask_sqlalchemy.pagination import Pagination
+
 from app import db
 from app.models.inventory import Inventory
 from app.models.inventory_transaction import InventoryTransaction
@@ -22,7 +24,7 @@ class InventoryRepository(BaseRepository[Inventory]):
         filter_type: Optional[str] = None,
         page: int = 1,
         per_page: int = 15,
-    ):
+    ) -> "Pagination[Inventory]":
         """Search inventory with optional filters and pagination."""
         query = Inventory.query.join(Medicine)
         if search:

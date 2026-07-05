@@ -2,8 +2,15 @@
 
 from typing import Dict, List, Optional, Any
 
+from flask_sqlalchemy.pagination import Pagination
+
 from app.models.visit import Visit
+from app.models.patient import Patient
+from app.models.user import User
 from app.repositories.visit_repository import visit_repository
+from app.repositories.patient_repository import patient_repository
+from app.repositories.user_repository import user_repository
+from app.utils import clean_input_data
 
 
 class VisitService:
@@ -15,7 +22,7 @@ class VisitService:
         per_page: int = 15,
         status: Optional[str] = None,
         search: Optional[str] = None,
-    ):
+    ) -> "Pagination[Visit]":
         """Get paginated list of visits."""
         return visit_repository.search(
             search, status=status, page=page, per_page=per_page
@@ -31,7 +38,7 @@ class VisitService:
         data: Dict[str, Any], admission_date: Optional[str] = None
     ) -> Visit:
         """Create a new visit."""
-        cleaned = {k: (None if (isinstance(v, str) and not v.strip()) else v) for k, v in data.items()}
+        cleaned = clean_input_data(data)
         admission_date = admission_date if (admission_date and admission_date.strip()) else None
 
         visit: Visit = Visit(
@@ -64,7 +71,7 @@ class VisitService:
         discharge_date: Optional[str] = None,
     ) -> Visit:
         """Update an existing visit."""
-        cleaned = {k: (None if (isinstance(v, str) and not v.strip()) else v) for k, v in data.items()}
+        cleaned = clean_input_data(data)
         admission_date = admission_date if (admission_date and admission_date.strip()) else None
         discharge_date = discharge_date if (discharge_date and discharge_date.strip()) else None
 
@@ -95,13 +102,13 @@ class VisitService:
         visit_repository.commit()
 
     @staticmethod
-    def get_all_patients() -> List:
-        return visit_repository.get_all_patients()
+    def get_all_patients() -> List[Patient]:
+        return patient_repository.get_all_patients()
 
     @staticmethod
-    def get_all_doctors() -> List:
+    def get_all_doctors() -> List[User]:
         """Get all doctors."""
-        return visit_repository.get_all_doctors()
+        return user_repository.get_all_doctors()
 
     @staticmethod
     def get_visit_details(visit: Visit) -> Dict[str, List]:

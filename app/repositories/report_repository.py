@@ -2,11 +2,14 @@
 
 from typing import List, Optional
 
+from flask_sqlalchemy.pagination import Pagination
+
 from app import db
 from app.models.doctor_report import DoctorReport
 from app.models.visit import Visit
 from app.models.patient import Patient
 from app.repositories.base_repository import BaseRepository
+from app.utils import generate_sequential_code
 
 
 class ReportRepository(BaseRepository[DoctorReport]):
@@ -17,7 +20,7 @@ class ReportRepository(BaseRepository[DoctorReport]):
 
     def search(
         self, search: Optional[str], page: int = 1, per_page: int = 15
-    ):
+    ) -> "Pagination[DoctorReport]":
         """Search doctor reports with pagination."""
         query = DoctorReport.query.join(Patient)
         if search:
@@ -34,19 +37,9 @@ class ReportRepository(BaseRepository[DoctorReport]):
 
     def generate_report_number(self) -> str:
         """Generate the next doctor report number."""
-        last: Optional[DoctorReport] = DoctorReport.query.order_by(
-            DoctorReport.doctor_report_id.desc()
-        ).first()
-        next_num: int = (last.doctor_report_id + 1) if last else 1
-        return f'DR{next_num}'
+        return generate_sequential_code(DoctorReport, 'doctor_report_id', 'DR')
 
-    def get_recent_visits(self, limit: int = 50) -> List[Visit]:
-        """Get recent visits."""
-        return Visit.query.order_by(Visit.visit_date.desc()).limit(limit).all()
 
-    def get_all_patients(self) -> List[Patient]:
-        """Get all patients ordered by first name."""
-        return Patient.query.order_by(Patient.first_name).all()
 
 
 report_repository: ReportRepository = ReportRepository()

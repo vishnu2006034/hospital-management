@@ -2,8 +2,15 @@
 
 from typing import Dict, List, Optional, Any
 
+from flask_sqlalchemy.pagination import Pagination
+
 from app.models.doctor_report import DoctorReport
+from app.models.visit import Visit
+from app.models.patient import Patient
 from app.repositories.report_repository import report_repository
+from app.repositories.visit_repository import visit_repository
+from app.repositories.patient_repository import patient_repository
+from app.utils import clean_input_data
 
 
 class ReportService:
@@ -12,7 +19,7 @@ class ReportService:
     @staticmethod
     def get_all_reports(
         page: int = 1, per_page: int = 15, search: Optional[str] = None
-    ):
+    ) -> "Pagination[DoctorReport]":
         """Get paginated list of doctor reports."""
         return report_repository.search(search, page=page, per_page=per_page)
 
@@ -29,7 +36,7 @@ class ReportService:
     @staticmethod
     def create_report(data: Dict[str, Any], doctor_id: int) -> DoctorReport:
         """Create a new doctor report."""
-        cleaned = {k: (None if (isinstance(v, str) and not v.strip()) else v) for k, v in data.items()}
+        cleaned = clean_input_data(data)
 
         report_number: str = report_repository.generate_report_number()
         report: DoctorReport = DoctorReport(
@@ -56,7 +63,7 @@ class ReportService:
         report: DoctorReport, data: Dict[str, Any]
     ) -> DoctorReport:
         """Update an existing doctor report."""
-        cleaned = {k: (None if (isinstance(v, str) and not v.strip()) else v) for k, v in data.items()}
+        cleaned = clean_input_data(data)
 
         report.chief_complaint = cleaned.get('chief_complaint')
         report.clinical_findings = cleaned.get('clinical_findings')
@@ -71,10 +78,10 @@ class ReportService:
         return report
 
     @staticmethod
-    def get_recent_visits(limit: int = 50) -> List:
+    def get_recent_visits(limit: int = 50) -> List[Visit]:
         """Get recent visits."""
-        return report_repository.get_recent_visits(limit)
+        return visit_repository.get_recent_visits(limit)
 
     @staticmethod
-    def get_all_patients() -> List:
-        return report_repository.get_all_patients()
+    def get_all_patients() -> List[Patient]:
+        return patient_repository.get_all_patients()

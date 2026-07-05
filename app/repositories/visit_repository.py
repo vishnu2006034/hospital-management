@@ -2,6 +2,8 @@
 
 from typing import List, Optional
 
+from flask_sqlalchemy.pagination import Pagination
+
 from app import db
 from app.models.visit import Visit
 from app.models.patient import Patient
@@ -23,7 +25,7 @@ class VisitRepository(BaseRepository[Visit]):
         status: Optional[str] = None,
         page: int = 1,
         per_page: int = 15,
-    ):
+    ) -> "Pagination[Visit]":
         """Search visits with optional status filter and pagination."""
         query = Visit.query.join(Patient).join(User, Visit.doctor_id == User.user_id)
         if status:
@@ -47,25 +49,9 @@ class VisitRepository(BaseRepository[Visit]):
             'doctor_reports': visit.doctor_reports.all(),
         }
 
-    def get_all_patients(self) -> List[Patient]:
-        """Get all patients ordered by first name."""
-        return Patient.query.order_by(Patient.first_name).all()
-
-    def get_all_doctors(self) -> List[User]:
-        """Get all active doctors."""
-        doctors: List[User] = User.query.join(
-            UserRole, User.user_id == UserRole.user_id
-        ).join(
-            Role, UserRole.role_id == Role.role_id
-        ).filter(
-            Role.role_name == 'Doctor',
-            User.status == 'ACTIVE'
-        ).all()
-        if not doctors:
-            doctors = User.query.filter_by(status='ACTIVE').order_by(
-                User.first_name
-            ).all()
-        return doctors
+    def get_recent_visits(self, limit: int = 50) -> List[Visit]:
+        """Get recent visits."""
+        return Visit.query.order_by(Visit.visit_date.desc()).limit(limit).all()
 
 
 visit_repository: VisitRepository = VisitRepository()

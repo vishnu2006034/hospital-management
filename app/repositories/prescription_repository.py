@@ -2,6 +2,8 @@
 
 from typing import List, Optional
 
+from flask_sqlalchemy.pagination import Pagination
+
 from app import db
 from app.models.prescription import Prescription
 from app.models.visit import Visit
@@ -18,7 +20,7 @@ class PrescriptionRepository(BaseRepository[Prescription]):
 
     def search(
         self, search: Optional[str], page: int = 1, per_page: int = 15
-    ):
+    ) -> "Pagination[Prescription]":
         """Search prescriptions with pagination."""
         query = Prescription.query.join(Visit).join(
             Inventory, Prescription.inventory_id == Inventory.inventory_id
@@ -39,9 +41,7 @@ class PrescriptionRepository(BaseRepository[Prescription]):
             Inventory.quantity_in_stock > 0
         ).order_by(Medicine.medicine_name).all()
 
-    def get_recent_visits(self, limit: int = 50) -> List[Visit]:
-        """Get recent visits."""
-        return Visit.query.order_by(Visit.visit_date.desc()).limit(limit).all()
+
 
     def deduct_stock(self, inventory_id: int, quantity: int) -> None:
         """Deduct stock from an inventory item."""

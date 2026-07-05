@@ -2,8 +2,12 @@
 
 from typing import Dict, List, Optional, Any
 
+from flask_sqlalchemy.pagination import Pagination
+
 from app.models.patient import Patient
+from app.models.visit import Visit
 from app.repositories.patient_repository import patient_repository
+from app.utils import clean_input_data
 
 
 class PatientService:
@@ -12,7 +16,7 @@ class PatientService:
     @staticmethod
     def get_all_patients(
         page: int = 1, per_page: int = 15, search: Optional[str] = None
-    ):
+    ) -> "Pagination[Patient]":
         """Get paginated list of patients."""
         return patient_repository.search(search, page=page, per_page=per_page)
 
@@ -28,7 +32,7 @@ class PatientService:
     @staticmethod
     def create_patient(data: Dict[str, Any]) -> Patient:
         """Create a new patient."""
-        cleaned = {k: (None if (isinstance(v, str) and not v.strip()) else v) for k, v in data.items()}
+        cleaned = clean_input_data(data)
 
         patient: Patient = Patient(
             patient_number=patient_repository.get_next_patient_number(),
@@ -52,7 +56,7 @@ class PatientService:
     @staticmethod
     def update_patient(patient: Patient, data: Dict[str, Any]) -> Patient:
         """Update an existing patient."""
-        cleaned = {k: (None if (isinstance(v, str) and not v.strip()) else v) for k, v in data.items()}
+        cleaned = clean_input_data(data)
 
         patient.first_name = cleaned['first_name']
         patient.last_name = cleaned.get('last_name')
@@ -76,6 +80,6 @@ class PatientService:
         patient_repository.commit()
 
     @staticmethod
-    def get_patient_visits(patient: Patient, limit: int = 20) -> List:
+    def get_patient_visits(patient: Patient, limit: int = 20) -> List[Visit]:
         """Get recent visits for a patient."""
         return patient_repository.get_patient_visits(patient, limit)

@@ -2,9 +2,12 @@
 
 from typing import Dict, List, Optional, Any
 
+from flask_sqlalchemy.pagination import Pagination
+
 from app.models.medicine import Medicine
 from app.repositories.medicine_repository import medicine_repository
 from app.repositories.medicine_repository import MedicineRepository
+from app.utils import clean_input_data
 
 
 
@@ -14,7 +17,7 @@ class MedicineService:
     @staticmethod
     def get_all_medicines(
         page: int = 1, per_page: int = 15, search: Optional[str] = None
-    ):
+    ) -> "Pagination[Medicine]":
         """Get paginated list of medicines."""
         return medicine_repository.search(search, page=page, per_page=per_page)
 
@@ -26,7 +29,7 @@ class MedicineService:
     @staticmethod
     def create_medicine(data: Dict[str, Any]) -> Medicine:
         """Create a new medicine."""
-        cleaned = {k: (None if (isinstance(v, str) and not v.strip()) else v) for k, v in data.items()}
+        cleaned = clean_input_data(data)
 
         medicine: Medicine = Medicine(
             medicine_name=cleaned['medicine_name'],
@@ -44,7 +47,7 @@ class MedicineService:
     @staticmethod
     def update_medicine(medicine: Medicine, data: Dict[str, Any]) -> Medicine:
         """Update an existing medicine."""
-        cleaned = {k: (None if (isinstance(v, str) and not v.strip()) else v) for k, v in data.items()}
+        cleaned = clean_input_data(data)
 
         medicine.medicine_name = cleaned['medicine_name']
         medicine.generic_name = cleaned.get('generic_name')

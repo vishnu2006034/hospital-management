@@ -1,4 +1,6 @@
 
+from typing import Optional
+
 from flask import Flask
 from flask_login import LoginManager
 
@@ -53,7 +55,7 @@ def create_app() -> Flask:
 
     # Flask-Login user loader
     @login_manager.user_loader
-    def load_user(user_id: str):
+    def load_user(user_id: str) -> Optional[models.User]:
         return db.session.get(models.User, int(user_id))
 
     # Register blueprints

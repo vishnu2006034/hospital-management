@@ -2,8 +2,13 @@
 
 from typing import Dict, List, Optional, Any
 
+from flask_sqlalchemy.pagination import Pagination
+
 from app.models.user import User
+from app.models.role import Role
+from app.models.user_role import UserRole
 from app.repositories.user_repository import user_repository
+from app.utils import clean_input_data
 
 
 class StaffService:
@@ -12,7 +17,7 @@ class StaffService:
     @staticmethod
     def get_all_staff(
         page: int = 1, per_page: int = 15, search: Optional[str] = None
-    ):
+    ) -> "Pagination[User]":
         """Get paginated list of staff members."""
         return user_repository.search(search, page=page, per_page=per_page)
 
@@ -28,7 +33,7 @@ class StaffService:
     @staticmethod
     def create_staff(data: Dict[str, Any]) -> User:
         """Create a new staff member."""
-        cleaned = {k: (None if (isinstance(v, str) and not v.strip()) else v) for k, v in data.items()}
+        cleaned = clean_input_data(data)
 
         user: User = User(
             employee_code=user_repository.get_next_employee_code(),
@@ -57,7 +62,7 @@ class StaffService:
     @staticmethod
     def update_staff(user: User, data: Dict[str, Any]) -> User:
         """Update an existing staff member."""
-        cleaned = {k: (None if (isinstance(v, str) and not v.strip()) else v) for k, v in data.items()}
+        cleaned = clean_input_data(data)
 
         user.first_name = cleaned['first_name']
         user.last_name = cleaned.get('last_name')
@@ -76,7 +81,7 @@ class StaffService:
         return user
 
     @staticmethod
-    def get_user_roles(user_id: int) -> List:
+    def get_user_roles(user_id: int) -> List[UserRole]:
         """Get all role assignments for a user."""
         return user_repository.get_user_roles(user_id)
 
@@ -86,11 +91,11 @@ class StaffService:
         return user_repository.toggle_role(user_id, role_id)
 
     @staticmethod
-    def get_all_roles() -> List:
+    def get_all_roles() -> List[Role]:
         """Get all available roles."""
         return user_repository.get_all_roles()
 
     @staticmethod
-    def get_role_by_id(role_id: int):
+    def get_role_by_id(role_id: int) -> Optional[Role]:
         """Get a role by ID."""
         return user_repository.get_role_by_id(role_id)

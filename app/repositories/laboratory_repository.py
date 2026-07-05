@@ -3,6 +3,8 @@
 from datetime import datetime
 from typing import List, Optional
 
+from flask_sqlalchemy.pagination import Pagination
+
 from app import db
 from app.models.laboratory import Laboratory
 from app.models.lab_report import LabReport
@@ -11,6 +13,7 @@ from app.models.patient import Patient
 from app.models.visit import Visit
 from app.models.user import User
 from app.repositories.base_repository import BaseRepository
+from app.utils import generate_sequential_code
 
 
 class LaboratoryRepository(BaseRepository[Laboratory]):
@@ -25,7 +28,7 @@ class LaboratoryRepository(BaseRepository[Laboratory]):
         status: Optional[str] = None,
         page: int = 1,
         per_page: int = 15,
-    ):
+    ) -> "Pagination[Laboratory]":
         """Search lab requests with optional status filter and pagination."""
         query = Laboratory.query.join(Patient)
         if status:
@@ -45,25 +48,11 @@ class LaboratoryRepository(BaseRepository[Laboratory]):
         """Get all reports for a lab request."""
         return lab.reports.all()
 
-    def get_recent_visits(self, limit: int = 50) -> List[Visit]:
-        """Get recent visits."""
-        return Visit.query.order_by(Visit.visit_date.desc()).limit(limit).all()
 
-    def get_all_patients(self) -> List[Patient]:
-        """Get all patients ordered by first name."""
-        return Patient.query.order_by(Patient.first_name).all()
-
-    def get_all_technicians(self) -> List[User]:
-        """Get all active lab technicians."""
-        return User.query.filter_by(status='ACTIVE').order_by(User.first_name).all()
 
     def generate_report_number(self) -> str:
         """Generate the next lab report number."""
-        last: Optional[LabReport] = LabReport.query.order_by(
-            LabReport.lab_report_id.desc()
-        ).first()
-        next_num: int = (last.lab_report_id + 1) if last else 1
-        return f'LR{next_num}'
+        return generate_sequential_code(LabReport, 'lab_report_id', 'LR')
 
     def update_completion_time(self, lab: Laboratory) -> None:
         """Set completion time if test is marked completed."""
@@ -86,7 +75,7 @@ class LabTestCatalogRepository(BaseRepository[LabTestCatalog]):
 
     def search(
         self, search: Optional[str], page: int = 1, per_page: int = 15
-    ):
+    ) -> "Pagination[LabTestCatalog]":
         """Search lab test catalog with pagination."""
         query = LabTestCatalog.query
         if search:
