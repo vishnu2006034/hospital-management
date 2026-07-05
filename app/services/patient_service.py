@@ -6,52 +6,52 @@ from flask_sqlalchemy.pagination import Pagination
 
 from app.models.patient import Patient
 from app.models.visit import Visit
-from app.repositories.patient_repository import patient_repository
+from app.repositories.patient_repository import PatientRepository
 from app.utils import clean_input_data
 
 
 class PatientService:
     """Service layer for Patient business operations."""
+    _patient_repository:PatientRepository=PatientRepository()
 
     @staticmethod
     def get_all_patients(
         page: int = 1, per_page: int = 15, search: Optional[str] = None
     ) -> "Pagination[Patient]":
         """Get paginated list of patients."""
-        return patient_repository.search(search, page=page, per_page=per_page)
+        return PatientService._patient_repository.search(search, page=page, per_page=per_page)
 
     @staticmethod
     def get_patient_by_id(patient_id: int) -> Patient:
         """Get a patient by ID."""
-        return patient_repository.get_by_id(patient_id)
+        return PatientService._patient_repository.get_by_id(patient_id)
 
     @staticmethod
     def generate_patient_number() -> str:
-        return patient_repository.get_next_patient_number()
+        return PatientService._patient_repository.get_next_patient_number()
 
     @staticmethod
     def create_patient(data: Dict[str, Any]) -> Patient:
         """Create a new patient."""
         cleaned = clean_input_data(data)
 
-        patient: Patient = Patient(
-            patient_number=patient_repository.get_next_patient_number(),
-            first_name=cleaned["first_name"],
-            last_name=cleaned.get("last_name"),
-            gender=cleaned.get("gender"),
-            dob=cleaned.get("dob"),
-            blood_group=cleaned.get("blood_group"),
-            phone=cleaned.get("phone"),
-            email=cleaned.get("email"),
-            address=cleaned.get("address"),
-            emergency_contact_name=cleaned.get("emergency_contact_name"),
-            emergency_contact_phone=cleaned.get("emergency_contact_phone"),
-            allergies=cleaned.get("allergies"),
-            medical_history=cleaned.get("medical_history"),
-        )
+        patient: Patient = Patient()
+        patient.patient_number=PatientService._patient_repository.get_next_patient_number(),
+        patient.first_name=cleaned["first_name"]
+        patient.last_name=cleaned.get("last_name")
+        patient.gender=cleaned.get("gender")
+        patient.dob=cleaned.get("dob")
+        patient.blood_group=cleaned.get("blood_group")
+        patient.phone=cleaned.get("phone")
+        patient.email=cleaned.get("email")
+        patient.address=cleaned.get("address")
+        patient.emergency_contact_name=cleaned.get("emergency_contact_name")
+        patient.emergency_contact_phone=cleaned.get("emergency_contact_phone")
+        patient.allergies=cleaned.get("allergies")
+        patient.medical_history=cleaned.get("medical_history")
 
-        patient_repository.add(patient)
-        patient_repository.commit()
+        PatientService._patient_repository.add(patient)
+        PatientService._patient_repository.commit()
 
         return patient
 
@@ -79,17 +79,17 @@ class PatientService:
             if field in cleaned:
                 setattr(patient, field, cleaned[field])
 
-        patient_repository.commit()
+        PatientService._patient_repository.commit()
 
         return patient
 
     @staticmethod
     def delete_patient(patient: Patient) -> None:
         """Delete a patient."""
-        patient_repository.delete(patient)
-        patient_repository.commit()
+        PatientService._patient_repository.delete(patient)
+        PatientService._patient_repository.commit()
 
     @staticmethod
     def get_patient_visits(patient: Patient, limit: int = 20) -> List[Visit]:
         """Get recent visits for a patient."""
-        return patient_repository.get_patient_visits(patient, limit)
+        return PatientService._patient_repository.get_patient_visits(patient, limit)

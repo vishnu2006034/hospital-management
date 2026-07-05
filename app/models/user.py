@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from app.models.doctor_report import DoctorReport
 
 
-class User(UserMixin, db.Model):
+class User(db.Model, UserMixin):
     """Staff / system user — doctors, nurses, admins, etc.
 
     Represents any employee of the hospital including doctors, nurses,

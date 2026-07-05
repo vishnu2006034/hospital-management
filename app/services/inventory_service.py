@@ -7,12 +7,13 @@ from flask_sqlalchemy.pagination import Pagination
 from app.models.inventory import Inventory
 from app.models.inventory_transaction import InventoryTransaction
 from app.models.medicine import Medicine
-from app.repositories.inventory_repository import inventory_repository
+from app.repositories.inventory_repository import InventoryRepository
 from app.utils import clean_input_data
 
 
 class InventoryService:
     """Service layer for Inventory business operations."""
+    _inventory_repository:InventoryRepository=InventoryRepository()
 
     @staticmethod
     def get_all_inventory(
@@ -22,14 +23,14 @@ class InventoryService:
         filter_type: Optional[str] = None,
     ) -> "Pagination[Inventory]":
         """Get paginated list of inventory items."""
-        return inventory_repository.search(
+        return InventoryService._inventory_repository.search(
             search, filter_type=filter_type, page=page, per_page=per_page
         )
 
     @staticmethod
     def get_inventory_by_id(inventory_id: int) -> Inventory:
         """Get an inventory item by ID."""
-        return inventory_repository.get_by_id(inventory_id)
+        return InventoryService._inventory_repository.get_by_id(inventory_id)
 
     @staticmethod
     def create_inventory(
@@ -41,20 +42,19 @@ class InventoryService:
         qty_stock = cleaned.get('quantity_in_stock')
         min_stock = cleaned.get('minimum_stock')
 
-        inv: Inventory = Inventory(
-            medicine_id=cleaned['medicine_id'],
-            batch_number=cleaned['batch_number'],
-            expiry_date=cleaned.get('expiry_date'),
-            purchase_price=cleaned.get('purchase_price'),
-            selling_price=cleaned.get('selling_price'),
-            quantity_in_stock=int(qty_stock) if qty_stock is not None else 0,
-            minimum_stock=int(min_stock) if min_stock is not None else 0,
-            supplier=cleaned.get('supplier'),
-        )
-        inventory_repository.add(inv)
+        inv: Inventory = Inventory()
+        inv.medicine_id=cleaned['medicine_id']
+        inv.batch_number=cleaned['batch_number']
+        inv.expiry_date=cleaned.get('expiry_date')
+        inv.purchase_price=cleaned.get('purchase_price')
+        inv.selling_price=cleaned.get('selling_price')
+        inv.quantity_in_stock=int(qty_stock) if qty_stock is not None else 0
+        inv.minimum_stock=int(min_stock) if min_stock is not None else 0
+        inv.supplier=cleaned.get('supplier')
+        InventoryService._inventory_repository.add(inv)
 
         if inv.quantity_in_stock > 0:
-            inventory_repository.create_transaction(
+            InventoryService._inventory_repository.create_transaction(
                 inventory_id=inv.inventory_id,
                 transaction_type='IN',
                 quantity=inv.quantity_in_stock,
@@ -63,7 +63,7 @@ class InventoryService:
                 remarks='Initial stock entry',
             )
 
-        inventory_repository.commit()
+        InventoryService._inventory_repository.commit()
         return inv
 
     @staticmethod
@@ -79,7 +79,7 @@ class InventoryService:
         inv.selling_price = cleaned.get('selling_price')
         inv.minimum_stock = int(min_stock) if min_stock is not None else 0
         inv.supplier = cleaned.get('supplier')
-        inventory_repository.commit()
+        InventoryService._inventory_repository.commit()
         return inv
 
     @staticmethod
@@ -92,7 +92,7 @@ class InventoryService:
         txn_type: str = cleaned['transaction_type']
         qty: int = int(cleaned['quantity'])
 
-        inventory_repository.create_transaction(
+        InventoryService._inventory_repository.create_transaction(
             inventory_id=inv.inventory_id,
             transaction_type=txn_type,
             quantity=qty,
@@ -102,14 +102,14 @@ class InventoryService:
             remarks=cleaned.get('remarks'),
         )
 
-        inventory_repository.update_stock(inv.inventory_id, txn_type, qty)
-        inventory_repository.commit()
+        InventoryService._inventory_repository.update_stock(inv.inventory_id, txn_type, qty)
+        InventoryService._inventory_repository.commit()
 
     @staticmethod
     def get_recent_transactions(inv: Inventory, limit: int = 20) -> List[InventoryTransaction]:
         """Get recent transactions for an inventory item."""
-        return inventory_repository.get_recent_transactions(inv.inventory_id, limit)
+        return InventoryService._inventory_repository.get_recent_transactions(inv.inventory_id, limit)
 
     @staticmethod
     def get_all_medicines() -> List[Medicine]:
-        return inventory_repository.get_medicines()
+        return InventoryService._inventory_repository.get_medicines()
