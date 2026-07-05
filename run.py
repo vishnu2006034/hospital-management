@@ -5,7 +5,7 @@ Configures and runs the Flask application server.
 
 import os
 import sys
-from typing import NoReturn
+# from typing import NoReturn
 
 from app import create_app
 from app.logging_config import setup_logging, get_logger
@@ -20,7 +20,7 @@ app = create_app()
 logger.info('Starting application')
 
 
-def main() -> NoReturn:
+def main() -> None:
     """Run the application server."""
     debug: bool = os.getenv('FLASK_DEBUG', '0') == '1'
     host: str = os.getenv('FLASK_HOST', '0.0.0.0')

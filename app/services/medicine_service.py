@@ -4,6 +4,8 @@ from typing import Dict, List, Optional, Any
 
 from app.models.medicine import Medicine
 from app.repositories.medicine_repository import medicine_repository
+from app.repositories.medicine_repository import MedicineRepository
+
 
 
 class MedicineService:
