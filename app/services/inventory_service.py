@@ -21,7 +21,7 @@ class InventoryService:
         per_page: int = 15,
         search: Optional[str] = None,
         filter_type: Optional[str] = None,
-    ) -> "Pagination[Inventory]":
+    ) -> Pagination:
         """Get paginated list of inventory items."""
         return InventoryService._inventory_repository.search(
             search, filter_type=filter_type, page=page, per_page=per_page

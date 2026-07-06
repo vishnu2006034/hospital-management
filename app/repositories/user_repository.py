@@ -25,7 +25,7 @@ class UserRepository(BaseRepository[User]):
         per_page: int = 15,
         sort_by: str = "created_at",
         descending: bool = True,
-    ) -> "Pagination[User]":
+    ) -> Pagination:
         """Search users with pagination."""
 
         query = User.query

@@ -21,7 +21,7 @@ class ReportService:
     @staticmethod
     def get_all_reports(
         page: int = 1, per_page: int = 15, search: Optional[str] = None
-    ) -> "Pagination[DoctorReport]":
+    ) -> Pagination:
         """Get paginated list of doctor reports."""
         return ReportService._report_repository.search(search, page=page, per_page=per_page)
 

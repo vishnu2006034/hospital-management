@@ -28,7 +28,7 @@ class LaboratoryRepository(BaseRepository[Laboratory]):
         status: Optional[str] = None,
         page: int = 1,
         per_page: int = 15,
-    ) -> "Pagination[Laboratory]":
+    ) -> Pagination:
         """Search lab requests with optional status filter and pagination."""
         query = Laboratory.query.join(Patient)
         if status:
@@ -75,7 +75,7 @@ class LabTestCatalogRepository(BaseRepository[LabTestCatalog]):
 
     def search(
         self, search: Optional[str], page: int = 1, per_page: int = 15
-    ) -> "Pagination[LabTestCatalog]":
+    ) -> Pagination:
         """Search lab test catalog with pagination."""
         query = LabTestCatalog.query
         if search:

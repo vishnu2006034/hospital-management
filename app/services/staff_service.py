@@ -17,7 +17,7 @@ class StaffService:
     @staticmethod
     def get_all_staff(
         page: int = 1, per_page: int = 15, search: Optional[str] = None
-    ) -> "Pagination[User]":
+    ) -> Pagination:
         """Get paginated list of staff members."""
         return StaffService._user_repository.search(search, page=page, per_page=per_page)
 

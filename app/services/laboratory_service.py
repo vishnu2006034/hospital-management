@@ -35,7 +35,7 @@ class LaboratoryService:
         per_page: int = 15,
         status: Optional[str] = None,
         search: Optional[str] = None,
-    ) -> "Pagination[Laboratory]":
+    ) -> Pagination:
         """Get paginated list of lab requests."""
         return LaboratoryService._laboratory_repository.search(
             search, status=status, page=page, per_page=per_page
@@ -113,7 +113,7 @@ class LaboratoryService:
     @staticmethod
     def get_all_catalog_tests(
         page: int = 1, per_page: int = 15, search: Optional[str] = None
-    ) -> "Pagination[LabTestCatalog]":
+    ) -> Pagination:
         """Get paginated list of catalog tests."""
         return LaboratoryService._lab_test_catalog_repository.search(
             search, page=page, per_page=per_page

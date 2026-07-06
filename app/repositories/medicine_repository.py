@@ -17,7 +17,7 @@ class MedicineRepository(BaseRepository[Medicine]):
     
     def search(
         self, search: Optional[str], page: int = 1, per_page: int = 15
-    )->"Pagination[Medicine]":
+    ) -> Pagination:
         """Search medicine with pagination."""
         query = Medicine.query
         if search:

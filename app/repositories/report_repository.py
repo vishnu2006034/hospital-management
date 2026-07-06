@@ -20,7 +20,7 @@ class ReportRepository(BaseRepository[DoctorReport]):
 
     def search(
         self, search: Optional[str], page: int = 1, per_page: int = 15
-    ) -> "Pagination[DoctorReport]":
+    ) -> Pagination:
         """Search doctor reports with pagination."""
         query = DoctorReport.query.join(Patient)
         if search:

@@ -17,7 +17,7 @@ class PatientService:
     @staticmethod
     def get_all_patients(
         page: int = 1, per_page: int = 15, search: Optional[str] = None
-    ) -> "Pagination[Patient]":
+    ) -> Pagination:
         """Get paginated list of patients."""
         return PatientService._patient_repository.search(search, page=page, per_page=per_page)
 

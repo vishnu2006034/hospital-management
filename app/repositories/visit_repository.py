@@ -25,7 +25,7 @@ class VisitRepository(BaseRepository[Visit]):
         status: Optional[str] = None,
         page: int = 1,
         per_page: int = 15,
-    ) -> "Pagination[Visit]":
+    ) -> Pagination:
         """Search visits with optional status filter and pagination."""
         query = Visit.query.join(Patient).join(User, Visit.doctor_id == User.user_id)
         if status:

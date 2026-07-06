@@ -24,7 +24,7 @@ class InventoryRepository(BaseRepository[Inventory]):
         filter_type: Optional[str] = None,
         page: int = 1,
         per_page: int = 15,
-    ) -> "Pagination[Inventory]":
+    ) -> Pagination:
         """Search inventory with optional filters and pagination."""
         query = Inventory.query.join(Medicine)
         if search:
@@ -68,15 +68,14 @@ class InventoryRepository(BaseRepository[Inventory]):
         remarks: Optional[str] = None,
     ) -> InventoryTransaction:
         """Create a new inventory transaction."""
-        txn: InventoryTransaction = InventoryTransaction(
-            inventory_id=inventory_id,
-            transaction_type=transaction_type,
-            quantity=quantity,
-            reference_type=reference_type,
-            reference_id=reference_id,
-            performed_by=performed_by,
-            remarks=remarks,
-        )
+        txn: InventoryTransaction = InventoryTransaction()
+        txn.inventory_id=inventory_id
+        txn.transaction_type=transaction_type
+        txn.quantity=quantity
+        txn.reference_type=reference_type
+        txn.reference_id=reference_id
+        txn.performed_by=performed_by
+        txn.remarks=remarks        
         db.session.add(txn)
         return txn
 

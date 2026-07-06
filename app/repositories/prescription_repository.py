@@ -20,7 +20,7 @@ class PrescriptionRepository(BaseRepository[Prescription]):
 
     def search(
         self, search: Optional[str], page: int = 1, per_page: int = 15
-    ) -> "Pagination[Prescription]":
+    ) -> Pagination:
         """Search prescriptions with pagination."""
         query = Prescription.query.join(Visit).join(
             Inventory, Prescription.inventory_id == Inventory.inventory_id

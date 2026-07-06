@@ -17,7 +17,7 @@ class MedicineService:
     @staticmethod
     def get_all_medicines(
         page: int = 1, per_page: int = 15, search: Optional[str] = None
-    ) -> "Pagination[Medicine]":
+    ) -> Pagination:
         """Get paginated list of medicines."""
         return MedicineService._medicine_repository.search(search, page=page, per_page=per_page)
 

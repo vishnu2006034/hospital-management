@@ -24,7 +24,7 @@ class VisitService:
         per_page: int = 15,
         status: Optional[str] = None,
         search: Optional[str] = None,
-    ) -> "Pagination[Visit]":
+    ) -> Pagination:
         """Get paginated list of visits."""
         return VisitService._visit_repository.search(
             search, status=status, page=page, per_page=per_page
