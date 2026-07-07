@@ -4,18 +4,20 @@ from typing import Dict, List, Optional, Any
 
 from flask_sqlalchemy.pagination import Pagination
 
-from app.models.prescription import Prescription
-from app.models.inventory import Inventory
-from app.models.visit import Visit
+from app import db
 from app.repositories.prescription_repository import PrescriptionRepository
 from app.repositories.visit_repository import VisitRepository
+from app.services.interfaces.prescription_service_interface import IPrescriptionService
+from app.dtos.prescription import PrescriptionResponse, PrescriptionCreateRequest
+from app.dtos.inventory import InventoryResponse
+from app.dtos.visit import VisitResponse
 from app.utils import clean_input_data
 
 
-class PrescriptionService:
+class PrescriptionService(IPrescriptionService):
     """Service layer for Prescription business operations."""
-    _prescription_repository:PrescriptionRepository=PrescriptionRepository()
-    _visit_repository:VisitRepository=VisitRepository()
+    _prescription_repository: PrescriptionRepository = PrescriptionRepository()
+    _visit_repository: VisitRepository = VisitRepository()
 
     @staticmethod
     def get_all_prescriptions(
@@ -25,28 +27,29 @@ class PrescriptionService:
         return PrescriptionService._prescription_repository.search(search, page=page, per_page=per_page)
 
     @staticmethod
-    def get_prescription_by_id(prescription_id: int) -> Prescription:
+    def get_prescription_by_id(prescription_id: int) -> PrescriptionResponse:
         """Get a prescription by ID."""
         return PrescriptionService._prescription_repository.get_by_id(prescription_id)
 
     @staticmethod
-    def create_prescription(data: Dict[str, Any], prescribed_by: int) -> Prescription:
+    def create_prescription(data: Dict[str, Any], prescribed_by: int) -> PrescriptionResponse:
         """Create a new prescription."""
         cleaned = clean_input_data(data)
 
         qty_val = cleaned.get('quantity')
         qty: Optional[int] = int(qty_val) if qty_val is not None else None
 
-        prescription: Prescription = Prescription()
-        prescription.visit_id=cleaned['visit_id']
-        prescription.inventory_id=cleaned['inventory_id']
-        prescription.prescribed_by=prescribed_by
-        prescription.dosage=cleaned.get('dosage')
-        prescription.frequency=cleaned.get('frequency')
-        prescription.duration=cleaned.get('duration')
-        prescription.quantity=qty
-        prescription.instructions=cleaned.get('instructions')
-        PrescriptionService._prescription_repository.add(prescription)
+        dto = PrescriptionCreateRequest(
+            visit_id=int(cleaned['visit_id']),
+            inventory_id=int(cleaned['inventory_id']),
+            dosage=cleaned.get('dosage'),
+            frequency=cleaned.get('frequency'),
+            duration=cleaned.get('duration'),
+            quantity=qty,
+            instructions=cleaned.get('instructions')
+        )
+
+        prescription_dto = PrescriptionService._prescription_repository.add(dto)
 
         if qty:
             PrescriptionService._prescription_repository.deduct_stock(
@@ -55,20 +58,20 @@ class PrescriptionService:
             )
 
         PrescriptionService._prescription_repository.commit()
-        return prescription
+        return prescription_dto
 
     @staticmethod
-    def delete_prescription(prescription: Prescription) -> None:
+    def delete_prescription(prescription_id: int) -> None:
         """Delete a prescription."""
-        PrescriptionService._prescription_repository.delete(prescription)
+        PrescriptionService._prescription_repository.delete(prescription_id)
         PrescriptionService._prescription_repository.commit()
 
     @staticmethod
-    def get_available_inventory() -> List[Inventory]:
+    def get_available_inventory() -> List[InventoryResponse]:
         """Get all available inventory items."""
         return PrescriptionService._prescription_repository.get_available_inventory()
 
     @staticmethod
-    def get_recent_visits(limit: int = 50) -> List[Visit]:
+    def get_recent_visits(limit: int = 50) -> List[VisitResponse]:
         """Get recent visits."""
         return PrescriptionService._visit_repository.get_recent_visits(limit)

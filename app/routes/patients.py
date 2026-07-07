@@ -37,7 +37,7 @@ def add_patient() -> str | Response:
 def view_patient(patient_id: int) -> str:
     """View a single patient with recent visits."""
     patient = PatientService.get_patient_by_id(patient_id)
-    visits = PatientService.get_patient_visits(patient)
+    visits = PatientService.get_patient_visits(patient_id)
     return render_template('patients/detail.html', patient=patient, visits=visits)
 
 
@@ -47,7 +47,7 @@ def edit_patient(patient_id: int) -> str | Response:
     patient = PatientService.get_patient_by_id(patient_id)
     if request.method == 'POST':
         data: Dict[str, str] = request.form.to_dict()
-        PatientService.update_patient(patient, data)
+        PatientService.update_patient(patient_id, data)
         flash(f'Patient {patient.full_name} updated.', 'success')
         return redirect(url_for('patients.view_patient', patient_id=patient.patient_id))
 
@@ -59,6 +59,6 @@ def edit_patient(patient_id: int) -> str | Response:
 def delete_patient(patient_id: int) -> Response:
     patient = PatientService.get_patient_by_id(patient_id)
     name: str = patient.full_name
-    PatientService.delete_patient(patient)
+    PatientService.delete_patient(patient_id)
     flash(f'Patient {name} deleted.', 'success')
     return redirect(url_for('patients.list_patients'))

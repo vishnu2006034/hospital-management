@@ -41,6 +41,6 @@ def add_prescription() -> str | Response:
 def delete_prescription(prescription_id: int) -> Response:
     prescription = PrescriptionService.get_prescription_by_id(prescription_id)
     visit_id: int = prescription.visit_id
-    PrescriptionService.delete_prescription(prescription)
+    PrescriptionService.delete_prescription(prescription_id)
     flash('Prescription removed.', 'success')
     return redirect(url_for('visits.view_visit', visit_id=visit_id))

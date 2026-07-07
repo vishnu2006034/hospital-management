@@ -3,19 +3,14 @@
 Dashboard and landing page routes.
 """
 
-from datetime import date
 from typing import Dict, Any
 
 from flask import Blueprint, render_template
 from flask_login import login_required
 
-from app.extensions import db
-from app.constants import VisitType, VisitStatus, RoleName
-from app.models.patient import Patient
-from app.models.user import User
-from app.models.visit import Visit
-from app.models.role import Role
-from app.models.user_role import UserRole
+from app.services.patient_service import PatientService
+from app.services.staff_service import StaffService
+from app.services.visit_service import VisitService
 
 main_bp: Blueprint = Blueprint('main', __name__)
 
@@ -28,31 +23,12 @@ def index() -> str:
 @main_bp.route('/dashboard')
 @login_required
 def dashboard() -> str:
-    total_patients: int = Patient.query.count()
-
-    # Count active doctors
-    doctor_role = Role.query.filter_by(role_name=RoleName.DOCTOR.value).first()
-    if doctor_role:
-        active_doctors: int = User.query.join(
-            UserRole, User.user_id == UserRole.user_id
-        ).filter(
-            UserRole.role_id == doctor_role.role_id,
-            UserRole.is_active.is_(True),
-            User.status == 'ACTIVE',
-        ).count()
-    else:
-        active_doctors = User.query.filter_by(status='ACTIVE').count()
-
-    today: date = date.today()
-    today_appointments: int = Visit.query.filter(
-        db.func.date(Visit.visit_date) == today
-    ).count()
-
+    total_patients: int = PatientService.get_total_patients_count()
+    active_doctors: int = StaffService.get_active_doctors_count()
+    today_appointments: int = VisitService.get_today_appointments_count()
+    
     # Calculate available beds (capacity of 100 minus active inpatient visits)
-    active_admissions: int = Visit.query.filter_by(
-        visit_type=VisitType.INPATIENT.value,
-        visit_status=VisitStatus.OPEN.value,
-    ).count()
+    active_admissions: int = VisitService.get_active_admissions_count()
     available_beds: int = max(0, 100 - active_admissions)
 
     context: Dict[str, Any] = {

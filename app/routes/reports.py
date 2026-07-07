@@ -52,7 +52,7 @@ def edit_report(report_id: int) -> str | Response:
     report = ReportService.get_report_by_id(report_id)
     if request.method == 'POST':
         data: Dict[str, str] = request.form.to_dict()
-        ReportService.update_report(report, data)
+        ReportService.update_report(report_id, data)
         flash('Report updated.', 'success')
         return redirect(url_for('reports.view_report', report_id=report.doctor_report_id))
 

@@ -46,7 +46,7 @@ def add_lab() -> str | Response:
 def view_lab(lab_id: int) -> str:
     """View a single lab request with reports."""
     lab = LaboratoryService.get_lab_by_id(lab_id)
-    reports = LaboratoryService.get_lab_reports(lab)
+    reports = LaboratoryService.get_lab_reports(lab_id)
     return render_template('laboratory/detail.html', lab=lab, reports=reports)
 
 
@@ -57,7 +57,7 @@ def edit_lab(lab_id: int) -> str | Response:
     lab = LaboratoryService.get_lab_by_id(lab_id)
     if request.method == 'POST':
         data: Dict[str, str] = request.form.to_dict()
-        LaboratoryService.update_lab_request(lab, data)
+        LaboratoryService.update_lab_request(lab_id, data)
         flash('Lab request updated.', 'success')
         return redirect(url_for('laboratory.view_lab', lab_id=lab.lab_id))
 
@@ -77,14 +77,11 @@ def add_report(lab_id: int) -> str | Response:
     lab = LaboratoryService.get_lab_by_id(lab_id)
     if request.method == 'POST':
         data: Dict[str, str] = request.form.to_dict()
-        report = LaboratoryService.add_report(lab, data)
+        report = LaboratoryService.add_report(lab_id, data)
         flash(f'Lab report {report.report_number} added.', 'success')
         return redirect(url_for('laboratory.view_lab', lab_id=lab.lab_id))
 
-    from app.models.lab_test_catalog import LabTestCatalog
-    tests = LabTestCatalog.query.filter_by(is_active=True).order_by(
-        LabTestCatalog.test_name
-    ).all()
+    tests = LaboratoryService.get_active_catalog_tests()
     return render_template('laboratory/report_form.html', lab=lab, report=None, tests=tests)
 
 
@@ -120,7 +117,7 @@ def edit_catalog(test_id: int) -> str | Response:
     test = LaboratoryService.get_catalog_test_by_id(test_id)
     if request.method == 'POST':
         data: Dict[str, str] = request.form.to_dict()
-        LaboratoryService.update_catalog_test(test, data)
+        LaboratoryService.update_catalog_test(test_id, data)
         flash(f'Test "{test.test_name}" updated.', 'success')
         return redirect(url_for('laboratory.list_catalog'))
 

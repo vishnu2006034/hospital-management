@@ -50,7 +50,7 @@ def edit_staff(user_id: int) -> str | Response:
     user = StaffService.get_user_by_id(user_id)
     if request.method == 'POST':
         data: Dict[str, str] = request.form.to_dict()
-        StaffService.update_staff(user, data)
+        StaffService.update_staff(user_id, data)
         flash(f'Staff member {user.full_name} updated.', 'success')
         return redirect(url_for('staff.view_staff', user_id=user.user_id))
 

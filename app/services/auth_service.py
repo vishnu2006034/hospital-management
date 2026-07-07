@@ -4,29 +4,32 @@ from typing import Dict, List, Optional, Any
 
 from flask_login import login_user, logout_user
 
+from app import db
 from app.models.user import User
 from app.repositories.user_repository import UserRepository
+from app.services.interfaces.auth_service_interface import IAuthService
+from app.dtos.user import UserResponse, UserCreateRequest
+from app.mappers.user_mapper import UserMapper
 
 
-class AuthService:
-    
+class AuthService(IAuthService):
     """Service layer for Authentication business operations."""
-    _user_repository:UserRepository=UserRepository()
+    _user_repository: UserRepository = UserRepository()
+
     @staticmethod
-    def authenticate_user(email: str, password: str) -> Optional[User]:
+    def authenticate_user(email: str, password: str) -> Optional[UserResponse]:
         """Authenticate a user by email and password."""
-      
-        user: Optional[User] = AuthService._user_repository.get_by_email(email)
-        if user is None or not user.check_password(password):
+        # Retrieve the user model to verify password
+        user_model = User.query.filter_by(email=email).first()
+        if user_model is None or not user_model.check_password(password):
             return None
-        
-        def can_login(self) -> bool:
-            return self.status == "ACTIVE"
-        return user
-    
+        return UserMapper.to_dto(user_model)
+
     @staticmethod
-    def login(user: User, remember: bool = False) -> None:
-        login_user(user, remember=remember)
+    def login(user: UserResponse, remember: bool = False) -> None:
+        user_model = db.session.get(User, user.user_id)
+        if user_model:
+            login_user(user_model, remember=remember)
 
     @staticmethod
     def logout() -> None:
@@ -34,7 +37,6 @@ class AuthService:
 
     @staticmethod
     def validate_registration(data: Dict[str, str]) -> List[str]:
-
         """Validate registration data."""
         errors: List[str] = []
         if not data.get('first_name'):
@@ -53,26 +55,25 @@ class AuthService:
 
     @staticmethod
     def generate_employee_code() -> str:
-        user_repository = UserRepository()
         return AuthService._user_repository.get_next_employee_code()
 
     @staticmethod
-    def create_user(data: Dict[str, str]) -> User:
+    def create_user(data: Dict[str, str]) -> UserResponse:
         """Create a new user account."""
-        user: User = User()
-        user.employee_code=AuthService._user_repository.get_next_employee_code()
-        user.first_name=data['first_name']
-        user.last_name=data.get('last_name')
-        user.email=data['email']
-        user.status='ACTIVE'
-        user.password=data['password']
-        AuthService._user_repository.add(user)
+        dto = UserCreateRequest(
+            first_name=data['first_name'],
+            last_name=data.get('last_name'),
+            email=data['email'],
+            password=data['password']
+        )
+        user_dto = AuthService._user_repository.add(dto)
 
         role_name: Optional[str] = data.get('role')
         if role_name:
             role = AuthService._user_repository.get_role_by_name(role_name)
             if role:
-                AuthService.user_repository.assign_role(user.user_id, role.role_id)
+                AuthService._user_repository.assign_role(user_dto.user_id, role.role_id)
 
-        AuthService.user_repository.commit()
-        return user
+        AuthService._user_repository.commit()
+        # Reload to get the assigned roles
+        return AuthService._user_repository.get_by_id(user_dto.user_id)

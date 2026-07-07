@@ -45,7 +45,7 @@ def edit_inventory(inventory_id: int) -> str | Response:
     inv = InventoryService.get_inventory_by_id(inventory_id)
     if request.method == 'POST':
         data: Dict[str, str] = request.form.to_dict()
-        InventoryService.update_inventory(inv, data)
+        InventoryService.update_inventory(inventory_id, data)
         flash('Inventory batch updated.', 'success')
         return redirect(url_for('inventory.list_inventory'))
 
@@ -60,9 +60,11 @@ def add_transaction(inventory_id: int) -> str | Response:
     inv = InventoryService.get_inventory_by_id(inventory_id)
     if request.method == 'POST':
         data: Dict[str, str] = request.form.to_dict()
-        InventoryService.add_transaction(inv, data, performed_by=current_user.user_id)
+        InventoryService.add_transaction(inventory_id, data, performed_by=current_user.user_id)
+        # Re-fetch inventory to get correct updated quantity
+        inv = InventoryService.get_inventory_by_id(inventory_id)
         flash(f'Transaction recorded. Stock: {inv.quantity_in_stock}', 'success')
         return redirect(url_for('inventory.list_inventory'))
 
-    transactions = InventoryService.get_recent_transactions(inv)
+    transactions = InventoryService.get_recent_transactions(inventory_id)
     return render_template('inventory/transaction.html', inv=inv, transactions=transactions)

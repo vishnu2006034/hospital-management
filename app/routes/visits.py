@@ -43,7 +43,7 @@ def add_visit() -> str | Response:
 def view_visit(visit_id: int) -> str:
     """View a single visit with related entities."""
     visit = VisitService.get_visit_by_id(visit_id)
-    details = VisitService.get_visit_details(visit)
+    details = VisitService.get_visit_details(visit_id)
     return render_template('visits/detail.html', visit=visit,
                            prescriptions=details['prescriptions'],
                            lab_requests=details['lab_requests'],
@@ -58,7 +58,7 @@ def edit_visit(visit_id: int) -> str | Response:
         data: Dict[str, str] = request.form.to_dict()
         admission_date = request.form.get('admission_date')
         discharge_date = request.form.get('discharge_date')
-        VisitService.update_visit(visit, data, admission_date=admission_date,
+        VisitService.update_visit(visit_id, data, admission_date=admission_date,
                                   discharge_date=discharge_date)
         flash('Visit updated.', 'success')
         return redirect(url_for('visits.view_visit', visit_id=visit.visit_id))
@@ -72,7 +72,6 @@ def edit_visit(visit_id: int) -> str | Response:
 @visits_bp.route('/<int:visit_id>/delete', methods=['POST'])
 @login_required
 def delete_visit(visit_id: int) -> Response:
-    visit = VisitService.get_visit_by_id(visit_id)
-    VisitService.delete_visit(visit)
+    VisitService.delete_visit(visit_id)
     flash('Visit deleted.', 'success')
     return redirect(url_for('visits.list_visits'))

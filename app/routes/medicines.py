@@ -38,7 +38,7 @@ def edit_medicine(medicine_id: int) -> str | Response:
     medicine = MedicineService.get_medicine_by_id(medicine_id)
     if request.method == 'POST':
         data: Dict[str, str] = request.form.to_dict()
-        MedicineService.update_medicine(medicine, data)
+        MedicineService.update_medicine(medicine_id, data)
         flash(f'Medicine "{medicine.medicine_name}" updated.', 'success')
         return redirect(url_for('medicines.list_medicines'))
 
@@ -50,6 +50,6 @@ def edit_medicine(medicine_id: int) -> str | Response:
 def delete_medicine(medicine_id: int) -> Response:
     medicine = MedicineService.get_medicine_by_id(medicine_id)
     name: str = medicine.medicine_name
-    MedicineService.delete_medicine(medicine)
+    MedicineService.delete_medicine(medicine_id)
     flash(f'Medicine "{name}" deleted.', 'success')
     return redirect(url_for('medicines.list_medicines'))
