@@ -30,3 +30,4 @@ class PrescriptionCreateRequest(BaseModel):
     duration: Optional[str] = None
     quantity: Optional[int] = None
     instructions: Optional[str] = None
+    prescribed_by: Optional[int] = None

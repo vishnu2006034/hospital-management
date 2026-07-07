@@ -71,15 +71,11 @@ class LaboratoryService(ILaboratoryService):
             lab_technician_id=int(cleaned['lab_technician_id']) if cleaned.get('lab_technician_id') else None,
             priority=cleaned.get('priority') or 'NORMAL',
             sample_type=cleaned.get('sample_type'),
-            remarks=cleaned.get('remarks')
+            remarks=cleaned.get('remarks'),
+            requested_by=requested_by
         )
 
         lab_dto = LaboratoryService._laboratory_repository.add(dto)
-        
-        # Keep requester mapping consistent (the requested_by field needs to be set manually on the model since it was passed as argument)
-        lab_model = db.session.get(Laboratory, lab_dto.lab_id)
-        if lab_model:
-            lab_model.requested_by = requested_by
 
         LaboratoryService._laboratory_repository.commit()
         return LaboratoryService._laboratory_repository.get_by_id(lab_dto.lab_id)

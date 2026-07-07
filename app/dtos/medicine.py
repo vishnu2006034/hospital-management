@@ -15,7 +15,6 @@ class MedicineResponse(BaseModel):
     manufacturer: Optional[str] = None
     unit_price: Optional[Decimal] = None
     created_at: datetime
-    updated_at: datetime
 
 class MedicineCreateRequest(BaseModel):
     medicine_name: str

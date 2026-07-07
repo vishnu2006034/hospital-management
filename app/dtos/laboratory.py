@@ -115,6 +115,7 @@ class LaboratoryCreateRequest(BaseModel):
     priority: Optional[str] = "NORMAL"
     sample_type: Optional[str] = None
     remarks: Optional[str] = None
+    requested_by: Optional[int] = None
 
 class LaboratoryUpdateRequest(BaseModel):
     test_status: Optional[str] = None

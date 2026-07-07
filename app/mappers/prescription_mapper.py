@@ -33,4 +33,6 @@ class PrescriptionMapper:
         prescription.duration = dto.duration
         prescription.quantity = dto.quantity
         prescription.instructions = dto.instructions
+        if dto.prescribed_by is not None:
+            prescription.prescribed_by = dto.prescribed_by
         return prescription

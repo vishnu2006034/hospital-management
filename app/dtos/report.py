@@ -43,6 +43,8 @@ class ReportCreateRequest(BaseModel):
     follow_up_required: Optional[bool] = False
     follow_up_date: Optional[date] = None
     next_visit_reason: Optional[str] = None
+    doctor_id: Optional[int] = None
+    report_number: Optional[str] = None
 
 class ReportUpdateRequest(BaseModel):
     chief_complaint: Optional[str] = None

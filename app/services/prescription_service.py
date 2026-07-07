@@ -46,7 +46,8 @@ class PrescriptionService(IPrescriptionService):
             frequency=cleaned.get('frequency'),
             duration=cleaned.get('duration'),
             quantity=qty,
-            instructions=cleaned.get('instructions')
+            instructions=cleaned.get('instructions'),
+            prescribed_by=prescribed_by
         )
 
         prescription_dto = PrescriptionService._prescription_repository.add(dto)

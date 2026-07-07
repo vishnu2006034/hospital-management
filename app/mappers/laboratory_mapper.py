@@ -50,6 +50,8 @@ class LaboratoryMapper:
         lab.sample_type = dto.sample_type
         lab.remarks = dto.remarks
         lab.test_status = "PENDING"
+        if dto.requested_by is not None:
+            lab.requested_by = dto.requested_by
         return lab
 
     @staticmethod

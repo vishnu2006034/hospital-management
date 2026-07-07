@@ -46,6 +46,10 @@ class ReportMapper:
         report.follow_up_required = bool(dto.follow_up_required)
         report.follow_up_date = dto.follow_up_date
         report.next_visit_reason = dto.next_visit_reason
+        if dto.doctor_id is not None:
+            report.doctor_id = dto.doctor_id
+        if dto.report_number is not None:
+            report.report_number = dto.report_number
         return report
 
     @staticmethod

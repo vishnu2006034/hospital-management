@@ -44,6 +44,7 @@ class ReportService(IReportService):
     def create_report(data: Dict[str, Any], doctor_id: int) -> ReportResponse:
         """Create a new doctor report."""
         cleaned = clean_input_data(data)
+        report_number = ReportService._report_repository.generate_report_number()
 
         dto = ReportCreateRequest(
             visit_id=int(cleaned['visit_id']),
@@ -56,16 +57,12 @@ class ReportService(IReportService):
             doctor_notes=cleaned.get('doctor_notes'),
             follow_up_required=bool(cleaned.get('follow_up_required')),
             follow_up_date=cleaned.get('follow_up_date'),
-            next_visit_reason=cleaned.get('next_visit_reason')
+            next_visit_reason=cleaned.get('next_visit_reason'),
+            doctor_id=doctor_id,
+            report_number=report_number
         )
 
         report_dto = ReportService._report_repository.add(dto)
-
-        # Retrieve model to set doctor_id and generate report number
-        report_model = db.session.get(DoctorReport, report_dto.doctor_report_id)
-        if report_model:
-            report_model.doctor_id = doctor_id
-            report_model.report_number = ReportService._report_repository.generate_report_number()
 
         ReportService._report_repository.commit()
         return ReportService._report_repository.get_by_id(report_dto.doctor_report_id)

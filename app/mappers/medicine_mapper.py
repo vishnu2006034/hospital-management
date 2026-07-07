@@ -15,8 +15,7 @@ class MedicineMapper:
             strength=medicine.strength,
             manufacturer=medicine.manufacturer,
             unit_price=medicine.unit_price,
-            created_at=medicine.created_at,
-            updated_at=medicine.updated_at
+            created_at=medicine.created_at
         )
 
     @staticmethod
