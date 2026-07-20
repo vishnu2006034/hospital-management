@@ -37,17 +37,17 @@ def add_report() -> str | Response:
                            patients=patients, visit_id=visit_id)
 
 
-@reports_bp.route('/<int:report_id>')
+@reports_bp.route('/<report_id>')
 @login_required
-def view_report(report_id: int) -> str:
+def view_report(report_id: str) -> str:
     """View a single doctor report."""
     report = ReportService.get_report_by_id(report_id)
     return render_template('reports/detail.html', report=report)
 
 
-@reports_bp.route('/<int:report_id>/edit', methods=['GET', 'POST'])
+@reports_bp.route('/<report_id>/edit', methods=['GET', 'POST'])
 @login_required
-def edit_report(report_id: int) -> str | Response:
+def edit_report(report_id: str) -> str | Response:
     """Edit an existing doctor report."""
     report = ReportService.get_report_by_id(report_id)
     if request.method == 'POST':

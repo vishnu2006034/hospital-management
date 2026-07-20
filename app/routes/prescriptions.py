@@ -36,11 +36,11 @@ def add_prescription() -> str | Response:
                            visits=visits, inventory=inventory, visit_id=visit_id)
 
 
-@prescriptions_bp.route('/<int:prescription_id>/delete', methods=['POST'])
+@prescriptions_bp.route('/<prescription_id>/delete', methods=['POST'])
 @login_required
-def delete_prescription(prescription_id: int) -> Response:
+def delete_prescription(prescription_id: str) -> Response:
     prescription = PrescriptionService.get_prescription_by_id(prescription_id)
-    visit_id: int = prescription.visit_id
+    visit_id: str = prescription.visit_id
     PrescriptionService.delete_prescription(prescription_id)
     flash('Prescription removed.', 'success')
     return redirect(url_for('visits.view_visit', visit_id=visit_id))

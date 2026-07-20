@@ -9,7 +9,7 @@ from app.dtos.visit import VisitResponse
 class LabTestCatalogResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    test_id: int
+    test_id: str
     test_code: str
     test_name: str
     category: Optional[str] = None
@@ -51,12 +51,12 @@ class LabTestCatalogUpdateRequest(BaseModel):
 class LabReportResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    lab_report_id: int
-    lab_id: int
-    test_id: int
-    patient_id: int
-    doctor_id: int
-    verified_by: Optional[int] = None
+    lab_report_id: str
+    lab_id: str
+    test_id: str
+    patient_id: str
+    doctor_id: str
+    verified_by: Optional[str] = None
     report_number: str
     result: str
     unit: Optional[str] = None
@@ -74,25 +74,25 @@ class LabReportResponse(BaseModel):
     verifier: Optional[UserResponse] = None
 
 class LabReportCreateRequest(BaseModel):
-    test_id: int
+    test_id: str
     result: str
     unit: Optional[str] = None
     reference_range: Optional[str] = None
     is_abnormal: Optional[bool] = False
     remarks: Optional[str] = None
-    lab_id: Optional[int] = None
-    patient_id: Optional[int] = None
-    doctor_id: Optional[int] = None
+    lab_id: Optional[str] = None
+    patient_id: Optional[str] = None
+    doctor_id: Optional[str] = None
     report_number: Optional[str] = None
 
 class LaboratoryResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    lab_id: int
-    visit_id: int
-    patient_id: int
-    requested_by: int
-    lab_technician_id: Optional[int] = None
+    lab_id: str
+    visit_id: str
+    patient_id: str
+    requested_by: str
+    lab_technician_id: Optional[str] = None
     priority: str
     sample_type: Optional[str] = None
     sample_collected_at: Optional[datetime] = None
@@ -109,18 +109,18 @@ class LaboratoryResponse(BaseModel):
     reports: List[LabReportResponse] = []
 
 class LaboratoryCreateRequest(BaseModel):
-    visit_id: int
-    patient_id: int
-    lab_technician_id: Optional[int] = None
+    visit_id: str
+    patient_id: str
+    lab_technician_id: Optional[str] = None
     priority: Optional[str] = "NORMAL"
     sample_type: Optional[str] = None
     remarks: Optional[str] = None
-    requested_by: Optional[int] = None
+    requested_by: Optional[str] = None
 
 class LaboratoryUpdateRequest(BaseModel):
     test_status: Optional[str] = None
     priority: Optional[str] = None
-    lab_technician_id: Optional[int] = None
+    lab_technician_id: Optional[str] = None
     sample_type: Optional[str] = None
     remarks: Optional[str] = None
     sample_collected_at: Optional[datetime] = None

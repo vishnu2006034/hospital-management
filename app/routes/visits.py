@@ -38,9 +38,9 @@ def add_visit() -> str | Response:
                            doctors=doctors, patient_id=patient_id)
 
 
-@visits_bp.route('/<int:visit_id>')
+@visits_bp.route('/<visit_id>')
 @login_required
-def view_visit(visit_id: int) -> str:
+def view_visit(visit_id: str) -> str:
     """View a single visit with related entities."""
     visit = VisitService.get_visit_by_id(visit_id)
     details = VisitService.get_visit_details(visit_id)
@@ -50,9 +50,9 @@ def view_visit(visit_id: int) -> str:
                            doctor_reports=details['doctor_reports'])
 
 
-@visits_bp.route('/<int:visit_id>/edit', methods=['GET', 'POST'])
+@visits_bp.route('/<visit_id>/edit', methods=['GET', 'POST'])
 @login_required
-def edit_visit(visit_id: int) -> str | Response:
+def edit_visit(visit_id: str) -> str | Response:
     visit = VisitService.get_visit_by_id(visit_id)
     if request.method == 'POST':
         data: Dict[str, str] = request.form.to_dict()
@@ -69,9 +69,9 @@ def edit_visit(visit_id: int) -> str | Response:
                            doctors=doctors, patient_id='')
 
 
-@visits_bp.route('/<int:visit_id>/delete', methods=['POST'])
+@visits_bp.route('/<visit_id>/delete', methods=['POST'])
 @login_required
-def delete_visit(visit_id: int) -> Response:
+def delete_visit(visit_id: str) -> Response:
     VisitService.delete_visit(visit_id)
     flash('Visit deleted.', 'success')
     return redirect(url_for('visits.list_visits'))

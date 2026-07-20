@@ -5,20 +5,20 @@ from pydantic import BaseModel, Field, ConfigDict
 class RoleResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     
-    role_id: int
+    role_id: str
     role_name: str
 
 class UserRoleResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     
-    role_id: int
+    role_id: str
     role_name: str
     is_active: bool
 
 class UserResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    user_id: int
+    user_id: str
     employee_code: str
     first_name: str
     last_name: Optional[str] = None
@@ -55,7 +55,7 @@ class UserCreateRequest(BaseModel):
     license_number: Optional[str] = None
     joining_date: Optional[date] = None
     status: Optional[str] = "ACTIVE"
-    role_id: Optional[int] = None
+    role_id: Optional[str] = None
 
 class UserUpdateRequest(BaseModel):
     first_name: str

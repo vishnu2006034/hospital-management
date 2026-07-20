@@ -8,10 +8,10 @@ from app.dtos.visit import VisitResponse
 class ReportResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    doctor_report_id: int
-    visit_id: int
-    patient_id: int
-    doctor_id: int
+    doctor_report_id: str
+    visit_id: str
+    patient_id: str
+    doctor_id: str
     report_number: str
     chief_complaint: Optional[str] = None
     clinical_findings: Optional[str] = None
@@ -32,8 +32,8 @@ class ReportResponse(BaseModel):
     doctor: Optional[UserResponse] = None
 
 class ReportCreateRequest(BaseModel):
-    visit_id: int
-    patient_id: int
+    visit_id: str
+    patient_id: str
     chief_complaint: Optional[str] = None
     clinical_findings: Optional[str] = None
     diagnosis: Optional[str] = None
@@ -43,7 +43,7 @@ class ReportCreateRequest(BaseModel):
     follow_up_required: Optional[bool] = False
     follow_up_date: Optional[date] = None
     next_visit_reason: Optional[str] = None
-    doctor_id: Optional[int] = None
+    doctor_id: Optional[str] = None
     report_number: Optional[str] = None
 
 class ReportUpdateRequest(BaseModel):

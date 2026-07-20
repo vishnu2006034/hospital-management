@@ -14,9 +14,8 @@ login_manager.login_view = 'auth.login'
 login_manager.login_message = 'Please log in to access this page.'
 login_manager.login_message_category = 'warning'
 
-# We import models *after* db and extensions are defined and exposed,
-# so that any models doing `from app import db` will succeed.
-from app import models
+# The application models have been migrated to the CRUD engine.
+
 
 from app.constants import (
     VisitType,
@@ -53,10 +52,67 @@ def create_app() -> Flask:
     login_manager.init_app(flask_app)
     csrf.init_app(flask_app)
 
+    # Initialize CRUD Provider
+    from hogc.engines.crud import PostgreSQLCRUDProvider
+    from hogc.engines.crud.schema.base import Base
+    from contextlib import contextmanager
+    @contextmanager
+    def session_context():
+        yield db.session
+
+    from app import extensions
+    extensions.crud_provider = PostgreSQLCRUDProvider(session_factory=session_context)
+
+    # Create EAV Tables and Seed Metadata
+    with flask_app.app_context():
+        Base.metadata.create_all(db.engine)
+        from app.crud_init import initialize_crud_metadata
+        initialize_crud_metadata()
+
     # Flask-Login user loader
     @login_manager.user_loader
-    def load_user(user_id: str) -> Optional[models.User]:
-        return db.session.get(models.User, int(user_id))
+    def load_user(user_id: str) -> Optional[extensions.UserSession]:
+        from app.extensions import crud_provider, UserSession
+        from hogc.lib.base import RequestContext as BaseRequestContext
+        from hogc.lib.contracts.crud.requests import GetRecordRequest
+        from hogc.lib.kernel.context import HogcContext, TenantContext, UserContext, ExecutionContext, RequestContext, get_context_provider
+
+        provider_ctx = get_context_provider()
+        tenant = TenantContext(tenant_id="default", org_id="default")
+        user = UserContext(user_id=user_id, username="system", email="system@example.com")
+        exec_ctx = ExecutionContext(source="system")
+        req_ctx = RequestContext(tenant=tenant, user=user, execution=exec_ctx)
+        platform_ctx = HogcContext(request=req_ctx)
+        token = provider_ctx.set(platform_ctx)
+
+        try:
+            base_req_ctx = BaseRequestContext(
+                tenant_id="default",
+                org_id="default",
+                user_id="system",
+                roles=[]
+            )
+            request = GetRecordRequest(
+                context=base_req_ctx,
+                module_id="user",
+                record_id=user_id
+            )
+            response = crud_provider.records.get_record(request)
+            data = response.data.data
+            return UserSession(
+                user_id=user_id,
+                email=data.get("email"),
+                first_name=data.get("first_name"),
+                last_name=data.get("last_name"),
+                status=data.get("status", "ACTIVE"),
+                role=data.get("role"),
+                password_hash=data.get("password_hash")
+            )
+        except Exception:
+            return None
+        finally:
+            provider_ctx.reset(token)
+
 
     # Register blueprints
     from app.routes import (
@@ -96,8 +152,6 @@ __all__ = [
     'migrate',
     'login_manager',
     'csrf',
-    # Subpackages
-    'models',
     # Enums
     'VisitType',
     'VisitStatus',

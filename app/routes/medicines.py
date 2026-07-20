@@ -32,9 +32,9 @@ def add_medicine() -> str | Response:
     return render_template('medicines/form.html', medicine=None)
 
 
-@medicines_bp.route('/<int:medicine_id>/edit', methods=['GET', 'POST'])
+@medicines_bp.route('/<medicine_id>/edit', methods=['GET', 'POST'])
 @login_required
-def edit_medicine(medicine_id: int) -> str | Response:
+def edit_medicine(medicine_id: str) -> str | Response:
     medicine = MedicineService.get_medicine_by_id(medicine_id)
     if request.method == 'POST':
         data: Dict[str, str] = request.form.to_dict()
@@ -45,9 +45,9 @@ def edit_medicine(medicine_id: int) -> str | Response:
     return render_template('medicines/form.html', medicine=medicine)
 
 
-@medicines_bp.route('/<int:medicine_id>/delete', methods=['POST'])
+@medicines_bp.route('/<medicine_id>/delete', methods=['POST'])
 @login_required
-def delete_medicine(medicine_id: int) -> Response:
+def delete_medicine(medicine_id: str) -> Response:
     medicine = MedicineService.get_medicine_by_id(medicine_id)
     name: str = medicine.medicine_name
     MedicineService.delete_medicine(medicine_id)

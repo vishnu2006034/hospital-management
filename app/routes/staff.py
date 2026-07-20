@@ -34,18 +34,18 @@ def add_staff() -> str | Response:
     return render_template('staff/form.html', user=None, roles=roles)
 
 
-@staff_bp.route('/<int:user_id>')
+@staff_bp.route('/<user_id>')
 @login_required
-def view_staff(user_id: int) -> str:
+def view_staff(user_id: str) -> str:
     """View a single staff member with roles."""
     user = StaffService.get_user_by_id(user_id)
     user_roles = StaffService.get_user_roles(user_id)
     return render_template('staff/detail.html', user=user, user_roles=user_roles)
 
 
-@staff_bp.route('/<int:user_id>/edit', methods=['GET', 'POST'])
+@staff_bp.route('/<user_id>/edit', methods=['GET', 'POST'])
 @login_required
-def edit_staff(user_id: int) -> str | Response:
+def edit_staff(user_id: str) -> str | Response:
     """Edit an existing staff member."""
     user = StaffService.get_user_by_id(user_id)
     if request.method == 'POST':
@@ -58,11 +58,11 @@ def edit_staff(user_id: int) -> str | Response:
     return render_template('staff/form.html', user=user, roles=roles)
 
 
-@staff_bp.route('/<int:user_id>/toggle-role', methods=['POST'])
+@staff_bp.route('/<user_id>/toggle-role', methods=['POST'])
 @login_required
-def toggle_role(user_id: int) -> Response:
+def toggle_role(user_id: str) -> Response:
     """Toggle a role for a staff member."""
-    role_id = request.form.get('role_id', type=int)
+    role_id = request.form.get('role_id')
     if not role_id:
         flash('No role specified.', 'error')
         return redirect(url_for('staff.view_staff', user_id=user_id))

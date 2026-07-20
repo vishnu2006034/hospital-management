@@ -5,7 +5,7 @@ from pydantic import BaseModel, ConfigDict
 class PatientResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    patient_id: int
+    patient_id: str
     patient_number: str
     first_name: str
     last_name: Optional[str] = None

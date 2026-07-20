@@ -38,9 +38,9 @@ def add_inventory() -> str | Response:
     return render_template('inventory/form.html', inv=None, medicines=medicines)
 
 
-@inventory_bp.route('/<int:inventory_id>/edit', methods=['GET', 'POST'])
+@inventory_bp.route('/<inventory_id>/edit', methods=['GET', 'POST'])
 @login_required
-def edit_inventory(inventory_id: int) -> str | Response:
+def edit_inventory(inventory_id: str) -> str | Response:
     """Edit an existing inventory item."""
     inv = InventoryService.get_inventory_by_id(inventory_id)
     if request.method == 'POST':
@@ -53,9 +53,9 @@ def edit_inventory(inventory_id: int) -> str | Response:
     return render_template('inventory/form.html', inv=inv, medicines=medicines)
 
 
-@inventory_bp.route('/<int:inventory_id>/transaction', methods=['GET', 'POST'])
+@inventory_bp.route('/<inventory_id>/transaction', methods=['GET', 'POST'])
 @login_required
-def add_transaction(inventory_id: int) -> str | Response:
+def add_transaction(inventory_id: str) -> str | Response:
     """Add a stock transaction to an inventory item."""
     inv = InventoryService.get_inventory_by_id(inventory_id)
     if request.method == 'POST':

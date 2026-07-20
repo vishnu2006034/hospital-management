@@ -8,9 +8,9 @@ from app.dtos.user import UserResponse
 class VisitResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    visit_id: int
-    patient_id: int
-    doctor_id: int
+    visit_id: str
+    patient_id: str
+    doctor_id: str
     visit_type: str
     visit_status: str
     visit_date: datetime
@@ -34,8 +34,8 @@ class VisitResponse(BaseModel):
     doctor: Optional[UserResponse] = None
 
 class VisitCreateRequest(BaseModel):
-    patient_id: int
-    doctor_id: int
+    patient_id: str
+    doctor_id: str
     visit_type: Optional[str] = "OUTPATIENT"
     visit_status: Optional[str] = "OPEN"
     chief_complaint: Optional[str] = None

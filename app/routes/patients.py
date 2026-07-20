@@ -32,18 +32,18 @@ def add_patient() -> str | Response:
     return render_template('patients/form.html', patient=None)
 
 
-@patients_bp.route('/<int:patient_id>')
+@patients_bp.route('/<patient_id>')
 @login_required
-def view_patient(patient_id: int) -> str:
+def view_patient(patient_id: str) -> str:
     """View a single patient with recent visits."""
     patient = PatientService.get_patient_by_id(patient_id)
     visits = PatientService.get_patient_visits(patient_id)
     return render_template('patients/detail.html', patient=patient, visits=visits)
 
 
-@patients_bp.route('/<int:patient_id>/edit', methods=['GET', 'POST'])
+@patients_bp.route('/<patient_id>/edit', methods=['GET', 'POST'])
 @login_required
-def edit_patient(patient_id: int) -> str | Response:
+def edit_patient(patient_id: str) -> str | Response:
     patient = PatientService.get_patient_by_id(patient_id)
     if request.method == 'POST':
         data: Dict[str, str] = request.form.to_dict()
@@ -54,9 +54,9 @@ def edit_patient(patient_id: int) -> str | Response:
     return render_template('patients/form.html', patient=patient)
 
 
-@patients_bp.route('/<int:patient_id>/delete', methods=['POST'])
+@patients_bp.route('/<patient_id>/delete', methods=['POST'])
 @login_required
-def delete_patient(patient_id: int) -> Response:
+def delete_patient(patient_id: str) -> Response:
     patient = PatientService.get_patient_by_id(patient_id)
     name: str = patient.full_name
     PatientService.delete_patient(patient_id)

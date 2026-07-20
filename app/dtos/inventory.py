@@ -8,13 +8,13 @@ from app.dtos.user import UserResponse
 class InventoryTransactionResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    transaction_id: int
-    inventory_id: int
-    performed_by: Optional[int] = None
+    transaction_id: str
+    inventory_id: str
+    performed_by: Optional[str] = None
     transaction_type: str
     quantity: int
     reference_type: Optional[str] = None
-    reference_id: Optional[int] = None
+    reference_id: Optional[str] = None
     remarks: Optional[str] = None
     transaction_date: datetime
     
@@ -23,8 +23,8 @@ class InventoryTransactionResponse(BaseModel):
 class InventoryResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    inventory_id: int
-    medicine_id: int
+    inventory_id: str
+    medicine_id: str
     batch_number: str
     expiry_date: Optional[date] = None
     purchase_price: Optional[Decimal] = None
@@ -42,7 +42,7 @@ class InventoryResponse(BaseModel):
     medicine: Optional[MedicineResponse] = None
 
 class InventoryCreateRequest(BaseModel):
-    medicine_id: int
+    medicine_id: str
     batch_number: str
     expiry_date: Optional[date] = None
     purchase_price: Optional[Decimal] = None
@@ -63,5 +63,5 @@ class StockTransactionRequest(BaseModel):
     transaction_type: str
     quantity: int
     reference_type: Optional[str] = None
-    reference_id: Optional[int] = None
+    reference_id: Optional[str] = None
     remarks: Optional[str] = None

@@ -6,7 +6,7 @@ from pydantic import BaseModel, ConfigDict
 class MedicineResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    medicine_id: int
+    medicine_id: str
     medicine_name: str
     generic_name: Optional[str] = None
     category: Optional[str] = None

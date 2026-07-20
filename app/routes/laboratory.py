@@ -41,18 +41,18 @@ def add_lab() -> str | Response:
                            patients=patients, technicians=technicians, visit_id=visit_id)
 
 
-@laboratory_bp.route('/<int:lab_id>')
+@laboratory_bp.route('/<lab_id>')
 @login_required
-def view_lab(lab_id: int) -> str:
+def view_lab(lab_id: str) -> str:
     """View a single lab request with reports."""
     lab = LaboratoryService.get_lab_by_id(lab_id)
     reports = LaboratoryService.get_lab_reports(lab_id)
     return render_template('laboratory/detail.html', lab=lab, reports=reports)
 
 
-@laboratory_bp.route('/<int:lab_id>/edit', methods=['GET', 'POST'])
+@laboratory_bp.route('/<lab_id>/edit', methods=['GET', 'POST'])
 @login_required
-def edit_lab(lab_id: int) -> str | Response:
+def edit_lab(lab_id: str) -> str | Response:
     """Edit an existing lab request."""
     lab = LaboratoryService.get_lab_by_id(lab_id)
     if request.method == 'POST':
@@ -70,9 +70,9 @@ def edit_lab(lab_id: int) -> str | Response:
 
 # LAB REPORTS
 
-@laboratory_bp.route('/<int:lab_id>/report/add', methods=['GET', 'POST'])
+@laboratory_bp.route('/<lab_id>/report/add', methods=['GET', 'POST'])
 @login_required
-def add_report(lab_id: int) -> str | Response:
+def add_report(lab_id: str) -> str | Response:
     """Add a report to a lab request."""
     lab = LaboratoryService.get_lab_by_id(lab_id)
     if request.method == 'POST':
@@ -110,9 +110,9 @@ def add_catalog() -> str | Response:
     return render_template('laboratory/catalog_form.html', test=None)
 
 
-@laboratory_bp.route('/catalog/<int:test_id>/edit', methods=['GET', 'POST'])
+@laboratory_bp.route('/catalog/<test_id>/edit', methods=['GET', 'POST'])
 @login_required
-def edit_catalog(test_id: int) -> str | Response:
+def edit_catalog(test_id: str) -> str | Response:
     """Edit an existing catalog test."""
     test = LaboratoryService.get_catalog_test_by_id(test_id)
     if request.method == 'POST':
